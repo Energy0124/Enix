@@ -19,7 +19,7 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 
-#include "Engine.h"
+#include "VulkanEngine.h"
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -374,13 +374,12 @@ static void glfw_error_callback(int error, const char* description)
 
 namespace Enix
 {
-   
 
-    void Engine::drawUI()
+    void VulkanEngine::drawUI()
     {
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
+        if (show_demo_window_)
+            ImGui::ShowDemoWindow(&show_demo_window_);
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
@@ -390,11 +389,12 @@ namespace Enix
             ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
             ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
+            ImGui::Checkbox("Demo Window", &show_demo_window_); // Edit bools storing our window open/close state
+            ImGui::Checkbox("Another Window", &show_another_window_);
 
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", reinterpret_cast<float*>(&clear_color_)); // Edit 3 floats representing a color
+            ImGui::ColorEdit3("clear color", reinterpret_cast<float*>(&clear_color_));
+            // Edit 3 floats representing a color
 
             if (ImGui::Button("Button"))
                 // Buttons return true when clicked (most widgets return true when edited/activated)
@@ -408,18 +408,18 @@ namespace Enix
         }
 
         // 3. Show another simple window.
-        if (show_another_window)
+        if (show_another_window_)
         {
-            ImGui::Begin("Another Window", &show_another_window);
+            ImGui::Begin("Another Window", &show_another_window_);
             // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             ImGui::Text("Hello from another window!");
             if (ImGui::Button("Close Me"))
-                show_another_window = false;
+                show_another_window_ = false;
             ImGui::End();
         }
     }
 
-    void Engine::tick(GLFWwindow* window, ImGui_ImplVulkanH_Window* wd, ImGuiIO& io)
+    void VulkanEngine::tick()
     {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -432,7 +432,7 @@ namespace Enix
         if (g_SwapChainRebuild)
         {
             int width, height;
-            glfwGetFramebufferSize(window, &width, &height);
+            glfwGetFramebufferSize(window_, &width, &height);
             if (width > 0 && height > 0)
             {
                 ImGui_ImplVulkan_SetMinImageCount(g_MinImageCount);
@@ -456,15 +456,15 @@ namespace Enix
         ImDrawData* main_draw_data = ImGui::GetDrawData();
         const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y
             <= 0.0f);
-        wd->ClearValue.color.float32[0] = clear_color_.x * clear_color_.w;
-        wd->ClearValue.color.float32[1] = clear_color_.y * clear_color_.w;
-        wd->ClearValue.color.float32[2] = clear_color_.z * clear_color_.w;
-        wd->ClearValue.color.float32[3] = clear_color_.w;
+        wd_->ClearValue.color.float32[0] = clear_color_.x * clear_color_.w;
+        wd_->ClearValue.color.float32[1] = clear_color_.y * clear_color_.w;
+        wd_->ClearValue.color.float32[2] = clear_color_.z * clear_color_.w;
+        wd_->ClearValue.color.float32[3] = clear_color_.w;
         if (!main_is_minimized)
-            FrameRender(wd, main_draw_data);
+            FrameRender(wd_, main_draw_data);
 
         // Update and Render additional Platform Windows
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        if (io_.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
@@ -472,10 +472,10 @@ namespace Enix
 
         // Present Main Platform Window
         if (!main_is_minimized)
-            FramePresent(wd);
+            FramePresent(wd_);
     }
 
-    int Engine::run()
+    int VulkanEngine::run()
     {
         // Setup GLFW window
         glfwSetErrorCallback(glfw_error_callback);
@@ -483,7 +483,7 @@ namespace Enix
             return 1;
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+Vulkan example", NULL, NULL);
+        window_ = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+Vulkan example", NULL, NULL);
 
         // Setup Vulkan
         if (!glfwVulkanSupported())
@@ -497,24 +497,24 @@ namespace Enix
 
         // Create Window Surface
         VkSurfaceKHR surface;
-        VkResult err = glfwCreateWindowSurface(g_Instance, window, g_Allocator, &surface);
+        VkResult err = glfwCreateWindowSurface(g_Instance, window_, g_Allocator, &surface);
         check_vk_result(err);
 
         // Create Framebuffers
         int w, h;
-        glfwGetFramebufferSize(window, &w, &h);
-        ImGui_ImplVulkanH_Window* wd = &g_MainWindowData;
-        SetupVulkanWindow(wd, surface, w, h);
+        glfwGetFramebufferSize(window_, &w, &h);
+        wd_ = &g_MainWindowData;
+        SetupVulkanWindow(wd_, surface, w, h);
 
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO();
-        (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+        io_ = ImGui::GetIO();
+        (void)io_;
+        io_.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+        io_.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+        io_.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
         //io.ConfigViewportsNoAutoMerge = true;
         //io.ConfigViewportsNoTaskBarIcon = true;
 
@@ -524,14 +524,14 @@ namespace Enix
 
         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
         ImGuiStyle& style = ImGui::GetStyle();
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        if (io_.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             style.WindowRounding = 0.0f;
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
         // Setup Platform/Renderer backends
-        ImGui_ImplGlfw_InitForVulkan(window, true);
+        ImGui_ImplGlfw_InitForVulkan(window_, true);
         ImGui_ImplVulkan_InitInfo init_info = {};
         init_info.Instance = g_Instance;
         init_info.PhysicalDevice = g_PhysicalDevice;
@@ -542,11 +542,11 @@ namespace Enix
         init_info.DescriptorPool = g_DescriptorPool;
         init_info.Subpass = 0;
         init_info.MinImageCount = g_MinImageCount;
-        init_info.ImageCount = wd->ImageCount;
+        init_info.ImageCount = wd_->ImageCount;
         init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         init_info.Allocator = g_Allocator;
         init_info.CheckVkResultFn = check_vk_result;
-        ImGui_ImplVulkan_Init(&init_info, wd->RenderPass);
+        ImGui_ImplVulkan_Init(&init_info, wd_->RenderPass);
 
         // Load Fonts
         // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -566,8 +566,8 @@ namespace Enix
         // Upload Fonts
         {
             // Use any command queue
-            VkCommandPool command_pool = wd->Frames[wd->FrameIndex].CommandPool;
-            VkCommandBuffer command_buffer = wd->Frames[wd->FrameIndex].CommandBuffer;
+            VkCommandPool command_pool = wd_->Frames[wd_->FrameIndex].CommandPool;
+            VkCommandBuffer command_buffer = wd_->Frames[wd_->FrameIndex].CommandBuffer;
 
             err = vkResetCommandPool(g_Device, command_pool, 0);
             check_vk_result(err);
@@ -599,9 +599,9 @@ namespace Enix
 
 
         // Main loop
-        while (!glfwWindowShouldClose(window))
+        while (!glfwWindowShouldClose(window_))
         {
-            tick(window, wd, io);
+            tick();
         }
 
         // Cleanup
@@ -614,7 +614,7 @@ namespace Enix
         CleanupVulkanWindow();
         CleanupVulkan();
 
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(window_);
         glfwTerminate();
 
         return 0;

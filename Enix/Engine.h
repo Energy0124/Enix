@@ -8,15 +8,12 @@ namespace Enix
 {
     class Engine
     {
-    private:
-        ImVec4 clear_color_{0.45f, 0.55f, 0.60f, 1.00f};
-        bool show_demo_window{true};
-        bool show_another_window{true};
     public:
-        void drawUI();
+        virtual void drawUI() = 0;
 
-        void tick(GLFWwindow* window, ImGui_ImplVulkanH_Window* wd, ImGuiIO& io);
+        virtual void tick() = 0;
 
-        int run();
+        virtual int run() = 0;
+        virtual ~Engine() = default;
     };
 }
