@@ -61,8 +61,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.170.0\Include;%VULKAN_SDK%/Include;../imgui/imgui;../imgui/imgui/backends;../glfw/glfw/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.170.0\Include;%VULKAN_SDK%/Include;../ThirdParty/imgui/imgui;../ThirdParty/imgui/imgui/backends;../ThirdParty/glfw/glfw/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,8 +83,8 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.170.0\Include;%VULKAN_SDK%/Include;../imgui/imgui;../imgui/imgui/backends;../glfw/glfw/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.170.0\Include;%VULKAN_SDK%/Include;../ThirdParty/imgui/imgui;../ThirdParty/imgui/imgui/backends;../ThirdParty/glfw/glfw/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -100,7 +100,7 @@
     <ClCompile Include="VulkanEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\imgui\imgui.vcxproj">
+    <ProjectReference Include="..\ThirdParty\imgui\imgui.vcxproj">
       <Project>{a937d100-a0b7-4648-87bc-fa25e9109bc2}</Project>
     </ProjectReference>
   </ItemGroup>

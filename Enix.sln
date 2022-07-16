@@ -2,9 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Enix", "Enix\Enix.vcxproj", "{D7D89FC5-9EFC-4940-A0B9-60A8C7F23AFD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "imgui\imgui.vcxproj", "{A937D100-A0B7-4648-87BC-FA25E9109BC2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "ThirdParty\imgui\imgui.vcxproj", "{A937D100-A0B7-4648-87BC-FA25E9109BC2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glfw", "glfw\glfw.vcxproj", "{4D0B96A4-E290-47EE-A73A-F18F332E53A5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glfw", "ThirdParty\glfw\glfw.vcxproj", "{4D0B96A4-E290-47EE-A73A-F18F332E53A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
