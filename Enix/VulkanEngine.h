@@ -12,7 +12,12 @@ namespace Enix
         GLFWwindow* window_ = nullptr;
         ImGui_ImplVulkanH_Window* wd_ = nullptr;
         ImGuiIO io_;
+        int init() override;
+        int cleanUp() override;
+
     public:
+        VulkanEngine();
+        ~VulkanEngine() override;
         void drawUI() override;
         void tick() override;
         int run() override;

@@ -374,6 +374,15 @@ static void glfw_error_callback(int error, const char* description)
 
 namespace Enix
 {
+    VulkanEngine::VulkanEngine()
+    {
+        VulkanEngine::init();
+    }
+
+    VulkanEngine::~VulkanEngine()
+    {
+        VulkanEngine::cleanUp();
+    }
 
     void VulkanEngine::drawUI()
     {
@@ -475,7 +484,7 @@ namespace Enix
             FramePresent(wd_);
     }
 
-    int VulkanEngine::run()
+    int VulkanEngine::init()
     {
         // Setup GLFW window
         glfwSetErrorCallback(glfw_error_callback);
@@ -593,6 +602,11 @@ namespace Enix
             ImGui_ImplVulkan_DestroyFontUploadObjects();
         }
 
+        return 0;
+    }
+
+    int VulkanEngine::run()
+    {
         // Our state
         bool show_demo_window = false;
         bool show_another_window = true;
@@ -601,11 +615,17 @@ namespace Enix
         // Main loop
         while (!glfwWindowShouldClose(window_))
         {
-            tick();
+            VulkanEngine::tick();
         }
 
+
+        return 0;
+    }
+
+    int VulkanEngine::cleanUp()
+    {
         // Cleanup
-        err = vkDeviceWaitIdle(g_Device);
+        VkResult err = vkDeviceWaitIdle(g_Device);
         check_vk_result(err);
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
