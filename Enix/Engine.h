@@ -1,8 +1,4 @@
 #pragma once
-#include <imgui.h>
-#include <GLFW/glfw3.h>
-
-#include "imgui_impl_vulkan.h"
 
 namespace Enix
 {
