@@ -4,9 +4,18 @@
 #include "Engine.h"
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
+#include <optional>
 
 namespace Enix
 {
+    struct QueueFamilyIndices {
+        std::optional<uint32_t> graphicsFamily;
+
+        bool isComplete() {
+            return graphicsFamily.has_value();
+        }
+    };
+    
     class VulkanEngine : public Engine
     {
     private:
@@ -22,6 +31,7 @@ namespace Enix
         VkDebugUtilsMessengerEXT debugMessenger_;
         GLFWwindow* window_ = nullptr;
         bool cleanedUp_ = false;
+        VkPhysicalDevice physicalDevice_;
 
         void initWindow();
         std::vector<const char*> getRequiredExtensions();
@@ -35,6 +45,8 @@ namespace Enix
                                            const VkAllocationCallbacks* pAllocator);
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
         void setupDebugMessenger();
+        bool isDeviceSuitable(VkPhysicalDevice device);
+        void pickPhysicalDevice();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
