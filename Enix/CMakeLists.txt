@@ -7,6 +7,8 @@ add_executable (Enix
     OpenGLEngine.cpp
     VulkanEngine.h
     VulkanEngine.cpp
+    VulkanEngineImgui.h
+    VulkanEngineImgui.cpp
 )
 
 
