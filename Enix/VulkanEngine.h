@@ -10,9 +10,11 @@ namespace Enix
 {
     struct QueueFamilyIndices {
         std::optional<uint32_t> graphicsFamily;
+        std::optional<uint32_t> presentFamily;
 
-        bool isComplete() {
-            return graphicsFamily.has_value();
+        [[nodiscard]] bool isComplete() const
+        {
+            return graphicsFamily.has_value() && presentFamily.has_value();
         }
     };
     
@@ -32,7 +34,12 @@ namespace Enix
         GLFWwindow* window_ = nullptr;
         bool cleanedUp_ = false;
         VkPhysicalDevice physicalDevice_;
+        VkDevice device_;
+        VkQueue graphicsQueue_;
+        VkSurfaceKHR surface_;
+        VkQueue presentQueue_;
 
+        
         void initWindow();
         std::vector<const char*> getRequiredExtensions();
         bool checkValidationLayerSupport();
@@ -45,8 +52,11 @@ namespace Enix
                                            const VkAllocationCallbacks* pAllocator);
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
         void setupDebugMessenger();
+        QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
         bool isDeviceSuitable(VkPhysicalDevice device);
         void pickPhysicalDevice();
+        void createLogicalDevice();
+        void createSurface();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
