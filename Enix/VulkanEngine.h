@@ -17,12 +17,21 @@ namespace Enix
             return graphicsFamily.has_value() && presentFamily.has_value();
         }
     };
+
+    struct SwapChainSupportDetails {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
     
     class VulkanEngine : public Engine
     {
     private:
         const std::vector<const char*> validationLayers_ = {
             "VK_LAYER_KHRONOS_validation"
+        };
+        const std::vector<const char*> deviceExtensions_ = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
 #ifdef NDEBUG
         const bool enableValidationLayers_ = false;
@@ -53,6 +62,8 @@ namespace Enix
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
         void setupDebugMessenger();
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+        bool checkDeviceExtensionSupport(VkPhysicalDevice device) ;
         bool isDeviceSuitable(VkPhysicalDevice device);
         void pickPhysicalDevice();
         void createLogicalDevice();
