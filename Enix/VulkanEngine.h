@@ -47,8 +47,12 @@ namespace Enix
         VkQueue graphicsQueue_;
         VkSurfaceKHR surface_;
         VkQueue presentQueue_;
+        VkSwapchainKHR swapChain_;
+        std::vector<VkImage> swapChainImages_;
+        VkFormat swapChainImageFormat_;
+        VkExtent2D swapChainExtent_;
 
-        
+
         void initWindow();
         std::vector<const char*> getRequiredExtensions();
         bool checkValidationLayerSupport();
@@ -63,11 +67,15 @@ namespace Enix
         void setupDebugMessenger();
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
         SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
         bool checkDeviceExtensionSupport(VkPhysicalDevice device) ;
         bool isDeviceSuitable(VkPhysicalDevice device);
         void pickPhysicalDevice();
         void createLogicalDevice();
         void createSurface();
+        void createSwapChain();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
