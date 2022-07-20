@@ -513,6 +513,11 @@ namespace Enix
         }
     }
 
+    void VulkanEngine::createGraphicsPipeline()
+    {
+        //todo: implement this
+    }
+
     void VulkanEngine::initVulkan()
     {
         // Setup Vulkan
@@ -535,6 +540,8 @@ namespace Enix
         createSwapChain();
 
         createImageViews();
+
+        createGraphicsPipeline();
 
     }
 

@@ -77,6 +77,7 @@ namespace Enix
         void createSurface();
         void createSwapChain();
         void createImageViews();
+        void createGraphicsPipeline();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
