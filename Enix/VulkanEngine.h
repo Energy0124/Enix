@@ -51,7 +51,7 @@ namespace Enix
         std::vector<VkImage> swapChainImages_;
         VkFormat swapChainImageFormat_;
         VkExtent2D swapChainExtent_;
-
+        std::vector<VkImageView> swapChainImageViews_;
 
         void initWindow();
         std::vector<const char*> getRequiredExtensions();
@@ -76,6 +76,7 @@ namespace Enix
         void createLogicalDevice();
         void createSurface();
         void createSwapChain();
+        void createImageViews();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
