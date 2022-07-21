@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <optional>
+#include <xstring>
 
 namespace Enix
 {
@@ -52,6 +53,9 @@ namespace Enix
         VkFormat swapChainImageFormat_;
         VkExtent2D swapChainExtent_;
         std::vector<VkImageView> swapChainImageViews_;
+        VkRenderPass renderPass_;
+        VkPipelineLayout pipelineLayout_;
+        VkPipeline graphicsPipeline_;
 
         void initWindow();
         std::vector<const char*> getRequiredExtensions();
@@ -77,12 +81,15 @@ namespace Enix
         void createSurface();
         void createSwapChain();
         void createImageViews();
+        VkShaderModule createShaderModule(const std::vector<char>& code);
         void createGraphicsPipeline();
+        void createRenderPass();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                       VkDebugUtilsMessageTypeFlagsEXT messageType,
                                       const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+        static std::vector<char> readFile(const std::string& filename);
     public:
         VulkanEngine();
         ~VulkanEngine() override;
