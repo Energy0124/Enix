@@ -56,7 +56,13 @@ namespace Enix
         VkRenderPass renderPass_;
         VkPipelineLayout pipelineLayout_;
         VkPipeline graphicsPipeline_;
-
+        std::vector<VkFramebuffer> swapChainFramebuffers_;
+        VkCommandPool commandPool_;
+        VkCommandBuffer commandBuffer_;
+        VkSemaphore imageAvailableSemaphore_;
+        VkSemaphore renderFinishedSemaphore_;
+        VkFence inFlightFence_;
+        
         void initWindow();
         std::vector<const char*> getRequiredExtensions();
         bool checkValidationLayerSupport();
@@ -84,6 +90,11 @@ namespace Enix
         VkShaderModule createShaderModule(const std::vector<char>& code);
         void createGraphicsPipeline();
         void createRenderPass();
+        void createFramebuffers();
+        void createCommandPool();
+        void createCommandBuffer();
+        void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+        void createSyncObjects();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -94,6 +105,7 @@ namespace Enix
         VulkanEngine();
         ~VulkanEngine() override;
         void drawUI() override;
+        void drawFrame();
         void tick() override;
         int init() override;
         int cleanUp() override;
