@@ -11,11 +11,13 @@
 
 namespace Enix
 {
-    struct Vertex {
+    struct Vertex
+    {
         glm::vec2 pos;
         glm::vec3 color;
 
-        static VkVertexInputBindingDescription getBindingDescription() {
+        static VkVertexInputBindingDescription getBindingDescription()
+        {
             VkVertexInputBindingDescription bindingDescription{};
             bindingDescription.binding = 0;
             bindingDescription.stride = sizeof(Vertex);
@@ -24,13 +26,14 @@ namespace Enix
             return bindingDescription;
         }
 
-        static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+        static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions()
+        {
             std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
             attributeDescriptions[0].binding = 0;
             attributeDescriptions[0].location = 0;
             attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
             attributeDescriptions[0].offset = offsetof(Vertex, pos);
-            
+
             attributeDescriptions[1].binding = 0;
             attributeDescriptions[1].location = 1;
             attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -38,8 +41,9 @@ namespace Enix
             return attributeDescriptions;
         }
     };
-    
-    struct QueueFamilyIndices {
+
+    struct QueueFamilyIndices
+    {
         std::optional<uint32_t> graphicsFamily;
         std::optional<uint32_t> presentFamily;
 
@@ -49,12 +53,13 @@ namespace Enix
         }
     };
 
-    struct SwapChainSupportDetails {
+    struct SwapChainSupportDetails
+    {
         VkSurfaceCapabilitiesKHR capabilities;
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
     };
-    
+
     class VulkanEngine : public Engine
     {
     private:
@@ -65,7 +70,7 @@ namespace Enix
         const std::vector<const char*> deviceExtensions_ = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
-        const std::vector<Vertex> vertices_= {
+        const std::vector<Vertex> vertices_ = {
             {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
             {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
             {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
@@ -113,7 +118,7 @@ namespace Enix
                                                      const VkAllocationCallbacks* pAllocator,
                                                      VkDebugUtilsMessengerEXT* pDebugMessenger);
         static void destroyDebugUtilsMessengerExt(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
-                                           const VkAllocationCallbacks* pAllocator);
+                                                  const VkAllocationCallbacks* pAllocator);
         void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
         void setupDebugMessenger();
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
@@ -121,7 +126,7 @@ namespace Enix
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-        bool checkDeviceExtensionSupport(VkPhysicalDevice device) ;
+        bool checkDeviceExtensionSupport(VkPhysicalDevice device);
         bool isDeviceSuitable(VkPhysicalDevice device);
         void pickPhysicalDevice();
         void createLogicalDevice();
