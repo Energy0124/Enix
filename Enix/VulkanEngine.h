@@ -28,6 +28,7 @@ namespace Enix
     class VulkanEngine : public Engine
     {
     private:
+        const int maxFramesInFlight_ = 2;
         const std::vector<const char*> validationLayers_ = {
             "VK_LAYER_KHRONOS_validation"
         };
@@ -58,12 +59,15 @@ namespace Enix
         VkPipeline graphicsPipeline_;
         std::vector<VkFramebuffer> swapChainFramebuffers_;
         VkCommandPool commandPool_;
-        VkCommandBuffer commandBuffer_;
-        VkSemaphore imageAvailableSemaphore_;
-        VkSemaphore renderFinishedSemaphore_;
-        VkFence inFlightFence_;
+        std::vector<VkCommandBuffer> commandBuffers_;
+        std::vector<VkSemaphore> imageAvailableSemaphores_;
+        std::vector<VkSemaphore> renderFinishedSemaphores_;
+        std::vector<VkFence> inFlightFences_;
+        uint32_t currentFrame_ = 0;
+        bool framebufferResized_ = false;
         
         void initWindow();
+        static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
         std::vector<const char*> getRequiredExtensions();
         bool checkValidationLayerSupport();
         void createVulkanInstance();
@@ -92,7 +96,7 @@ namespace Enix
         void createRenderPass();
         void createFramebuffers();
         void createCommandPool();
-        void createCommandBuffer();
+        void createCommandBuffers();
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
         void createSyncObjects();
         void initVulkan();
@@ -105,6 +109,8 @@ namespace Enix
         VulkanEngine();
         ~VulkanEngine() override;
         void drawUI() override;
+        void cleanupSwapChain();
+        void recreateSwapChain();
         void drawFrame();
         void tick() override;
         int init() override;
