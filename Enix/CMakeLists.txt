@@ -17,3 +17,6 @@ set_property(TARGET Enix PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DI
 target_include_directories(Enix PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_link_libraries(Enix glm Vulkan::Vulkan ${OPENGL_LIBRARY} glfw imgui)
+
+# make sure that the shaders are compiled before running Enix
+add_dependencies(Enix Shaders)

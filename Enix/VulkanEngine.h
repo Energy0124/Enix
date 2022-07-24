@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 #include <optional>
 #include <xstring>
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <array>
 
@@ -63,7 +64,7 @@ namespace Enix
     class VulkanEngine : public Engine
     {
     private:
-        const int maxFramesInFlight_ = 2;
+        const uint32_t maxFramesInFlight_ = 2;
         const std::vector<const char*> validationLayers_ = {
             "VK_LAYER_KHRONOS_validation"
         };
@@ -78,6 +79,15 @@ namespace Enix
         };
         const std::vector<uint32_t> indices_ = {
             0, 1, 2, 2, 3, 0
+        };
+        VkDescriptorPool descriptorPool_;
+        std::vector<VkDescriptorSet> descriptorSets_;
+
+        struct UniformBufferObject
+        {
+            alignas(16) glm::mat4 model;
+            alignas(16) glm::mat4 view;
+            alignas(16) glm::mat4 proj;
         };
 #ifdef NDEBUG
         const bool enableValidationLayers_ = false;
@@ -99,6 +109,7 @@ namespace Enix
         VkExtent2D swapChainExtent_;
         std::vector<VkImageView> swapChainImageViews_;
         VkRenderPass renderPass_;
+        VkDescriptorSetLayout descriptorSetLayout_;
         VkPipelineLayout pipelineLayout_;
         VkPipeline graphicsPipeline_;
         std::vector<VkFramebuffer> swapChainFramebuffers_;
@@ -113,6 +124,8 @@ namespace Enix
         VkDeviceMemory vertexBufferMemory_;
         VkBuffer indexBuffer_;
         VkDeviceMemory indexBufferMemory_;
+        std::vector<VkBuffer> uniformBuffers_;
+        std::vector<VkDeviceMemory> uniformBuffersMemory_;
 
         void initWindow();
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
@@ -154,6 +167,10 @@ namespace Enix
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void createVertexBuffer();
         void createIndexBuffer();
+        void createDescriptorSetLayout();
+        void createUniformBuffers();
+        void createDescriptorPool();
+        void createDescriptorSets();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -166,6 +183,7 @@ namespace Enix
         void drawUI() override;
         void cleanupSwapChain();
         void recreateSwapChain();
+        void updateUniformBuffer(uint32_t currentImage);
         void drawFrame();
         void tick() override;
         int init() override;
