@@ -961,6 +961,7 @@ namespace Enix
         VkBuffer vertexBuffers[] = {vertexBuffer_};
         VkDeviceSize offsets[] = {0};
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer_, 0, VK_INDEX_TYPE_UINT32);
 
         VkViewport viewport{};
         viewport.x = 0.0f;
@@ -976,7 +977,7 @@ namespace Enix
         scissor.extent = swapChainExtent_;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices_.size()), 1, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices_.size()), 1, 0, 0, 0);
 
         vkCmdEndRenderPass(commandBuffer);
 
@@ -1107,6 +1108,30 @@ namespace Enix
         vkFreeMemory(device_, stagingBufferMemory, nullptr);
     }
 
+    void VulkanEngine::createIndexBuffer()
+    {
+        VkDeviceSize bufferSize = sizeof(indices_[0]) * indices_.size();
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                     stagingBufferMemory);
+
+        void* data;
+        vkMapMemory(device_, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, indices_.data(), (size_t)bufferSize);
+        vkUnmapMemory(device_, stagingBufferMemory);
+        
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer_,
+                     indexBufferMemory_);
+
+        copyBuffer(stagingBuffer, indexBuffer_, bufferSize);
+        
+        vkDestroyBuffer(device_, stagingBuffer, nullptr);
+        vkFreeMemory(device_, stagingBufferMemory, nullptr);
+    }
+
     void VulkanEngine::initVulkan()
     {
         // Setup Vulkan
@@ -1127,6 +1152,7 @@ namespace Enix
         createFramebuffers();
         createCommandPool();
         createVertexBuffer();
+        createIndexBuffer();
         createCommandBuffers();
         createSyncObjects();
     }
@@ -1160,8 +1186,12 @@ namespace Enix
         }
 
         cleanupSwapChain();
+        
         vkDestroyBuffer(device_, vertexBuffer_, nullptr);
         vkFreeMemory(device_, vertexBufferMemory_, nullptr);
+
+        vkDestroyBuffer(device_, indexBuffer_, nullptr);
+        vkFreeMemory(device_, indexBufferMemory_, nullptr);
 
         vkDestroyPipeline(device_, graphicsPipeline_, nullptr);
         vkDestroyPipelineLayout(device_, pipelineLayout_, nullptr);

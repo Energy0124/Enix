@@ -71,9 +71,13 @@ namespace Enix
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
         const std::vector<Vertex> vertices_ = {
-            {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-            {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+        };
+        const std::vector<uint32_t> indices_ = {
+            0, 1, 2, 2, 3, 0
         };
 #ifdef NDEBUG
         const bool enableValidationLayers_ = false;
@@ -107,6 +111,8 @@ namespace Enix
         bool framebufferResized_ = false;
         VkBuffer vertexBuffer_;
         VkDeviceMemory vertexBufferMemory_;
+        VkBuffer indexBuffer_;
+        VkDeviceMemory indexBufferMemory_;
 
         void initWindow();
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
@@ -142,10 +148,12 @@ namespace Enix
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
         void createSyncObjects();
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-        void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory&
+        void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
+                          VkBuffer& buffer, VkDeviceMemory&
                           bufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void createVertexBuffer();
+        void createIndexBuffer();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
