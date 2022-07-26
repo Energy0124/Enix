@@ -61,6 +61,13 @@ namespace Enix
         std::vector<VkPresentModeKHR> presentModes;
     };
 
+    struct UniformBufferObject
+    {
+        alignas(16) glm::mat4 model;
+        alignas(16) glm::mat4 view;
+        alignas(16) glm::mat4 proj;
+    };
+
     class VulkanEngine : public Engine
     {
     private:
@@ -82,13 +89,8 @@ namespace Enix
         };
         VkDescriptorPool descriptorPool_;
         std::vector<VkDescriptorSet> descriptorSets_;
+        VkImageView textureImageView_;
 
-        struct UniformBufferObject
-        {
-            alignas(16) glm::mat4 model;
-            alignas(16) glm::mat4 view;
-            alignas(16) glm::mat4 proj;
-        };
 #ifdef NDEBUG
         const bool enableValidationLayers_ = false;
 #else
@@ -181,6 +183,8 @@ namespace Enix
         void createTextureImage();
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+        VkImageView createImageView(VkImage image, VkFormat format);
+        void createTextureImageView();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
