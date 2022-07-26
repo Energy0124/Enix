@@ -94,6 +94,7 @@ namespace Enix
 #else
         const bool enableValidationLayers_ = true;
 #endif
+        std::string workspaceRoot_ = "../../";
         VkInstance instance_ = nullptr;
         VkDebugUtilsMessengerEXT debugMessenger_;
         GLFWwindow* window_ = nullptr;
@@ -126,7 +127,9 @@ namespace Enix
         VkDeviceMemory indexBufferMemory_;
         std::vector<VkBuffer> uniformBuffers_;
         std::vector<VkDeviceMemory> uniformBuffersMemory_;
-
+        VkImage textureImage_;
+        VkDeviceMemory textureImageMemory_;
+        
         void initWindow();
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
         std::vector<const char*> getRequiredExtensions();
@@ -165,12 +168,19 @@ namespace Enix
                           VkBuffer& buffer, VkDeviceMemory&
                           bufferMemory);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+        void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
         void createVertexBuffer();
         void createIndexBuffer();
         void createDescriptorSetLayout();
         void createUniformBuffers();
         void createDescriptorPool();
         void createDescriptorSets();
+        void createImage(int texWidth, int texHeight, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags
+                         properties, VkImage& image, VkDeviceMemory& imageMemory);
+        void createTextureImage();
+        VkCommandBuffer beginSingleTimeCommands();
+        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
