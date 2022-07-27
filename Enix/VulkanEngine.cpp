@@ -125,21 +125,21 @@ namespace Enix
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForVulkan(window_, true);
-        ImGui_ImplVulkan_InitInfo init_info = {};
-        init_info.Instance = instance_;
-        init_info.PhysicalDevice = physicalDevice_;
-        init_info.Device = device_;
-        init_info.QueueFamily = indices.graphicsFamily.value();
-        init_info.Queue = presentQueue_;
-        init_info.PipelineCache = VK_NULL_HANDLE;
-        init_info.DescriptorPool = imguiDescriptorPool_;
-        init_info.Subpass = 0;
-        init_info.MinImageCount = maxFramesInFlight_;
-        init_info.ImageCount = static_cast<uint32_t>(swapChainImages_.size());
-        init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-        init_info.Allocator = VK_NULL_HANDLE;
-        init_info.CheckVkResultFn = VK_NULL_HANDLE;
-        ImGui_ImplVulkan_Init(&init_info, renderPass_);
+        ImGui_ImplVulkan_InitInfo initInfo = {};
+        initInfo.Instance = instance_;
+        initInfo.PhysicalDevice = physicalDevice_;
+        initInfo.Device = device_;
+        initInfo.QueueFamily = indices.graphicsFamily.value();
+        initInfo.Queue = presentQueue_;
+        initInfo.PipelineCache = VK_NULL_HANDLE;
+        initInfo.DescriptorPool = imguiDescriptorPool_;
+        initInfo.Subpass = 0;
+        initInfo.MinImageCount = maxFramesInFlight_;
+        initInfo.ImageCount = static_cast<uint32_t>(swapChainImages_.size());
+        initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+        initInfo.Allocator = VK_NULL_HANDLE;
+        initInfo.CheckVkResultFn = VK_NULL_HANDLE;
+        ImGui_ImplVulkan_Init(&initInfo, renderPass_);
 
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
         ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
