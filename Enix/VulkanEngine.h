@@ -10,6 +10,8 @@
 #include <glm/glm.hpp>
 #include <array>
 
+#include "imgui.h"
+
 namespace Enix
 {
     struct Vertex
@@ -138,6 +140,8 @@ namespace Enix
         VkImage textureImage_;
         VkDeviceMemory textureImageMemory_;
         VkSampler textureSampler_;
+        ImGuiIO imguiIo_;
+        VkDescriptorPool imguiDescriptorPool_;
 
         void initWindow();
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
@@ -200,6 +204,7 @@ namespace Enix
                                       VkDebugUtilsMessageTypeFlagsEXT messageType,
                                       const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
         static std::vector<char> readFile(const std::string& filename);
+        void initImgui();
     public:
         VulkanEngine();
         ~VulkanEngine() override;
