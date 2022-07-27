@@ -16,6 +16,7 @@ namespace Enix
     {
         glm::vec2 pos;
         glm::vec3 color;
+        glm::vec2 texCoord;
 
         static VkVertexInputBindingDescription getBindingDescription()
         {
@@ -27,9 +28,9 @@ namespace Enix
             return bindingDescription;
         }
 
-        static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions()
+        static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions()
         {
-            std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+            std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
             attributeDescriptions[0].binding = 0;
             attributeDescriptions[0].location = 0;
             attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
@@ -39,6 +40,11 @@ namespace Enix
             attributeDescriptions[1].location = 1;
             attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
             attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+            attributeDescriptions[2].binding = 0;
+            attributeDescriptions[2].location = 2;
+            attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+            attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
             return attributeDescriptions;
         }
     };
@@ -79,10 +85,10 @@ namespace Enix
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
         const std::vector<Vertex> vertices_ = {
-            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
         };
         const std::vector<uint32_t> indices_ = {
             0, 1, 2, 2, 3, 0
@@ -131,7 +137,8 @@ namespace Enix
         std::vector<VkDeviceMemory> uniformBuffersMemory_;
         VkImage textureImage_;
         VkDeviceMemory textureImageMemory_;
-        
+        VkSampler textureSampler_;
+
         void initWindow();
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
         std::vector<const char*> getRequiredExtensions();
@@ -178,13 +185,15 @@ namespace Enix
         void createUniformBuffers();
         void createDescriptorPool();
         void createDescriptorSets();
-        void createImage(int texWidth, int texHeight, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags
+        void createImage(int texWidth, int texHeight, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+                         VkMemoryPropertyFlags
                          properties, VkImage& image, VkDeviceMemory& imageMemory);
         void createTextureImage();
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
         VkImageView createImageView(VkImage image, VkFormat format);
         void createTextureImageView();
+        void createTextureSampler();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
