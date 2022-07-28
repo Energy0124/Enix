@@ -140,7 +140,7 @@ namespace Enix
         VkImage textureImage_;
         VkDeviceMemory textureImageMemory_;
         VkSampler textureSampler_;
-        ImGuiIO imguiIo_;
+        ImGuiIO* imguiIo_;
         VkDescriptorPool imguiDescriptorPool_;
 
         void initWindow();

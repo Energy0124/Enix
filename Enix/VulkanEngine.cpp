@@ -99,12 +99,12 @@ namespace Enix
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        imguiIo_ = ImGui::GetIO();
+        imguiIo_ = &ImGui::GetIO();
         (void)imguiIo_;
-        imguiIo_.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+        imguiIo_->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-        imguiIo_.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-        imguiIo_.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+        imguiIo_->ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+        imguiIo_->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
         //io.ConfigViewportsNoAutoMerge = true;
         //io.ConfigViewportsNoTaskBarIcon = true;
 
@@ -114,7 +114,7 @@ namespace Enix
 
         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
         ImGuiStyle& style = ImGui::GetStyle();
-        if (imguiIo_.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        if (imguiIo_->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             style.WindowRounding = 0.0f;
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -304,7 +304,7 @@ namespace Enix
         ImGui::Render();
 
         // Update and Render additional Platform Windows
-        if (imguiIo_.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        if (imguiIo_->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
