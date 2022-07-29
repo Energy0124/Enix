@@ -169,6 +169,46 @@ namespace Enix
     {
         ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspaceFlags);
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("New"))
+                {
+                }
+                if (ImGui::MenuItem("Open", "Ctrl+O"))
+                {
+                }
+                if (ImGui::MenuItem("Save", "Ctrl+S"))
+                {
+                }
+                if (ImGui::MenuItem("Save As.."))
+                {
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Edit"))
+            {
+                if (ImGui::MenuItem("Undo", "CTRL+Z"))
+                {
+                }
+                if (ImGui::MenuItem("Redo", "CTRL+Y", false, false))
+                {
+                } // Disabled item
+                ImGui::Separator();
+                if (ImGui::MenuItem("Cut", "CTRL+X"))
+                {
+                }
+                if (ImGui::MenuItem("Copy", "CTRL+C"))
+                {
+                }
+                if (ImGui::MenuItem("Paste", "CTRL+V"))
+                {
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
         ImGui::ShowDemoWindow();
         ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
