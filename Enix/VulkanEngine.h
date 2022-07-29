@@ -80,14 +80,14 @@ namespace Enix
     class VulkanEngine : public Engine
     {
     private:
-        const uint32_t maxFramesInFlight_ = 2;
-        const std::vector<const char*> validationLayers_ = {
+        const uint32_t _maxFramesInFlight = 2;
+        const std::vector<const char*> _validationLayers = {
             "VK_LAYER_KHRONOS_validation"
         };
-        const std::vector<const char*> deviceExtensions_ = {
+        const std::vector<const char*> _deviceExtensions = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
-        const std::vector<Vertex> vertices_ = {
+        const std::vector<Vertex> _vertices = {
             {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
             {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
             {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
@@ -98,57 +98,57 @@ namespace Enix
             {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
             {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
         };
-        const std::vector<uint32_t> indices_ = {
+        const std::vector<uint32_t> _indices = {
             0, 1, 2, 2, 3, 0,
             4, 5, 6, 6, 7, 4
         };
-        VkDescriptorPool descriptorPool_;
-        std::vector<VkDescriptorSet> descriptorSets_;
-        VkImageView textureImageView_;
+        VkDescriptorPool _descriptorPool;
+        std::vector<VkDescriptorSet> _descriptorSets;
+        VkImageView _textureImageView;
 
 #ifdef NDEBUG
-        const bool enableValidationLayers_ = false;
+        const bool _enableValidationLayers = false;
 #else
-        const bool enableValidationLayers_ = true;
+        const bool _enableValidationLayers = true;
 #endif
-        std::string workspaceRoot_ = "../../";
-        VkInstance instance_ = nullptr;
-        VkDebugUtilsMessengerEXT debugMessenger_;
-        GLFWwindow* window_ = nullptr;
-        bool cleanedUp_ = false;
-        VkPhysicalDevice physicalDevice_;
-        VkDevice device_;
-        VkQueue graphicsQueue_;
-        VkSurfaceKHR surface_;
-        VkQueue presentQueue_;
-        VkSwapchainKHR swapChain_;
-        std::vector<VkImage> swapChainImages_;
-        VkFormat swapChainImageFormat_;
-        VkExtent2D swapChainExtent_;
-        std::vector<VkImageView> swapChainImageViews_;
-        VkRenderPass renderPass_;
-        VkDescriptorSetLayout descriptorSetLayout_;
-        VkPipelineLayout pipelineLayout_;
-        VkPipeline graphicsPipeline_;
-        std::vector<VkFramebuffer> swapChainFramebuffers_;
-        VkCommandPool commandPool_;
-        std::vector<VkCommandBuffer> commandBuffers_;
-        std::vector<VkSemaphore> imageAvailableSemaphores_;
-        std::vector<VkSemaphore> renderFinishedSemaphores_;
-        std::vector<VkFence> inFlightFences_;
-        uint32_t currentFrame_ = 0;
-        bool framebufferResized_ = false;
-        VkBuffer vertexBuffer_;
-        VkDeviceMemory vertexBufferMemory_;
-        VkBuffer indexBuffer_;
-        VkDeviceMemory indexBufferMemory_;
-        std::vector<VkBuffer> uniformBuffers_;
-        std::vector<VkDeviceMemory> uniformBuffersMemory_;
-        VkImage textureImage_;
-        VkDeviceMemory textureImageMemory_;
-        VkSampler textureSampler_;
-        ImGuiIO* imguiIo_;
-        VkDescriptorPool imguiDescriptorPool_;
+        std::string _workspaceRoot = "../../";
+        VkInstance _instance = nullptr;
+        VkDebugUtilsMessengerEXT _debugMessenger;
+        GLFWwindow* _window = nullptr;
+        bool _cleanedUp = false;
+        VkPhysicalDevice _physicalDevice;
+        VkDevice _device;
+        VkQueue _graphicsQueue;
+        VkSurfaceKHR _surface;
+        VkQueue _presentQueue;
+        VkSwapchainKHR _swapChain;
+        std::vector<VkImage> _swapChainImages;
+        VkFormat _swapChainImageFormat;
+        VkExtent2D _swapChainExtent;
+        std::vector<VkImageView> _swapChainImageViews;
+        VkRenderPass _renderPass;
+        VkDescriptorSetLayout _descriptorSetLayout;
+        VkPipelineLayout _pipelineLayout;
+        VkPipeline _graphicsPipeline;
+        std::vector<VkFramebuffer> _swapChainFramebuffers;
+        VkCommandPool _commandPool;
+        std::vector<VkCommandBuffer> _commandBuffers;
+        std::vector<VkSemaphore> _imageAvailableSemaphores;
+        std::vector<VkSemaphore> _renderFinishedSemaphores;
+        std::vector<VkFence> _inFlightFences;
+        uint32_t _currentFrame = 0;
+        bool _framebufferResized = false;
+        VkBuffer _vertexBuffer;
+        VkDeviceMemory _vertexBufferMemory;
+        VkBuffer _indexBuffer;
+        VkDeviceMemory _indexBufferMemory;
+        std::vector<VkBuffer> _uniformBuffers;
+        std::vector<VkDeviceMemory> _uniformBuffersMemory;
+        VkImage _textureImage;
+        VkDeviceMemory _textureImageMemory;
+        VkSampler _textureSampler;
+        ImGuiIO* _imguiIo;
+        VkDescriptorPool _imguiDescriptorPool;
 
         void initWindow();
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
