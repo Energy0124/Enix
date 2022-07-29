@@ -63,7 +63,7 @@ namespace Enix
 
         return buffer;
     }
-    
+
     void VulkanEngine::initImgui()
     {
         //1: create descriptor pool for IMGUI
@@ -167,6 +167,16 @@ namespace Enix
 
     void VulkanEngine::drawUI()
     {
+        ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
+        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspaceFlags);
+        ImGui::ShowDemoWindow();
+        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+
+        ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
+
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                    ImGui::GetIO().Framerate);
+        ImGui::End();
     }
 
     void VulkanEngine::cleanupSwapChain()
@@ -292,15 +302,9 @@ namespace Enix
         // Start the Dear ImGui frame
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
+
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
-        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
-
-        ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                    ImGui::GetIO().Framerate);
-        ImGui::End();
+        drawUI();
         ImGui::Render();
 
         // Update and Render additional Platform Windows
@@ -310,9 +314,7 @@ namespace Enix
             ImGui::RenderPlatformWindowsDefault();
         }
 
-
         drawFrame();
-        drawUI();
     }
 
     void VulkanEngine::initWindow()
