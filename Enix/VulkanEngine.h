@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <array>
 
@@ -16,7 +17,7 @@ namespace Enix
 {
     struct Vertex
     {
-        glm::vec2 pos;
+        glm::vec3 pos;
         glm::vec3 color;
         glm::vec2 texCoord;
 
@@ -35,7 +36,7 @@ namespace Enix
             std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
             attributeDescriptions[0].binding = 0;
             attributeDescriptions[0].location = 0;
-            attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+            attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
             attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
             attributeDescriptions[1].binding = 0;
@@ -87,13 +88,19 @@ namespace Enix
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
         const std::vector<Vertex> vertices_ = {
-            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+            {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+            {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+
+            {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+            {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+            {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
         };
         const std::vector<uint32_t> indices_ = {
-            0, 1, 2, 2, 3, 0
+            0, 1, 2, 2, 3, 0,
+            4, 5, 6, 6, 7, 4
         };
         VkDescriptorPool descriptorPool_;
         std::vector<VkDescriptorSet> descriptorSets_;
