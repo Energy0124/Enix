@@ -149,6 +149,9 @@ namespace Enix
         VkSampler _textureSampler;
         ImGuiIO* _imguiIo;
         VkDescriptorPool _imguiDescriptorPool;
+        VkImage _depthImage;
+        VkDeviceMemory _depthImageMemory;
+        VkImageView _depthImageView;
 
         void initWindow();
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
@@ -202,9 +205,14 @@ namespace Enix
         void createTextureImage();
         VkCommandBuffer beginSingleTimeCommands();
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
-        VkImageView createImageView(VkImage image, VkFormat format);
+        VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
         void createTextureImageView();
         void createTextureSampler();
+        VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
+                                     VkFormatFeatureFlags features);
+        VkFormat findDepthFormat();
+        bool hasStencilComponent(VkFormat format);
+        void createDepthResources();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
