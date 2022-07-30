@@ -10,7 +10,7 @@ riderModule.iml
 *.slo
 *.lo
 *.o
-*.obj
+#*.obj
 
 # Precompiled Headers
 *.gch
@@ -186,7 +186,7 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-*.obj
+#*.obj
 *.iobj
 *.pch
 *.pdb
@@ -493,3 +493,8 @@ _deps
 glfw3.pc
 glfw3Config.cmake
 glfw3ConfigVersion.cmake
+
+/ThirdParty/tinyobjloader/tinyobjloader.pc
+/ThirdParty/tinyobjloader/tinyobjloader-config.cmake
+/ThirdParty/tinyobjloader/tinyobjloader-config-version.cmake
+/ThirdParty/tinyobjloader/tinyobjloader-targets.cmake
