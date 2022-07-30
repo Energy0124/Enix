@@ -9,6 +9,7 @@ add_executable (Enix
     VulkanEngine.cpp
     VulkanEngineImgui.h
     VulkanEngineImgui.cpp
+    Vertex.h
 )
 
 

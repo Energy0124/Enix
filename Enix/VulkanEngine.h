@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <vector>
 
+#include "Vertex.h"
 #include "Engine.h"
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
@@ -9,49 +10,14 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
-#include <array>
+
+#include <unordered_map>
 
 #include "imgui.h"
 
+
 namespace Enix
 {
-    struct Vertex
-    {
-        glm::vec3 pos;
-        glm::vec3 color;
-        glm::vec2 texCoord;
-
-        static VkVertexInputBindingDescription getBindingDescription()
-        {
-            VkVertexInputBindingDescription bindingDescription{};
-            bindingDescription.binding = 0;
-            bindingDescription.stride = sizeof(Vertex);
-            bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-            return bindingDescription;
-        }
-
-        static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions()
-        {
-            std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-            attributeDescriptions[0].binding = 0;
-            attributeDescriptions[0].location = 0;
-            attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-            attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-            attributeDescriptions[1].binding = 0;
-            attributeDescriptions[1].location = 1;
-            attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-            attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-            attributeDescriptions[2].binding = 0;
-            attributeDescriptions[2].location = 2;
-            attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-            attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-            return attributeDescriptions;
-        }
-    };
-
     struct QueueFamilyIndices
     {
         std::optional<uint32_t> graphicsFamily;
@@ -81,13 +47,14 @@ namespace Enix
     {
     private:
         const uint32_t _maxFramesInFlight = 2;
-        const std::vector<const char*> _validationLayers = {
+        const std::vector<const char*> _validationLayers{
             "VK_LAYER_KHRONOS_validation"
         };
-        const std::vector<const char*> _deviceExtensions = {
+        const std::vector<const char*> _deviceExtensions{
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
-        const std::vector<Vertex> _vertices = {
+        std::vector<Vertex> _vertices{};
+        std::vector<Vertex> _verticesTest{
             {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
             {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
             {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
@@ -98,10 +65,15 @@ namespace Enix
             {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
             {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
         };
-        const std::vector<uint32_t> _indices = {
+        std::vector<uint32_t> _indices{};
+
+        std::vector<uint32_t> _indicesTest{
             0, 1, 2, 2, 3, 0,
             4, 5, 6, 6, 7, 4
         };
+
+        std::unordered_map<Vertex, uint32_t> _uniqueVertices{};
+
         VkDescriptorPool _descriptorPool;
         std::vector<VkDescriptorSet> _descriptorSets;
         VkImageView _textureImageView;
@@ -112,6 +84,8 @@ namespace Enix
         const bool _enableValidationLayers = true;
 #endif
         std::string _workspaceRoot = "../../";
+        std::string _modelPath = "Models/viking_room.obj";
+        std::string _texturePath = "Textures/viking_room.png";
         VkInstance _instance = nullptr;
         VkDebugUtilsMessengerEXT _debugMessenger;
         GLFWwindow* _window = nullptr;
@@ -213,6 +187,7 @@ namespace Enix
         VkFormat findDepthFormat();
         bool hasStencilComponent(VkFormat format);
         void createDepthResources();
+        void loadModel();
         void initVulkan();
         static void glfwErrorCallback(int error, const char* description);
         static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

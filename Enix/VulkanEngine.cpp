@@ -25,6 +25,9 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
 
 namespace Enix
 {
@@ -224,7 +227,7 @@ namespace Enix
         vkDestroyImageView(_device, _depthImageView, nullptr);
         vkDestroyImage(_device, _depthImage, nullptr);
         vkFreeMemory(_device, _depthImageMemory, nullptr);
-        
+
         for (size_t i = 0; i < _swapChainFramebuffers.size(); i++)
         {
             vkDestroyFramebuffer(_device, _swapChainFramebuffers[i], nullptr);
@@ -1582,7 +1585,7 @@ namespace Enix
     void VulkanEngine::createTextureImage()
     {
         int texWidth, texHeight, texChannels;
-        std::string filename = _workspaceRoot + "Textures/battler.png";
+        std::string filename = _workspaceRoot + _texturePath;
         stbi_uc* pixels = stbi_load(filename.data(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         VkDeviceSize imageSize = texWidth * texHeight * 4;
 
@@ -1752,6 +1755,49 @@ namespace Enix
                               VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }
 
+    void VulkanEngine::loadModel()
+    {
+        tinyobj::attrib_t attrib;
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
+        std::string warn, err;
+
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, (_workspaceRoot + _modelPath).c_str()))
+        {
+            throw std::runtime_error(warn + err);
+        }
+
+        for (const auto& shape : shapes)
+        {
+            for (const auto& index : shape.mesh.indices)
+            {
+                Vertex vertex{};
+                vertex.pos = {
+                    attrib.vertices[3 * index.vertex_index + 0],
+                    attrib.vertices[3 * index.vertex_index + 1],
+                    attrib.vertices[3 * index.vertex_index + 2]
+                };
+
+                vertex.texCoord = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+                };
+
+                vertex.color = {1.0f, 1.0f, 1.0f};
+                vertex.texCoord = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+                };
+
+                if (!_uniqueVertices.contains(vertex)) {
+                    _uniqueVertices[vertex] = static_cast<uint32_t>(_vertices.size());
+                    _vertices.push_back(vertex);
+                }
+                _indices.push_back(_uniqueVertices[vertex]);
+            }
+        }
+    }
+
     void VulkanEngine::initVulkan()
     {
         // Setup Vulkan
@@ -1776,6 +1822,7 @@ namespace Enix
         createTextureImage();
         createTextureImageView();
         createTextureSampler();
+        loadModel();
         createVertexBuffer();
         createIndexBuffer();
         createUniformBuffers();
