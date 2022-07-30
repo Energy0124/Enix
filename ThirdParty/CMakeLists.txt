@@ -35,3 +35,9 @@ target_link_libraries(imgui PUBLIC Vulkan::Vulkan ${OPENGL_LIBRARY} glfw)
 add_library(stb_image INTERFACE)
 target_include_directories(stb_image INTERFACE stb_image)
 
+
+if(NOT TARGET tinyobjloader)
+    add_subdirectory(tinyobjloader)
+    set_target_properties(tinyobjloader PROPERTIES FOLDER tinyobjloader)
+    set_target_properties(uninstall PROPERTIES FOLDER tinyobjloader)
+endif()
