@@ -220,14 +220,14 @@ namespace Enix
                                       const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
         static std::vector<char> readFile(const std::string& filename);
         void initImgui();
-    public:
-        VulkanEngine();
-        ~VulkanEngine() override;
-        void drawUI() override;
         void cleanupSwapChain();
         void recreateSwapChain();
         void updateUniformBuffer(uint32_t currentImage);
         void drawFrame();
+    public:
+        VulkanEngine();
+        ~VulkanEngine() override;
+        void drawUI() override;
         void tick() override;
         int init() override;
         int cleanUp() override;
