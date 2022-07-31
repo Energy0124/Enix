@@ -25,7 +25,7 @@ namespace Enix
         VulkanEngineImgui();
         ~VulkanEngineImgui() override;
         void drawUI() override;
-        void tick() override;
+        void tick(double deltaTime) override;
         
         int run() override;
     };

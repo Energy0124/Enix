@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.h>
 #include <optional>
 #include <string>
+#include <chrono>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -126,6 +127,7 @@ namespace Enix
         VkImage _depthImage;
         VkDeviceMemory _depthImageMemory;
         VkImageView _depthImageView;
+        std::chrono::steady_clock::time_point _lastTickTimePoint;
 
         void initWindow();
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
@@ -203,7 +205,7 @@ namespace Enix
         VulkanEngine();
         ~VulkanEngine() override;
         void drawUI() override;
-        void tick() override;
+        void tick(double deltaTime) override;
         int init() override;
         int cleanUp() override;
         int run() override;

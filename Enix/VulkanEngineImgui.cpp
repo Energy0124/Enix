@@ -432,7 +432,7 @@ namespace Enix
         }
     }
 
-    void VulkanEngineImgui::tick()
+    void VulkanEngineImgui::tick(double deltaTime)
     {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -625,7 +625,7 @@ namespace Enix
         // Main loop
         while (!glfwWindowShouldClose(window_))
         {
-            VulkanEngineImgui::tick();
+            VulkanEngineImgui::tick(0);
         }
 
 

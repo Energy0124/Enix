@@ -16,7 +16,7 @@ namespace Enix
         ImGuiIO io_;
     public:
         void drawUI() override;
-        void tick() override;
+        void tick(double deltaTime) override;
         int run() override;
     };
 }

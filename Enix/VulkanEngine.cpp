@@ -29,6 +29,24 @@
 #include <tiny_obj_loader.h>
 
 
+// for temporary debugging purposes
+static auto t1 = std::chrono::high_resolution_clock::now();
+void DEBUG_startTimer(const std::string&& message)
+{
+    using std::chrono::high_resolution_clock;
+    t1 = high_resolution_clock::now();
+    std::cout << "start timer: "<< message << std::endl;
+}
+
+void DEBUG_logTimer(const std::string&& message)
+{
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration;
+    auto t2 = high_resolution_clock::now();
+    duration<double, std::milli> ms = t2 - t1;
+    std::cout << message << ": " << ms.count() << "ms" << std::endl;
+}
+
 namespace Enix
 {
     void VulkanEngine::glfwErrorCallback(int error, const char* description)
@@ -237,7 +255,6 @@ namespace Enix
         {
             vkDestroyImageView(_device, _swapChainImageViews[i], nullptr);
         }
-
         vkDestroySwapchainKHR(_device, _swapChain, nullptr);
     }
 
@@ -255,8 +272,6 @@ namespace Enix
 
         createSwapChain();
         createImageViews();
-        createRenderPass();
-        createGraphicsPipeline();
         createDepthResources();
         createFramebuffers();
     }
@@ -281,6 +296,8 @@ namespace Enix
         vkUnmapMemory(_device, _uniformBuffersMemory[currentImage]);
     }
 
+  
+
     void VulkanEngine::drawFrame()
     {
         vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
@@ -299,7 +316,6 @@ namespace Enix
         {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
-
         updateUniformBuffer(_currentFrame);
 
         vkResetCommandBuffer(_commandBuffers[_currentFrame], 0);
@@ -338,10 +354,11 @@ namespace Enix
         presentInfo.pResults = nullptr; // Optional
 
         result = vkQueuePresentKHR(_presentQueue, &presentInfo);
-
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _framebufferResized)
         {
+            _framebufferResized = false;
             recreateSwapChain();
+            return;
         }
         else if (result != VK_SUCCESS)
         {
@@ -351,7 +368,8 @@ namespace Enix
         _currentFrame = (_currentFrame + 1) % _maxFramesInFlight;
     }
 
-    void VulkanEngine::tick()
+
+    void VulkanEngine::tick(double deltaTime)
     {
         glfwPollEvents();
 
@@ -369,7 +387,6 @@ namespace Enix
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
-
         drawFrame();
     }
 
@@ -1789,7 +1806,8 @@ namespace Enix
                     1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
                 };
 
-                if (!_uniqueVertices.contains(vertex)) {
+                if (!_uniqueVertices.contains(vertex))
+                {
                     _uniqueVertices[vertex] = static_cast<uint32_t>(_vertices.size());
                     _vertices.push_back(vertex);
                 }
@@ -1845,10 +1863,22 @@ namespace Enix
 
     int VulkanEngine::run()
     {
+        double deltaTime;
+
         // Main loop
         while (!glfwWindowShouldClose(_window))
         {
-            VulkanEngine::tick();
+            {
+                using namespace std::chrono;
+
+                steady_clock::time_point tickTimePoint = steady_clock::now();
+                auto timeSpan = duration_cast<duration<double>>(tickTimePoint - _lastTickTimePoint);
+                deltaTime = timeSpan.count();
+
+                _lastTickTimePoint = tickTimePoint;
+            }
+            std::cout << "deltaTime: " << deltaTime << std::endl;
+            tick(deltaTime);
         }
 
         vkDeviceWaitIdle(_device);

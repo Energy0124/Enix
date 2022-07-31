@@ -20,7 +20,7 @@ namespace Enix
         
         virtual void drawUI() = 0;
 
-        virtual void tick() = 0;
+        virtual void tick(double deltaTime) = 0;
         
         virtual int run() = 0;
         
