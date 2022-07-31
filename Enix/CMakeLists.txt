@@ -10,6 +10,12 @@ add_executable (Enix
     VulkanEngineImgui.h
     VulkanEngineImgui.cpp
     Vertex.h
+    Window.h
+    Window.cpp
+    Device.h
+    Device.cpp
+    Model.h
+    Model.cpp
 )
 
 
