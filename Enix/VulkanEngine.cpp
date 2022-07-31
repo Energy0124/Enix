@@ -1,5 +1,6 @@
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
+
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 
@@ -19,6 +20,7 @@
 #include <chrono>
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include <stb_image.h>
 
 #include "imgui.h"
@@ -26,21 +28,20 @@
 #include "imgui_impl_vulkan.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
+
 #include <tiny_obj_loader.h>
 
 
 // for temporary debugging purposes
 static auto t1 = std::chrono::high_resolution_clock::now();
 
-void DEBUG_startTimer(const std::string&& message)
-{
+void DEBUG_startTimer(const std::string &&message) {
     using std::chrono::high_resolution_clock;
     t1 = high_resolution_clock::now();
     std::cout << "start timer: " << message << std::endl;
 }
 
-void DEBUG_logTimer(const std::string&& message)
-{
+void DEBUG_logTimer(const std::string &&message) {
     using std::chrono::high_resolution_clock;
     using std::chrono::duration;
     auto t2 = high_resolution_clock::now();
@@ -48,29 +49,25 @@ void DEBUG_logTimer(const std::string&& message)
     std::cout << message << ": " << ms.count() << "ms" << std::endl;
 }
 
-namespace Enix
-{
+namespace Enix {
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanEngine::debugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT messageType,
-        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-        void* pUserData)
-    {
+            VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+            VkDebugUtilsMessageTypeFlagsEXT messageType,
+            const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+            void *pUserData) {
         std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
         return VK_FALSE;
     }
 
-    std::vector<char> VulkanEngine::readFile(const std::string& filename)
-    {
+    std::vector<char> VulkanEngine::readFile(const std::string &filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
-        if (!file.is_open())
-        {
+        if (!file.is_open()) {
             throw std::runtime_error("failed to open file!");
         }
 
-        size_t fileSize = (size_t)file.tellg();
+        size_t fileSize = (size_t) file.tellg();
         std::vector<char> buffer(fileSize);
 
         file.seekg(0);
@@ -81,24 +78,23 @@ namespace Enix
         return buffer;
     }
 
-    void VulkanEngine::initImgui()
-    {
+    void VulkanEngine::initImgui() {
         //1: create descriptor pool for IMGUI
         // the size of the pool is very oversize, but it's copied from imgui demo itself.
         VkDescriptorPoolSize poolSizes[] =
-        {
-            {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
-            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
-            {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
-            {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
-            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-            {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}
-        };
+                {
+                        {VK_DESCRIPTOR_TYPE_SAMPLER,                1000},
+                        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+                        {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          1000},
+                        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          1000},
+                        {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   1000},
+                        {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   1000},
+                        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         1000},
+                        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         1000},
+                        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+                        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+                        {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       1000}
+                };
         VkDescriptorPoolCreateInfo poolInfo = {};
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
@@ -107,8 +103,7 @@ namespace Enix
         poolInfo.pPoolSizes = poolSizes;
 
 
-        if (vkCreateDescriptorPool(_device, &poolInfo, nullptr, &_imguiDescriptorPool) != VK_SUCCESS)
-        {
+        if (vkCreateDescriptorPool(_device, &poolInfo, nullptr, &_imguiDescriptorPool) != VK_SUCCESS) {
             throw std::runtime_error("failed to create imgui descriptor pool!");
         }
 
@@ -117,7 +112,7 @@ namespace Enix
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         _imguiIo = &ImGui::GetIO();
-        (void)_imguiIo;
+        (void) _imguiIo;
         _imguiIo->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         _imguiIo->ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
@@ -130,9 +125,8 @@ namespace Enix
         //ImGui::StyleColorsClassic();
 
         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-        ImGuiStyle& style = ImGui::GetStyle();
-        if (_imguiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
+        ImGuiStyle &style = ImGui::GetStyle();
+        if (_imguiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             style.WindowRounding = 0.0f;
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
@@ -164,63 +158,46 @@ namespace Enix
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    VulkanEngine::VulkanEngine(): _window()
-    {
+    VulkanEngine::VulkanEngine() : _window() {
         VulkanEngine::init();
     }
 
-    VulkanEngine::~VulkanEngine()
-    {
+    VulkanEngine::~VulkanEngine() {
         // try catch to avoid leaking exceptions in destructor
-        try
-        {
+        try {
             VulkanEngine::cleanUp();
         }
-        catch (const std::exception& e)
-        {
+        catch (const std::exception &e) {
             std::cerr << "Exception in VulkanEngine destructor: " << e.what() << std::endl;
         }
     }
 
-    void VulkanEngine::drawUI()
-    {
+    void VulkanEngine::drawUI() {
         ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspaceFlags);
-        if (ImGui::BeginMainMenuBar())
-        {
-            if (ImGui::BeginMenu("File"))
-            {
-                if (ImGui::MenuItem("New"))
-                {
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("New")) {
                 }
-                if (ImGui::MenuItem("Open", "Ctrl+O"))
-                {
+                if (ImGui::MenuItem("Open", "Ctrl+O")) {
                 }
-                if (ImGui::MenuItem("Save", "Ctrl+S"))
-                {
+                if (ImGui::MenuItem("Save", "Ctrl+S")) {
                 }
-                if (ImGui::MenuItem("Save As.."))
-                {
+                if (ImGui::MenuItem("Save As..")) {
                 }
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu("Edit"))
-            {
-                if (ImGui::MenuItem("Undo", "CTRL+Z"))
-                {
+            if (ImGui::BeginMenu("Edit")) {
+                if (ImGui::MenuItem("Undo", "CTRL+Z")) {
                 }
-                if (ImGui::MenuItem("Redo", "CTRL+Y", false, false))
-                {
+                if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {
                 } // Disabled item
                 ImGui::Separator();
-                if (ImGui::MenuItem("Cut", "CTRL+X"))
-                {
+                if (ImGui::MenuItem("Cut", "CTRL+X")) {
                 }
-                if (ImGui::MenuItem("Copy", "CTRL+C"))
-                {
+                if (ImGui::MenuItem("Copy", "CTRL+C")) {
                 }
-                if (ImGui::MenuItem("Paste", "CTRL+V"))
-                {
+                if (ImGui::MenuItem("Paste", "CTRL+V")) {
                 }
                 ImGui::EndMenu();
             }
@@ -236,29 +213,24 @@ namespace Enix
         ImGui::End();
     }
 
-    void VulkanEngine::cleanupSwapChain()
-    {
+    void VulkanEngine::cleanupSwapChain() {
         vkDestroyImageView(_device, _depthImageView, nullptr);
         vkDestroyImage(_device, _depthImage, nullptr);
         vkFreeMemory(_device, _depthImageMemory, nullptr);
 
-        for (size_t i = 0; i < _swapChainFramebuffers.size(); i++)
-        {
+        for (size_t i = 0; i < _swapChainFramebuffers.size(); i++) {
             vkDestroyFramebuffer(_device, _swapChainFramebuffers[i], nullptr);
         }
 
-        for (size_t i = 0; i < _swapChainImageViews.size(); i++)
-        {
+        for (size_t i = 0; i < _swapChainImageViews.size(); i++) {
             vkDestroyImageView(_device, _swapChainImageViews[i], nullptr);
         }
         vkDestroySwapchainKHR(_device, _swapChain, nullptr);
     }
 
-    void VulkanEngine::recreateSwapChain()
-    {
+    void VulkanEngine::recreateSwapChain() {
         int width = 0, height = 0;
-        while (width == 0 || height == 0)
-        {
+        while (width == 0 || height == 0) {
             glfwGetFramebufferSize(_window, &width, &height);
             glfwWaitEvents();
         }
@@ -272,8 +244,7 @@ namespace Enix
         createFramebuffers();
     }
 
-    void VulkanEngine::updateUniformBuffer(uint32_t currentImage)
-    {
+    void VulkanEngine::updateUniformBuffer(uint32_t currentImage) {
         static auto startTime = std::chrono::high_resolution_clock::now();
 
         auto currentTime = std::chrono::high_resolution_clock::now();
@@ -286,15 +257,14 @@ namespace Enix
                                     _swapChainExtent.width / static_cast<float>(_swapChainExtent.height), 0.1f, 10.0f);
         ubo.proj[1][1] *= -1;
 
-        void* data;
+        void *data;
         vkMapMemory(_device, _uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
         memcpy(data, &ubo, sizeof(ubo));
         vkUnmapMemory(_device, _uniformBuffersMemory[currentImage]);
     }
 
 
-    void VulkanEngine::drawFrame()
-    {
+    void VulkanEngine::drawFrame() {
         vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
         vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
 
@@ -302,13 +272,10 @@ namespace Enix
         VkResult result = vkAcquireNextImageKHR(_device, _swapChain, UINT64_MAX,
                                                 _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE,
                                                 &imageIndex);
-        if (result == VK_ERROR_OUT_OF_DATE_KHR)
-        {
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             recreateSwapChain();
             return;
-        }
-        else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-        {
+        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");
         }
         updateUniformBuffer(_currentFrame);
@@ -331,8 +298,7 @@ namespace Enix
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, _inFlightFences[_currentFrame]) != VK_SUCCESS)
-        {
+        if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, _inFlightFences[_currentFrame]) != VK_SUCCESS) {
             throw std::runtime_error("failed to submit draw command buffer!");
         }
 
@@ -349,14 +315,11 @@ namespace Enix
         presentInfo.pResults = nullptr; // Optional
 
         result = vkQueuePresentKHR(_presentQueue, &presentInfo);
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _framebufferResized)
-        {
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _framebufferResized) {
             _framebufferResized = false;
             recreateSwapChain();
             return;
-        }
-        else if (result != VK_SUCCESS)
-        {
+        } else if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
         }
 
@@ -364,8 +327,7 @@ namespace Enix
     }
 
 
-    void VulkanEngine::tick(double deltaTime)
-    {
+    void VulkanEngine::tick(double deltaTime) {
         glfwPollEvents();
 
         // Start the Dear ImGui frame
@@ -377,8 +339,7 @@ namespace Enix
         ImGui::Render();
 
         // Update and Render additional Platform Windows
-        if (_imguiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
+        if (_imguiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
@@ -386,43 +347,36 @@ namespace Enix
     }
 
 
-    std::vector<const char*> VulkanEngine::getRequiredExtensions()
-    {
+    std::vector<const char *> VulkanEngine::getRequiredExtensions() {
         uint32_t glfwExtensionCount = 0;
-        const char** glfwExtensions;
+        const char **glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-        std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+        std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-        if (_enableValidationLayers)
-        {
+        if (_enableValidationLayers) {
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
 
         return extensions;
     }
 
-    bool VulkanEngine::checkValidationLayerSupport()
-    {
+    bool VulkanEngine::checkValidationLayerSupport() {
         uint32_t layerCount;
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
         std::vector<VkLayerProperties> availableLayers(layerCount);
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
-        for (const char* layerName : _validationLayers)
-        {
+        for (const char *layerName: _validationLayers) {
             bool layerFound = false;
-            for (const auto& layerProperties : availableLayers)
-            {
-                if (strcmp(layerName, layerProperties.layerName) == 0)
-                {
+            for (const auto &layerProperties: availableLayers) {
+                if (strcmp(layerName, layerProperties.layerName) == 0) {
                     layerFound = true;
                     break;
                 }
             }
-            if (!layerFound)
-            {
+            if (!layerFound) {
                 return false;
             }
         }
@@ -430,10 +384,8 @@ namespace Enix
         return true;
     }
 
-    void VulkanEngine::createVulkanInstance()
-    {
-        if (_enableValidationLayers && !checkValidationLayerSupport())
-        {
+    void VulkanEngine::createVulkanInstance() {
+        if (_enableValidationLayers && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
         }
 
@@ -455,23 +407,19 @@ namespace Enix
 
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
         // set validation layers if enabled
-        if (_enableValidationLayers)
-        {
+        if (_enableValidationLayers) {
             createInfo.enabledLayerCount = static_cast<uint32_t>(_validationLayers.size());
             createInfo.ppEnabledLayerNames = _validationLayers.data();
 
             populateDebugMessengerCreateInfo(debugCreateInfo);
-            createInfo.pNext = reinterpret_cast<VkDebugUtilsMessengerCreateInfoEXT*>(&debugCreateInfo);
-        }
-        else
-        {
+            createInfo.pNext = reinterpret_cast<VkDebugUtilsMessengerCreateInfoEXT *>(&debugCreateInfo);
+        } else {
             createInfo.enabledLayerCount = 0;
 
             createInfo.pNext = nullptr;
         }
 
-        if (vkCreateInstance(&createInfo, nullptr, &_instance) != VK_SUCCESS)
-        {
+        if (vkCreateInstance(&createInfo, nullptr, &_instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");
         }
 
@@ -483,66 +431,57 @@ namespace Enix
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
         std::cout << "available extensions:\n";
-        for (const auto& extension : extensions)
-        {
+        for (const auto &extension: extensions) {
             std::cout << '\t' << extension.extensionName << '\n';
         }
     }
 
     VkResult VulkanEngine::createDebugUtilsMessengerExt(VkInstance instance,
-                                                        const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-                                                        const VkAllocationCallbacks* pAllocator,
-                                                        VkDebugUtilsMessengerEXT* pDebugMessenger)
-    {
+                                                        const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+                                                        const VkAllocationCallbacks *pAllocator,
+                                                        VkDebugUtilsMessengerEXT *pDebugMessenger) {
         auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(
-            instance, "vkCreateDebugUtilsMessengerEXT"));
-        if (func != nullptr)
-        {
+                instance, "vkCreateDebugUtilsMessengerEXT"));
+        if (func != nullptr) {
             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-        }
-        else
-        {
+        } else {
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
     }
 
     void VulkanEngine::destroyDebugUtilsMessengerExt(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
-                                                     const VkAllocationCallbacks* pAllocator)
-    {
+                                                     const VkAllocationCallbacks *pAllocator) {
         auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
-            vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
-        if (func != nullptr)
-        {
+                vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
+        if (func != nullptr) {
             func(instance, debugMessenger, pAllocator);
         }
     }
 
-    void VulkanEngine::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
-    {
+    void VulkanEngine::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
         createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+                                     VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                                     VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+                                 VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                                 VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
     }
 
-    void VulkanEngine::setupDebugMessenger()
-    {
+    void VulkanEngine::setupDebugMessenger() {
         if (!_enableValidationLayers) return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         populateDebugMessengerCreateInfo(createInfo);
 
-        if (createDebugUtilsMessengerExt(_instance, &createInfo, nullptr, &_debugMessenger) != VK_SUCCESS)
-        {
+        if (createDebugUtilsMessengerExt(_instance, &createInfo, nullptr, &_debugMessenger) != VK_SUCCESS) {
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }
 
-    QueueFamilyIndices VulkanEngine::findQueueFamilies(VkPhysicalDevice device)
-    {
+    QueueFamilyIndices VulkanEngine::findQueueFamilies(VkPhysicalDevice device) {
         QueueFamilyIndices indices;
 
         uint32_t queueFamilyCount = 0;
@@ -551,20 +490,16 @@ namespace Enix
         std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
         vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
         int i = 0;
-        for (const auto& queueFamily : queueFamilies)
-        {
-            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-            {
+        for (const auto &queueFamily: queueFamilies) {
+            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 indices.graphicsFamily = i;
             }
             VkBool32 presentSupport = false;
             vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface, &presentSupport);
-            if (presentSupport)
-            {
+            if (presentSupport) {
                 indices.presentFamily = i;
             }
-            if (indices.isComplete())
-            {
+            if (indices.isComplete()) {
                 break;
             }
             i++;
@@ -573,8 +508,7 @@ namespace Enix
         return indices;
     }
 
-    SwapChainSupportDetails VulkanEngine::querySwapChainSupport(VkPhysicalDevice device)
-    {
+    SwapChainSupportDetails VulkanEngine::querySwapChainSupport(VkPhysicalDevice device) {
         SwapChainSupportDetails details;
 
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, _surface, &details.capabilities);
@@ -582,8 +516,7 @@ namespace Enix
         uint32_t formatCount;
         vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface, &formatCount, nullptr);
 
-        if (formatCount != 0)
-        {
+        if (formatCount != 0) {
             details.formats.resize(formatCount);
             vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface, &formatCount, details.formats.data());
         }
@@ -591,8 +524,7 @@ namespace Enix
         uint32_t presentModeCount;
         vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface, &presentModeCount, nullptr);
 
-        if (presentModeCount != 0)
-        {
+        if (presentModeCount != 0) {
             details.presentModes.resize(presentModeCount);
             vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface, &presentModeCount, details.presentModes.data());
         }
@@ -600,45 +532,35 @@ namespace Enix
         return details;
     }
 
-    VkSurfaceFormatKHR VulkanEngine::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
-    {
-        for (const auto& availableFormat : availableFormats)
-        {
+    VkSurfaceFormatKHR VulkanEngine::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats) {
+        for (const auto &availableFormat: availableFormats) {
             if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace ==
-                VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-            {
+                                                                     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                 return availableFormat;
             }
         }
         return availableFormats[0];
     }
 
-    VkPresentModeKHR VulkanEngine::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
-    {
-        for (const auto& availablePresentMode : availablePresentModes)
-        {
-            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-            {
+    VkPresentModeKHR VulkanEngine::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes) {
+        for (const auto &availablePresentMode: availablePresentModes) {
+            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
                 return availablePresentMode;
             }
         }
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
-    VkExtent2D VulkanEngine::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
-    {
-        if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-        {
+    VkExtent2D VulkanEngine::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
+        if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities.currentExtent;
-        }
-        else
-        {
+        } else {
             int width, height;
             glfwGetFramebufferSize(_window, &width, &height);
 
             VkExtent2D actualExtent = {
-                static_cast<uint32_t>(width),
-                static_cast<uint32_t>(height)
+                    static_cast<uint32_t>(width),
+                    static_cast<uint32_t>(height)
             };
 
             actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width,
@@ -650,8 +572,7 @@ namespace Enix
         }
     }
 
-    bool VulkanEngine::checkDeviceExtensionSupport(VkPhysicalDevice device)
-    {
+    bool VulkanEngine::checkDeviceExtensionSupport(VkPhysicalDevice device) {
         uint32_t extensionCount;
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
@@ -659,22 +580,19 @@ namespace Enix
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
         std::set<std::string> requiredExtensions(_deviceExtensions.begin(), _deviceExtensions.end());
-        for (const auto& [extensionName, specVersion] : availableExtensions)
-        {
+        for (const auto &[extensionName, specVersion]: availableExtensions) {
             requiredExtensions.erase(extensionName);
         }
         return requiredExtensions.empty();
     }
 
-    bool VulkanEngine::isDeviceSuitable(VkPhysicalDevice device)
-    {
+    bool VulkanEngine::isDeviceSuitable(VkPhysicalDevice device) {
         QueueFamilyIndices indices = findQueueFamilies(device);
 
         bool extensionsSupported = checkDeviceExtensionSupport(device);
 
         bool swapChainAdequate = false;
-        if (extensionsSupported)
-        {
+        if (extensionsSupported) {
             SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
             swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
         }
@@ -685,41 +603,34 @@ namespace Enix
         return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
     }
 
-    void VulkanEngine::pickPhysicalDevice()
-    {
+    void VulkanEngine::pickPhysicalDevice() {
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
-        if (deviceCount == 0)
-        {
+        if (deviceCount == 0) {
             throw std::runtime_error("failed to find GPUs with Vulkan support!");
         }
         std::vector<VkPhysicalDevice> devices(deviceCount);
         vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
 
-        for (const auto& device : devices)
-        {
-            if (isDeviceSuitable(device))
-            {
+        for (const auto &device: devices) {
+            if (isDeviceSuitable(device)) {
                 _physicalDevice = device;
                 break;
             }
         }
-        if (_physicalDevice == VK_NULL_HANDLE)
-        {
+        if (_physicalDevice == VK_NULL_HANDLE) {
             throw std::runtime_error("failed to find a suitable GPU!");
         }
     }
 
-    void VulkanEngine::createLogicalDevice()
-    {
+    void VulkanEngine::createLogicalDevice() {
         QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
         std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
         float queuePriority = 1.0f;
-        for (uint32_t queueFamily : uniqueQueueFamilies)
-        {
+        for (uint32_t queueFamily: uniqueQueueFamilies) {
             VkDeviceQueueCreateInfo queueCreateInfo{};
             queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             queueCreateInfo.queueFamilyIndex = queueFamily;
@@ -740,18 +651,14 @@ namespace Enix
         createInfo.enabledExtensionCount = static_cast<uint32_t>(_deviceExtensions.size());
         createInfo.ppEnabledExtensionNames = _deviceExtensions.data();
 
-        if (_enableValidationLayers)
-        {
+        if (_enableValidationLayers) {
             createInfo.enabledLayerCount = static_cast<uint32_t>(_validationLayers.size());
             createInfo.ppEnabledLayerNames = _validationLayers.data();
-        }
-        else
-        {
+        } else {
             createInfo.enabledLayerCount = 0;
         }
 
-        if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_device) != VK_SUCCESS)
-        {
+        if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_device) != VK_SUCCESS) {
             throw std::runtime_error("failed to create logical device!");
         }
 
@@ -761,12 +668,10 @@ namespace Enix
     }
 
 
-    void VulkanEngine::createSwapChain()
-    {
+    void VulkanEngine::createSwapChain() {
         int width = 0, height = 0;
         glfwGetFramebufferSize(_window, &width, &height);
-        while (width == 0 || height == 0)
-        {
+        while (width == 0 || height == 0) {
             glfwGetFramebufferSize(_window, &width, &height);
             glfwWaitEvents();
         }
@@ -780,8 +685,8 @@ namespace Enix
         VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
         uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-        if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
-        {
+        if (swapChainSupport.capabilities.maxImageCount > 0 &&
+            imageCount > swapChainSupport.capabilities.maxImageCount) {
             imageCount = swapChainSupport.capabilities.maxImageCount;
         }
 
@@ -797,14 +702,11 @@ namespace Enix
 
         QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
         uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
-        if (indices.graphicsFamily != indices.presentFamily)
-        {
+        if (indices.graphicsFamily != indices.presentFamily) {
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;
             createInfo.pQueueFamilyIndices = queueFamilyIndices;
-        }
-        else
-        {
+        } else {
             createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
             createInfo.queueFamilyIndexCount = 0;
             createInfo.pQueueFamilyIndices = nullptr;
@@ -815,8 +717,7 @@ namespace Enix
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        if (vkCreateSwapchainKHR(_device, &createInfo, nullptr, &_swapChain) != VK_SUCCESS)
-        {
+        if (vkCreateSwapchainKHR(_device, &createInfo, nullptr, &_swapChain) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain!");
         }
         vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, nullptr);
@@ -827,34 +728,29 @@ namespace Enix
         _swapChainExtent = extent;
     }
 
-    void VulkanEngine::createImageViews()
-    {
+    void VulkanEngine::createImageViews() {
         _swapChainImageViews.resize(_swapChainImages.size());
 
-        for (uint32_t i = 0; i < _swapChainImages.size(); i++)
-        {
+        for (uint32_t i = 0; i < _swapChainImages.size(); i++) {
             _swapChainImageViews[i] = createImageView(_swapChainImages[i], _swapChainImageFormat,
                                                       VK_IMAGE_ASPECT_COLOR_BIT);
         }
     }
 
-    VkShaderModule VulkanEngine::createShaderModule(const std::vector<char>& code)
-    {
+    VkShaderModule VulkanEngine::createShaderModule(const std::vector<char> &code) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
-        createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+        createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
 
         VkShaderModule shaderModule;
-        if (vkCreateShaderModule(_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-        {
+        if (vkCreateShaderModule(_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
             throw std::runtime_error("failed to create shader module!");
         }
         return shaderModule;
     }
 
-    void VulkanEngine::createGraphicsPipeline()
-    {
+    void VulkanEngine::createGraphicsPipeline() {
         auto vertShaderCode = readFile(_workspaceRoot + "Shaders/shader.vert.spv");
         auto fragShaderCode = readFile(_workspaceRoot + "Shaders/shader.frag.spv");
 
@@ -903,8 +799,8 @@ namespace Enix
         scissor.extent = _swapChainExtent;
 
         std::vector<VkDynamicState> dynamicStates = {
-            VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
+                VK_DYNAMIC_STATE_VIEWPORT,
+                VK_DYNAMIC_STATE_SCISSOR
         };
 
         VkPipelineDynamicStateCreateInfo dynamicState{};
@@ -941,7 +837,7 @@ namespace Enix
 
         VkPipelineColorBlendAttachmentState colorBlendAttachment{};
         colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-            VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+                                              VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         colorBlendAttachment.blendEnable = VK_FALSE;
         colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
         colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
@@ -973,15 +869,24 @@ namespace Enix
         depthStencil.front = {}; // Optional
         depthStencil.back = {}; // Optional
 
+
+        //setup push constants
+        VkPushConstantRange push_constant;
+        //this push constant range starts at the beginning
+        push_constant.offset = 0;
+        //this push constant range takes up the size of a MeshPushConstant struct
+        push_constant.size = sizeof(MeshPushConstant);
+        //this push constant range is accessible only in the vertex shader
+        push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 1; // Optional
         pipelineLayoutInfo.pSetLayouts = &_descriptorSetLayout; // Optional
-        pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
-        pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
+        pipelineLayoutInfo.pushConstantRangeCount = 1; // Optional
+        pipelineLayoutInfo.pPushConstantRanges = &push_constant; // Optional
 
-        if (vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr, &_pipelineLayout) != VK_SUCCESS)
-        {
+        if (vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr, &_pipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("failed to create pipeline layout!");
         }
 
@@ -1004,8 +909,7 @@ namespace Enix
         pipelineInfo.basePipelineIndex = -1; // Optional
 
         if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_graphicsPipeline) !=
-            VK_SUCCESS)
-        {
+            VK_SUCCESS) {
             throw std::runtime_error("failed to create graphics pipeline!");
         }
 
@@ -1013,8 +917,7 @@ namespace Enix
         vkDestroyShaderModule(_device, vertShaderModule, nullptr);
     }
 
-    void VulkanEngine::createRenderPass()
-    {
+    void VulkanEngine::createRenderPass() {
         VkAttachmentDescription colorAttachment{};
         colorAttachment.format = _swapChainImageFormat;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -1053,10 +956,10 @@ namespace Enix
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
         dependency.dstSubpass = 0;
         dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+                                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dependency.srcAccessMask = 0;
         dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+                                  VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
         std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
@@ -1069,20 +972,17 @@ namespace Enix
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        if (vkCreateRenderPass(_device, &renderPassInfo, nullptr, &_renderPass) != VK_SUCCESS)
-        {
+        if (vkCreateRenderPass(_device, &renderPassInfo, nullptr, &_renderPass) != VK_SUCCESS) {
             throw std::runtime_error("failed to create render pass!");
         }
     }
 
-    void VulkanEngine::createFramebuffers()
-    {
+    void VulkanEngine::createFramebuffers() {
         _swapChainFramebuffers.resize(_swapChainImageViews.size());
-        for (size_t i = 0; i < _swapChainImageViews.size(); i++)
-        {
+        for (size_t i = 0; i < _swapChainImageViews.size(); i++) {
             std::array attachments = {
-                _swapChainImageViews[i],
-                _depthImageView
+                    _swapChainImageViews[i],
+                    _depthImageView
             };
 
             VkFramebufferCreateInfo framebufferInfo{};
@@ -1094,29 +994,25 @@ namespace Enix
             framebufferInfo.height = _swapChainExtent.height;
             framebufferInfo.layers = 1;
 
-            if (vkCreateFramebuffer(_device, &framebufferInfo, nullptr, &_swapChainFramebuffers[i]) != VK_SUCCESS)
-            {
+            if (vkCreateFramebuffer(_device, &framebufferInfo, nullptr, &_swapChainFramebuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to create framebuffer!");
             }
         }
     }
 
-    void VulkanEngine::createCommandPool()
-    {
+    void VulkanEngine::createCommandPool() {
         QueueFamilyIndices queueFamilyIndices = findQueueFamilies(_physicalDevice);
 
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
-        if (vkCreateCommandPool(_device, &poolInfo, nullptr, &_commandPool) != VK_SUCCESS)
-        {
+        if (vkCreateCommandPool(_device, &poolInfo, nullptr, &_commandPool) != VK_SUCCESS) {
             throw std::runtime_error("failed to create command pool!");
         }
     }
 
-    void VulkanEngine::createCommandBuffers()
-    {
+    void VulkanEngine::createCommandBuffers() {
         _commandBuffers.resize(_maxFramesInFlight);
 
         VkCommandBufferAllocateInfo allocInfo{};
@@ -1125,21 +1021,18 @@ namespace Enix
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = static_cast<uint32_t>(_commandBuffers.size());
 
-        if (vkAllocateCommandBuffers(_device, &allocInfo, _commandBuffers.data()) != VK_SUCCESS)
-        {
+        if (vkAllocateCommandBuffers(_device, &allocInfo, _commandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
     }
 
-    void VulkanEngine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
-    {
+    void VulkanEngine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = 0; // Optional
         beginInfo.pInheritanceInfo = nullptr; // Optional
 
-        if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
-        {
+        if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
             throw std::runtime_error("failed to begin recording command buffer!");
         }
 
@@ -1183,6 +1076,13 @@ namespace Enix
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1,
                                 &_descriptorSets[_currentFrame], 0, nullptr);
 
+        MeshPushConstant constant{
+                glm::rotate(glm::mat4(1.0f), static_cast<float>(_timeSinceEngineStart) * glm::radians(90.0f),
+                            glm::vec3(0.0f, 0.0f, 1.0f))};
+        //upload the matrix to the GPU via push constant
+        vkCmdPushConstants(_commandBuffers[_currentFrame], _pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                           sizeof(MeshPushConstant), &constant);
+
         // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
         _model->draw(commandBuffer);
 
@@ -1190,14 +1090,12 @@ namespace Enix
 
         vkCmdEndRenderPass(commandBuffer);
 
-        if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-        {
+        if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("failed to record command buffer!");
         }
     }
 
-    void VulkanEngine::createSyncObjects()
-    {
+    void VulkanEngine::createSyncObjects() {
         _imageAvailableSemaphores.resize(_maxFramesInFlight);
         _renderFinishedSemaphores.resize(_maxFramesInFlight);
         _inFlightFences.resize(_maxFramesInFlight);
@@ -1209,25 +1107,20 @@ namespace Enix
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        for (size_t i = 0; i < _maxFramesInFlight; i++)
-        {
+        for (size_t i = 0; i < _maxFramesInFlight; i++) {
             if (vkCreateSemaphore(_device, &semaphoreInfo, nullptr, &_imageAvailableSemaphores[i]) != VK_SUCCESS ||
                 vkCreateSemaphore(_device, &semaphoreInfo, nullptr, &_renderFinishedSemaphores[i]) != VK_SUCCESS ||
-                vkCreateFence(_device, &fenceInfo, nullptr, &_inFlightFences[i]) != VK_SUCCESS)
-            {
+                vkCreateFence(_device, &fenceInfo, nullptr, &_inFlightFences[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to create semaphores!");
             }
         }
     }
 
-    uint32_t VulkanEngine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
-    {
+    uint32_t VulkanEngine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
         VkPhysicalDeviceMemoryProperties memProperties;
         vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
-        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-        {
-            if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-            {
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+            if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
                 return i;
             }
         }
@@ -1236,16 +1129,14 @@ namespace Enix
     }
 
     void VulkanEngine::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                                    VkBuffer& buffer, VkDeviceMemory& bufferMemory)
-    {
+                                    VkBuffer &buffer, VkDeviceMemory &bufferMemory) {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = size;
         bufferInfo.usage = usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         bufferInfo.flags = 0;
-        if (vkCreateBuffer(_device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-        {
+        if (vkCreateBuffer(_device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
             throw std::runtime_error("failed to create vertex buffer!");
         }
         VkMemoryRequirements memRequirements;
@@ -1254,15 +1145,13 @@ namespace Enix
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
-        if (vkAllocateMemory(_device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-        {
+        if (vkAllocateMemory(_device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate vertex buffer memory!");
         }
         vkBindBufferMemory(_device, buffer, bufferMemory, 0);
     }
 
-    void VulkanEngine::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
-    {
+    void VulkanEngine::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
         VkBufferCopy copyRegion{};
@@ -1274,8 +1163,7 @@ namespace Enix
         endSingleTimeCommands(commandBuffer);
     }
 
-    void VulkanEngine::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
-    {
+    void VulkanEngine::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
         VkBufferImageCopy region{};
@@ -1288,17 +1176,16 @@ namespace Enix
         region.imageSubresource.layerCount = 1;
         region.imageOffset = {0, 0, 0};
         region.imageExtent = {
-            width,
-            height,
-            1
+                width,
+                height,
+                1
         };
         vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
         endSingleTimeCommands(commandBuffer);
     }
 
     void VulkanEngine::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout,
-                                             VkImageLayout newLayout)
-    {
+                                             VkImageLayout newLayout) {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
         VkImageMemoryBarrier barrier{};
@@ -1314,52 +1201,41 @@ namespace Enix
         barrier.subresourceRange.baseArrayLayer = 0;
         barrier.subresourceRange.layerCount = 1;
 
-        if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
-        {
+        if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
-            if (hasStencilComponent(format))
-            {
+            if (hasStencilComponent(format)) {
                 barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
             }
-        }
-        else
-        {
+        } else {
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         }
 
         VkPipelineStageFlags sourceStage;
         VkPipelineStageFlags destinationStage;
 
-        if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
-        {
+        if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
             barrier.srcAccessMask = 0;
             barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout ==
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-        {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout ==
+                                                                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
             barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
             sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout ==
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
-        {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout ==
+                                                             VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
             barrier.srcAccessMask = 0;
             barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
-                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                                    VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-        }
-        else
-        {
+        } else {
             throw std::invalid_argument("unsupported layout transition!");
         }
 
@@ -1423,8 +1299,7 @@ namespace Enix
     //     vkFreeMemory(_device, stagingBufferMemory, nullptr);
     // }
 
-    void VulkanEngine::createDescriptorSetLayout()
-    {
+    void VulkanEngine::createDescriptorSetLayout() {
         VkDescriptorSetLayoutBinding uboLayoutBinding{};
         uboLayoutBinding.binding = 0;
         uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1445,27 +1320,23 @@ namespace Enix
         layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
         layoutInfo.pBindings = bindings.data();
 
-        if (vkCreateDescriptorSetLayout(_device, &layoutInfo, nullptr, &_descriptorSetLayout) != VK_SUCCESS)
-        {
+        if (vkCreateDescriptorSetLayout(_device, &layoutInfo, nullptr, &_descriptorSetLayout) != VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor set layout!");
         }
     }
 
-    void VulkanEngine::createUniformBuffers()
-    {
+    void VulkanEngine::createUniformBuffers() {
         VkDeviceSize bufferSize = sizeof(UniformBufferObject);
         _uniformBuffers.resize(_maxFramesInFlight);
         _uniformBuffersMemory.resize(_maxFramesInFlight);
-        for (size_t i = 0; i < _maxFramesInFlight; i++)
-        {
+        for (size_t i = 0; i < _maxFramesInFlight; i++) {
             createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                          _uniformBuffers[i], _uniformBuffersMemory[i]);
         }
     }
 
-    void VulkanEngine::createDescriptorPool()
-    {
+    void VulkanEngine::createDescriptorPool() {
         std::array<VkDescriptorPoolSize, 2> poolSizes{};
         poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         poolSizes[0].descriptorCount = static_cast<uint32_t>(_maxFramesInFlight);
@@ -1477,14 +1348,12 @@ namespace Enix
         poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
         poolInfo.pPoolSizes = poolSizes.data();
         poolInfo.maxSets = static_cast<uint32_t>(_maxFramesInFlight);
-        if (vkCreateDescriptorPool(_device, &poolInfo, nullptr, &_descriptorPool) != VK_SUCCESS)
-        {
+        if (vkCreateDescriptorPool(_device, &poolInfo, nullptr, &_descriptorPool) != VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor pool!");
         }
     }
 
-    void VulkanEngine::createDescriptorSets()
-    {
+    void VulkanEngine::createDescriptorSets() {
         std::vector<VkDescriptorSetLayout> layouts(_maxFramesInFlight, _descriptorSetLayout);
         VkDescriptorSetAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -1492,13 +1361,11 @@ namespace Enix
         allocInfo.descriptorSetCount = static_cast<uint32_t>(_maxFramesInFlight);
         allocInfo.pSetLayouts = layouts.data();
         _descriptorSets.resize(_maxFramesInFlight);
-        if (vkAllocateDescriptorSets(_device, &allocInfo, _descriptorSets.data()) != VK_SUCCESS)
-        {
+        if (vkAllocateDescriptorSets(_device, &allocInfo, _descriptorSets.data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
 
-        for (size_t i = 0; i < _maxFramesInFlight; i++)
-        {
+        for (size_t i = 0; i < _maxFramesInFlight; i++) {
             VkDescriptorBufferInfo bufferInfo{};
             bufferInfo.buffer = _uniformBuffers[i];
             bufferInfo.offset = 0;
@@ -1534,9 +1401,8 @@ namespace Enix
     }
 
     void VulkanEngine::createImage(int texWidth, int texHeight, VkFormat format, VkImageTiling tiling,
-                                   VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image,
-                                   VkDeviceMemory& imageMemory)
-    {
+                                   VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image,
+                                   VkDeviceMemory &imageMemory) {
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -1552,8 +1418,7 @@ namespace Enix
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageInfo.flags = 0;
-        if (vkCreateImage(_device, &imageInfo, nullptr, &image) != VK_SUCCESS)
-        {
+        if (vkCreateImage(_device, &imageInfo, nullptr, &image) != VK_SUCCESS) {
             throw std::runtime_error("failed to create texture image!");
         }
         VkMemoryRequirements memRequirements;
@@ -1562,22 +1427,19 @@ namespace Enix
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
-        if (vkAllocateMemory(_device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
-        {
+        if (vkAllocateMemory(_device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate texture image memory!");
         }
         vkBindImageMemory(_device, image, imageMemory, 0);
     }
 
-    void VulkanEngine::createTextureImage()
-    {
+    void VulkanEngine::createTextureImage() {
         int texWidth, texHeight, texChannels;
         std::string filename = _workspaceRoot + _texturePath;
-        stbi_uc* pixels = stbi_load(filename.data(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        stbi_uc *pixels = stbi_load(filename.data(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         VkDeviceSize imageSize = texWidth * texHeight * 4;
 
-        if (!pixels)
-        {
+        if (!pixels) {
             throw std::runtime_error("failed to load texture image!");
         }
 
@@ -1587,7 +1449,7 @@ namespace Enix
         createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
                      stagingBufferMemory);
-        void* data;
+        void *data;
         vkMapMemory(_device, stagingBufferMemory, 0, imageSize, 0, &data);
         memcpy(data, pixels, static_cast<size_t>(imageSize));
         vkUnmapMemory(_device, stagingBufferMemory);
@@ -1607,8 +1469,7 @@ namespace Enix
         vkFreeMemory(_device, stagingBufferMemory, nullptr);
     }
 
-    VkCommandBuffer VulkanEngine::beginSingleTimeCommands()
-    {
+    VkCommandBuffer VulkanEngine::beginSingleTimeCommands() {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -1627,8 +1488,7 @@ namespace Enix
         return commandBuffer;
     }
 
-    void VulkanEngine::endSingleTimeCommands(VkCommandBuffer commandBuffer)
-    {
+    void VulkanEngine::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
         vkEndCommandBuffer(commandBuffer);
 
         VkSubmitInfo submitInfo{};
@@ -1642,8 +1502,7 @@ namespace Enix
         vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer);
     }
 
-    VkImageView VulkanEngine::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
-    {
+    VkImageView VulkanEngine::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = image;
@@ -1656,21 +1515,18 @@ namespace Enix
         viewInfo.subresourceRange.layerCount = 1;
 
         VkImageView imageView;
-        if (vkCreateImageView(_device, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
-        {
+        if (vkCreateImageView(_device, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
             throw std::runtime_error("failed to create texture image view!");
         }
 
         return imageView;
     }
 
-    void VulkanEngine::createTextureImageView()
-    {
+    void VulkanEngine::createTextureImageView() {
         _textureImageView = createImageView(_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
-    void VulkanEngine::createTextureSampler()
-    {
+    void VulkanEngine::createTextureSampler() {
         VkSamplerCreateInfo samplerInfo{};
         samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         samplerInfo.magFilter = VK_FILTER_LINEAR;
@@ -1691,25 +1547,19 @@ namespace Enix
         samplerInfo.minLod = 0.0f;
         samplerInfo.maxLod = 0.0f;
 
-        if (vkCreateSampler(_device, &samplerInfo, nullptr, &_textureSampler) != VK_SUCCESS)
-        {
+        if (vkCreateSampler(_device, &samplerInfo, nullptr, &_textureSampler) != VK_SUCCESS) {
             throw std::runtime_error("failed to create texture sampler!");
         }
     }
 
-    VkFormat VulkanEngine::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
-                                               VkFormatFeatureFlags features)
-    {
-        for (VkFormat format : candidates)
-        {
+    VkFormat VulkanEngine::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
+                                               VkFormatFeatureFlags features) {
+        for (VkFormat format: candidates) {
             VkFormatProperties props;
             vkGetPhysicalDeviceFormatProperties(_physicalDevice, format, &props);
-            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
-            {
+            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
                 return format;
-            }
-            else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
-            {
+            } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
                 return format;
             }
         }
@@ -1717,22 +1567,19 @@ namespace Enix
         throw std::runtime_error("failed to find supported format!");
     }
 
-    VkFormat VulkanEngine::findDepthFormat()
-    {
+    VkFormat VulkanEngine::findDepthFormat() {
         return findSupportedFormat(
-            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+                {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
         );
     }
 
-    bool VulkanEngine::hasStencilComponent(VkFormat format)
-    {
+    bool VulkanEngine::hasStencilComponent(VkFormat format) {
         return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
     }
 
-    void VulkanEngine::createDepthResources()
-    {
+    void VulkanEngine::createDepthResources() {
         VkFormat depthFormat = findDepthFormat();
         createImage(_swapChainExtent.width, _swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL,
                     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _depthImage,
@@ -1742,15 +1589,13 @@ namespace Enix
                               VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }
 
-    void VulkanEngine::loadModel()
-    {
+    void VulkanEngine::loadModel() {
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         std::string warn, err;
 
-        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, (_workspaceRoot + _modelPath).c_str()))
-        {
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, (_workspaceRoot + _modelPath).c_str())) {
             throw std::runtime_error(warn + err);
         }
 
@@ -1758,30 +1603,27 @@ namespace Enix
         std::vector<Vertex> vertices{};
         std::vector<uint32_t> indices{};
 
-        for (const auto& shape : shapes)
-        {
-            for (const auto& index : shape.mesh.indices)
-            {
+        for (const auto &shape: shapes) {
+            for (const auto &index: shape.mesh.indices) {
                 Vertex vertex{};
                 vertex.pos = {
-                    attrib.vertices[3 * index.vertex_index + 0],
-                    attrib.vertices[3 * index.vertex_index + 1],
-                    attrib.vertices[3 * index.vertex_index + 2]
+                        attrib.vertices[3 * index.vertex_index + 0],
+                        attrib.vertices[3 * index.vertex_index + 1],
+                        attrib.vertices[3 * index.vertex_index + 2]
                 };
 
                 vertex.texCoord = {
-                    attrib.texcoords[2 * index.texcoord_index + 0],
-                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+                        attrib.texcoords[2 * index.texcoord_index + 0],
+                        1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
                 };
 
                 vertex.color = {1.0f, 1.0f, 1.0f};
                 vertex.texCoord = {
-                    attrib.texcoords[2 * index.texcoord_index + 0],
-                    1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+                        attrib.texcoords[2 * index.texcoord_index + 0],
+                        1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
                 };
 
-                if (!uniqueVertices.contains(vertex))
-                {
+                if (!uniqueVertices.contains(vertex)) {
                     uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
                     vertices.push_back(vertex);
                 }
@@ -1793,11 +1635,9 @@ namespace Enix
         _model = std::make_unique<Model>(*_enixDevice, std::move(vertices), std::move(indices));
     }
 
-    void VulkanEngine::initVulkan()
-    {
+    void VulkanEngine::initVulkan() {
         // Setup Vulkan
-        if (!glfwVulkanSupported())
-        {
+        if (!glfwVulkanSupported()) {
             throw std::runtime_error("GLFW: Vulkan not supported");
         }
         // create vk instance
@@ -1830,8 +1670,7 @@ namespace Enix
         loadModel();
     }
 
-    int VulkanEngine::init()
-    {
+    int VulkanEngine::init() {
         initVulkan();
 
         initImgui();
@@ -1839,23 +1678,23 @@ namespace Enix
         return 0;
     }
 
-    int VulkanEngine::run()
-    {
+    int VulkanEngine::run() {
+        using namespace std::chrono;
         double deltaTime;
-
+        _engineStartTimePoint = steady_clock::now();
         // Main loop
-        while (!glfwWindowShouldClose(_window))
-        {
-            {
-                using namespace std::chrono;
+        while (!glfwWindowShouldClose(_window)) {
 
-                steady_clock::time_point tickTimePoint = steady_clock::now();
-                auto timeSpan = duration_cast<duration<double>>(tickTimePoint - _lastTickTimePoint);
-                deltaTime = timeSpan.count();
+            steady_clock::time_point tickTimePoint = steady_clock::now();
+            auto timeSpan = duration_cast < duration < double >> (tickTimePoint - _lastTickTimePoint);
+            deltaTime = timeSpan.count();
 
-                _lastTickTimePoint = tickTimePoint;
-            }
+            _lastTickTimePoint = tickTimePoint;
+
             std::cout << "deltaTime: " << deltaTime << std::endl;
+            _deltaTime = deltaTime;
+            _timeSinceEngineStart =
+                    duration_cast < duration < double >> (tickTimePoint - _engineStartTimePoint).count();
             tick(deltaTime);
         }
 
@@ -1865,10 +1704,8 @@ namespace Enix
         return 0;
     }
 
-    int VulkanEngine::cleanUp()
-    {
-        if (_cleanedUp)
-        {
+    int VulkanEngine::cleanUp() {
+        if (_cleanedUp) {
             return 0;
         }
 
@@ -1884,8 +1721,7 @@ namespace Enix
         vkDestroyImage(_device, _textureImage, nullptr);
         vkFreeMemory(_device, _textureImageMemory, nullptr);
 
-        for (size_t i = 0; i < _maxFramesInFlight; i++)
-        {
+        for (size_t i = 0; i < _maxFramesInFlight; i++) {
             vkDestroyBuffer(_device, _uniformBuffers[i], nullptr);
             vkFreeMemory(_device, _uniformBuffersMemory[i], nullptr);
         }
@@ -1909,8 +1745,7 @@ namespace Enix
 
         vkDestroyRenderPass(_device, _renderPass, nullptr);
 
-        for (size_t i = 0; i < _maxFramesInFlight; ++i)
-        {
+        for (size_t i = 0; i < _maxFramesInFlight; ++i) {
             vkDestroySemaphore(_device, _imageAvailableSemaphores[i], nullptr);
             vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
             vkDestroyFence(_device, _inFlightFences[i], nullptr);
@@ -1920,8 +1755,7 @@ namespace Enix
 
         vkDestroyDevice(_device, nullptr);
 
-        if (_enableValidationLayers)
-        {
+        if (_enableValidationLayers) {
             destroyDebugUtilsMessengerExt(_instance, _debugMessenger, nullptr);
         }
 
