@@ -31,11 +31,12 @@
 
 // for temporary debugging purposes
 static auto t1 = std::chrono::high_resolution_clock::now();
+
 void DEBUG_startTimer(const std::string&& message)
 {
     using std::chrono::high_resolution_clock;
     t1 = high_resolution_clock::now();
-    std::cout << "start timer: "<< message << std::endl;
+    std::cout << "start timer: " << message << std::endl;
 }
 
 void DEBUG_logTimer(const std::string&& message)
@@ -49,11 +50,6 @@ void DEBUG_logTimer(const std::string&& message)
 
 namespace Enix
 {
-    void VulkanEngine::glfwErrorCallback(int error, const char* description)
-    {
-        std::cerr << "GLFW Error " << error << ": " << description << std::endl;
-    }
-
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanEngine::debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -168,7 +164,7 @@ namespace Enix
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    VulkanEngine::VulkanEngine()
+    VulkanEngine::VulkanEngine(): _window()
     {
         VulkanEngine::init();
     }
@@ -296,7 +292,6 @@ namespace Enix
         vkUnmapMemory(_device, _uniformBuffersMemory[currentImage]);
     }
 
-  
 
     void VulkanEngine::drawFrame()
     {
@@ -388,27 +383,6 @@ namespace Enix
             ImGui::RenderPlatformWindowsDefault();
         }
         drawFrame();
-    }
-
-    void VulkanEngine::initWindow()
-    {
-        // Setup GLFW window
-        glfwSetErrorCallback(glfwErrorCallback);
-        if (!glfwInit())
-        {
-            throw std::runtime_error("Failed to initialize GLFW");
-        }
-
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        _window = glfwCreateWindow(1280, 720, "Enix Engine", nullptr, nullptr);
-        glfwSetWindowUserPointer(_window, this);
-        glfwSetFramebufferSizeCallback(_window, framebufferResizeCallback);
-    }
-
-    void VulkanEngine::framebufferResizeCallback(GLFWwindow* window, int width, int height)
-    {
-        auto app = reinterpret_cast<VulkanEngine*>(glfwGetWindowUserPointer(window));
-        app->_framebufferResized = true;
     }
 
 
@@ -786,13 +760,6 @@ namespace Enix
         vkGetDeviceQueue(_device, indices.presentFamily.value(), 0, &_presentQueue);
     }
 
-    void VulkanEngine::createSurface()
-    {
-        if (glfwCreateWindowSurface(_instance, _window, nullptr, &_surface) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create window surface!");
-        }
-    }
 
     void VulkanEngine::createSwapChain()
     {
@@ -1215,7 +1182,7 @@ namespace Enix
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1,
                                 &_descriptorSets[_currentFrame], 0, nullptr);
-        
+
         // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
         _model->draw(commandBuffer);
 
@@ -1822,7 +1789,7 @@ namespace Enix
             }
         }
 
-        
+
         _model = std::make_unique<Model>(*_enixDevice, std::move(vertices), std::move(indices));
     }
 
@@ -1836,7 +1803,8 @@ namespace Enix
         // create vk instance
         createVulkanInstance();
         setupDebugMessenger();
-        createSurface();
+        // createSurface();
+        _window.createSurface(_instance, _surface);
         pickPhysicalDevice();
         createLogicalDevice();
         createSwapChain();
@@ -1864,8 +1832,6 @@ namespace Enix
 
     int VulkanEngine::init()
     {
-        initWindow();
-
         initVulkan();
 
         initImgui();
@@ -1962,8 +1928,8 @@ namespace Enix
         vkDestroySurfaceKHR(_instance, _surface, nullptr);
         vkDestroyInstance(_instance, nullptr);
 
-        glfwDestroyWindow(_window);
-        glfwTerminate();
+        // glfwDestroyWindow(_window);
+        // glfwTerminate();
 
         _cleanedUp = true;
         return 0;

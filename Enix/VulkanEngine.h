@@ -16,6 +16,7 @@
 
 #include "imgui.h"
 #include "Model.h"
+#include "Window.h"
 
 
 namespace Enix
@@ -75,6 +76,8 @@ namespace Enix
 
         // std::unordered_map<Vertex, uint32_t> _uniqueVertices{};
 
+        Window _window;
+        
         VkDescriptorPool _descriptorPool;
         std::vector<VkDescriptorSet> _descriptorSets;
         VkImageView _textureImageView;
@@ -89,7 +92,7 @@ namespace Enix
         std::string _texturePath = "Textures/viking_room.png";
         VkInstance _instance = nullptr;
         VkDebugUtilsMessengerEXT _debugMessenger;
-        GLFWwindow* _window = nullptr;
+        
         bool _cleanedUp = false;
         VkPhysicalDevice _physicalDevice;
         VkDevice _device;
@@ -113,10 +116,10 @@ namespace Enix
         std::vector<VkFence> _inFlightFences;
         uint32_t _currentFrame = 0;
         bool _framebufferResized = false;
-        VkBuffer _vertexBuffer;
-        VkDeviceMemory _vertexBufferMemory;
-        VkBuffer _indexBuffer;
-        VkDeviceMemory _indexBufferMemory;
+        // VkBuffer _vertexBuffer;
+        // VkDeviceMemory _vertexBufferMemory;
+        // VkBuffer _indexBuffer;
+        // VkDeviceMemory _indexBufferMemory;
         std::vector<VkBuffer> _uniformBuffers;
         std::vector<VkDeviceMemory> _uniformBuffersMemory;
         VkImage _textureImage;
@@ -131,7 +134,7 @@ namespace Enix
         std::unique_ptr<Model> _model;
         std::unique_ptr<Device> _enixDevice;
 
-        void initWindow();
+        
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
         std::vector<const char*> getRequiredExtensions();
         bool checkValidationLayerSupport();
@@ -171,8 +174,8 @@ namespace Enix
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-        void createVertexBuffer();
-        void createIndexBuffer();
+        // void createVertexBuffer();
+        // void createIndexBuffer();
         void createDescriptorSetLayout();
         void createUniformBuffers();
         void createDescriptorPool();
