@@ -15,6 +15,7 @@
 #include <unordered_map>
 
 #include "imgui.h"
+#include "Model.h"
 
 
 namespace Enix
@@ -54,7 +55,7 @@ namespace Enix
         const std::vector<const char*> _deviceExtensions{
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
-        std::vector<Vertex> _vertices{};
+        // std::vector<Vertex> _vertices{};
         std::vector<Vertex> _verticesTest{
             {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
             {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
@@ -66,14 +67,13 @@ namespace Enix
             {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
             {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
         };
-        std::vector<uint32_t> _indices{};
-
+        // std::vector<uint32_t> _indices{};
         std::vector<uint32_t> _indicesTest{
             0, 1, 2, 2, 3, 0,
             4, 5, 6, 6, 7, 4
         };
 
-        std::unordered_map<Vertex, uint32_t> _uniqueVertices{};
+        // std::unordered_map<Vertex, uint32_t> _uniqueVertices{};
 
         VkDescriptorPool _descriptorPool;
         std::vector<VkDescriptorSet> _descriptorSets;
@@ -128,6 +128,8 @@ namespace Enix
         VkDeviceMemory _depthImageMemory;
         VkImageView _depthImageView;
         std::chrono::steady_clock::time_point _lastTickTimePoint;
+        std::unique_ptr<Model> _model;
+        std::unique_ptr<Device> _enixDevice;
 
         void initWindow();
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);

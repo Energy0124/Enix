@@ -1193,10 +1193,11 @@ namespace Enix
 
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
 
-        VkBuffer vertexBuffers[] = {_vertexBuffer};
-        VkDeviceSize offsets[] = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        // VkBuffer vertexBuffers[] = {_vertexBuffer};
+        // VkDeviceSize offsets[] = {0};
+        // vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+        // vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        _model->bind(commandBuffer);
 
         VkViewport viewport{};
         viewport.x = 0.0f;
@@ -1214,7 +1215,9 @@ namespace Enix
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1,
                                 &_descriptorSets[_currentFrame], 0, nullptr);
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
+        
+        // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
+        _model->draw(commandBuffer);
 
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), _commandBuffers[_currentFrame]);
 
@@ -1403,55 +1406,55 @@ namespace Enix
         endSingleTimeCommands(commandBuffer);
     }
 
-    void VulkanEngine::createVertexBuffer()
-    {
-        VkDeviceSize bufferSize = sizeof(_vertices[0]) * _vertices.size();
-
-
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-                     stagingBufferMemory);
-
-        void* data;
-        vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, _vertices.data(), (size_t)bufferSize);
-        vkUnmapMemory(_device, stagingBufferMemory);
-
-        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _vertexBuffer,
-                     _vertexBufferMemory);
-
-        copyBuffer(stagingBuffer, _vertexBuffer, bufferSize);
-
-        vkDestroyBuffer(_device, stagingBuffer, nullptr);
-        vkFreeMemory(_device, stagingBufferMemory, nullptr);
-    }
-
-    void VulkanEngine::createIndexBuffer()
-    {
-        VkDeviceSize bufferSize = sizeof(_indices[0]) * _indices.size();
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-                     stagingBufferMemory);
-
-        void* data;
-        vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, _indices.data(), (size_t)bufferSize);
-        vkUnmapMemory(_device, stagingBufferMemory);
-
-        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _indexBuffer,
-                     _indexBufferMemory);
-
-        copyBuffer(stagingBuffer, _indexBuffer, bufferSize);
-
-        vkDestroyBuffer(_device, stagingBuffer, nullptr);
-        vkFreeMemory(_device, stagingBufferMemory, nullptr);
-    }
+    // void VulkanEngine::createVertexBuffer()
+    // {
+    //     VkDeviceSize bufferSize = sizeof(_vertices[0]) * _vertices.size();
+    //
+    //
+    //     VkBuffer stagingBuffer;
+    //     VkDeviceMemory stagingBufferMemory;
+    //     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    //                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+    //                  stagingBufferMemory);
+    //
+    //     void* data;
+    //     vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    //     memcpy(data, _vertices.data(), (size_t)bufferSize);
+    //     vkUnmapMemory(_device, stagingBufferMemory);
+    //
+    //     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+    //                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _vertexBuffer,
+    //                  _vertexBufferMemory);
+    //
+    //     copyBuffer(stagingBuffer, _vertexBuffer, bufferSize);
+    //
+    //     vkDestroyBuffer(_device, stagingBuffer, nullptr);
+    //     vkFreeMemory(_device, stagingBufferMemory, nullptr);
+    // }
+    //
+    // void VulkanEngine::createIndexBuffer()
+    // {
+    //     VkDeviceSize bufferSize = sizeof(_indices[0]) * _indices.size();
+    //     VkBuffer stagingBuffer;
+    //     VkDeviceMemory stagingBufferMemory;
+    //     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    //                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+    //                  stagingBufferMemory);
+    //
+    //     void* data;
+    //     vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    //     memcpy(data, _indices.data(), (size_t)bufferSize);
+    //     vkUnmapMemory(_device, stagingBufferMemory);
+    //
+    //     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+    //                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _indexBuffer,
+    //                  _indexBufferMemory);
+    //
+    //     copyBuffer(stagingBuffer, _indexBuffer, bufferSize);
+    //
+    //     vkDestroyBuffer(_device, stagingBuffer, nullptr);
+    //     vkFreeMemory(_device, stagingBufferMemory, nullptr);
+    // }
 
     void VulkanEngine::createDescriptorSetLayout()
     {
@@ -1784,6 +1787,10 @@ namespace Enix
             throw std::runtime_error(warn + err);
         }
 
+        std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+        std::vector<Vertex> vertices{};
+        std::vector<uint32_t> indices{};
+
         for (const auto& shape : shapes)
         {
             for (const auto& index : shape.mesh.indices)
@@ -1806,14 +1813,17 @@ namespace Enix
                     1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
                 };
 
-                if (!_uniqueVertices.contains(vertex))
+                if (!uniqueVertices.contains(vertex))
                 {
-                    _uniqueVertices[vertex] = static_cast<uint32_t>(_vertices.size());
-                    _vertices.push_back(vertex);
+                    uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                    vertices.push_back(vertex);
                 }
-                _indices.push_back(_uniqueVertices[vertex]);
+                indices.push_back(uniqueVertices[vertex]);
             }
         }
+
+        
+        _model = std::make_unique<Model>(*_enixDevice, std::move(vertices), std::move(indices));
     }
 
     void VulkanEngine::initVulkan()
@@ -1840,14 +1850,16 @@ namespace Enix
         createTextureImage();
         createTextureImageView();
         createTextureSampler();
-        loadModel();
-        createVertexBuffer();
-        createIndexBuffer();
+        // createVertexBuffer();
+        // createIndexBuffer();
         createUniformBuffers();
         createDescriptorPool();
         createDescriptorSets();
         createCommandBuffers();
         createSyncObjects();
+        // temporary solution, todo: refactor this, move create device to a proper place
+        _enixDevice = std::make_unique<Device>(_device, _physicalDevice, _graphicsQueue, _commandPool);
+        loadModel();
     }
 
     int VulkanEngine::init()
@@ -1918,11 +1930,13 @@ namespace Enix
         vkDestroyDescriptorPool(_device, _descriptorPool, nullptr);
         vkDestroyDescriptorSetLayout(_device, _descriptorSetLayout, nullptr);
 
-        vkDestroyBuffer(_device, _vertexBuffer, nullptr);
-        vkFreeMemory(_device, _vertexBufferMemory, nullptr);
-
-        vkDestroyBuffer(_device, _indexBuffer, nullptr);
-        vkFreeMemory(_device, _indexBufferMemory, nullptr);
+        // vkDestroyBuffer(_device, _vertexBuffer, nullptr);
+        // vkFreeMemory(_device, _vertexBufferMemory, nullptr);
+        //
+        // vkDestroyBuffer(_device, _indexBuffer, nullptr);
+        // vkFreeMemory(_device, _indexBufferMemory, nullptr);
+        //todo: change to use use raii so we don't need to call this manually
+        _model->releaseResources();
 
         vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
