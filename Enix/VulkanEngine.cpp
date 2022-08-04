@@ -1,11 +1,3 @@
-#define GLFW_INCLUDE_NONE
-#define GLFW_INCLUDE_VULKAN
-
-#include <GLFW/glfw3.h>
-#include <vulkan/vulkan.h>
-
-#include "VulkanEngine.h"
-
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -15,22 +7,27 @@
 #include <limits>
 #include <algorithm>
 #include <fstream>
-
-#include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
 
-#define STB_IMAGE_IMPLEMENTATION
+#include <vulkan/vulkan.h>
 
+#define GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
+#include <glm/gtc/matrix_transform.hpp>
+
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
-#define TINYOBJLOADER_IMPLEMENTATION
-
-#include <tiny_obj_loader.h>
-
+#include "VulkanEngine.h"
 
 // for temporary debugging purposes
 static auto t1 = std::chrono::high_resolution_clock::now();
