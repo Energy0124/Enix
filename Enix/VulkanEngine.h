@@ -1,26 +1,21 @@
 ﻿#pragma once
 
 #include <vector>
-
-#include "Vertex.h"
-#include "Engine.h"
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <optional>
 #include <string>
 #include <chrono>
 #include <memory>
-
-#define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-
 #include <glm/glm.hpp>
-
 #include <unordered_map>
 
+#include "Engine.h"
 #include "imgui.h"
-#include "Model.h"
-#include "Window.h"
+#include "Render/Vertex.h"
+#include "Render/Model.h"
+#include "Render/Window.h"
 
 
 namespace Enix {
@@ -88,7 +83,7 @@ namespace Enix {
 #else
         const bool _enableValidationLayers = true;
 #endif
-        std::string _workspaceRoot = "../../";
+        std::string _workspaceRoot = "../";
         std::string _modelPath = "Models/viking_room.obj";
         std::string _texturePath = "Textures/viking_room.png";
         VkInstance _instance = nullptr;

@@ -1,22 +1,22 @@
 
 # Add source to this project's executable.
-add_executable (Enix
-    Main.cpp
-    Engine.h
-    OpenGLEngine.h
-    OpenGLEngine.cpp
-    VulkanEngine.h
-    VulkanEngine.cpp
-    VulkanEngineImgui.h
-    VulkanEngineImgui.cpp
-    Vertex.h
-    Window.h
-    Window.cpp
-    Device.h
-    Device.cpp
-    Model.h
-    Model.cpp
-)
+add_executable(Enix
+        Main.cpp
+        Engine.h
+        OpenGLEngine.h
+        OpenGLEngine.cpp
+        VulkanEngine.h
+        VulkanEngine.cpp
+        VulkanEngineImgui.h
+        VulkanEngineImgui.cpp
+        Render/Vertex.h
+        Render/Window.h
+        Render/Window.cpp
+        Render/Device.h
+        Render/Device.cpp
+        Render/Model.h
+        Render/Model.cpp
+        )
 
 
 set_property(TARGET Enix PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:Enix>)
