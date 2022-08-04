@@ -13,8 +13,7 @@ namespace Enix
     {
     }
 
-    uint32_t Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
-    {
+    uint32_t Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
         VkPhysicalDeviceMemoryProperties memProperties;
         vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
@@ -29,7 +28,7 @@ namespace Enix
     }
 
     void Device::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                              VkBuffer& buffer, VkDeviceMemory& bufferMemory)
+                              VkBuffer& buffer, VkDeviceMemory& bufferMemory) const
     {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -54,8 +53,7 @@ namespace Enix
         vkBindBufferMemory(_device, buffer, bufferMemory, 0);
     }
 
-    void Device::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
-    {
+    void Device::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
         VkBufferCopy copyRegion{};
@@ -67,8 +65,7 @@ namespace Enix
         endSingleTimeCommands(commandBuffer);
     }
 
-    VkCommandBuffer Device::beginSingleTimeCommands()
-    {
+    VkCommandBuffer Device::beginSingleTimeCommands() const {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -87,8 +84,7 @@ namespace Enix
         return commandBuffer;
     }
 
-    void Device::endSingleTimeCommands(VkCommandBuffer commandBuffer)
-    {
+    void Device::endSingleTimeCommands(VkCommandBuffer commandBuffer) const {
         vkEndCommandBuffer(commandBuffer);
 
         VkSubmitInfo submitInfo{};

@@ -18,6 +18,7 @@
 #include "Render/Vertex.h"
 #include "Render/Model.h"
 #include "Render/Window.h"
+#include "Asset/MeshAsset.h"
 
 
 namespace Enix {
@@ -130,6 +131,7 @@ namespace Enix {
         VkImageView _depthImageView;
         std::chrono::steady_clock::time_point _lastTickTimePoint;
         std::unique_ptr<Model> _model;
+        std::unique_ptr<MeshAsset> _meshAsset;
         std::unique_ptr<Device> _enixDevice;
         double _deltaTime;
         std::chrono::time_point <std::chrono::steady_clock> _engineStartTimePoint;
@@ -278,7 +280,6 @@ namespace Enix {
         int cleanUp() override;
 
         int run() override;
-
 
 
     };

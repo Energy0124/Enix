@@ -53,15 +53,14 @@ namespace Enix
         vkFreeMemory(_device, stagingBufferMemory, nullptr);
     }
 
-    Model::Model(Device& device, std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices): _device(device),
+    Model::Model(const Device& device, std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices): _device(device),
         _vertices(vertices), _indices(indices)
     {
         createVertexBuffers();
         createIndexBuffer();
     }
 
-    void Model::releaseResources()
-    {
+    void Model::releaseResources() const {
         // destroy vertex buffer
         vkDestroyBuffer(_device, _vertexBuffer, nullptr);
         vkFreeMemory(_device, _vertexBufferMemory, nullptr);
@@ -77,16 +76,14 @@ namespace Enix
         // releaseResources();
     }
 
-    void Model::bind(VkCommandBuffer commandBuffer)
-    {
+    void Model::bind(VkCommandBuffer commandBuffer) const {
         VkBuffer vertexBuffers[] = {_vertexBuffer};
         VkDeviceSize offsets[] = {0};
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
         vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     }
 
-    void Model::draw(VkCommandBuffer commandBuffer)
-    {
+    void Model::draw(VkCommandBuffer commandBuffer) const {
         vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
     }
 }

@@ -13,14 +13,17 @@
 
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
+
 #include <GLFW/glfw3.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include <stb_image.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
+
 #include <tiny_obj_loader.h>
 
 #include "imgui.h"
@@ -28,6 +31,7 @@
 #include "imgui_impl_vulkan.h"
 
 #include "VulkanEngine.h"
+#include "Asset/MeshAsset.h"
 
 // for temporary debugging purposes
 static auto t1 = std::chrono::high_resolution_clock::now();
@@ -1054,7 +1058,7 @@ namespace Enix {
         // VkDeviceSize offsets[] = {0};
         // vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
         // vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-        _model->bind(commandBuffer);
+        _meshAsset->model().bind(commandBuffer);
 
         VkViewport viewport{};
         viewport.x = 0.0f;
@@ -1081,7 +1085,7 @@ namespace Enix {
                            sizeof(MeshPushConstant), &constant);
 
         // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
-        _model->draw(commandBuffer);
+        _meshAsset->model().draw(commandBuffer);
 
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), _commandBuffers[_currentFrame]);
 
@@ -1664,7 +1668,9 @@ namespace Enix {
         createSyncObjects();
         // temporary solution, todo: refactor this, move create device to a proper place
         _enixDevice = std::make_unique<Device>(_device, _physicalDevice, _graphicsQueue, _commandPool);
-        loadModel();
+//        loadModel();
+        _meshAsset = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
+                                                _workspaceRoot + _texturePath, *_enixDevice);
     }
 
     int VulkanEngine::init() {
@@ -1683,7 +1689,7 @@ namespace Enix {
         while (!glfwWindowShouldClose(_window)) {
 
             steady_clock::time_point tickTimePoint = steady_clock::now();
-            auto timeSpan = duration_cast < duration < double >> (tickTimePoint - _lastTickTimePoint);
+            auto timeSpan = duration_cast<duration<double >>(tickTimePoint - _lastTickTimePoint);
             deltaTime = timeSpan.count();
 
             _lastTickTimePoint = tickTimePoint;
@@ -1691,7 +1697,7 @@ namespace Enix {
             std::cout << "deltaTime: " << deltaTime << std::endl;
             _deltaTime = deltaTime;
             _timeSinceEngineStart =
-                    duration_cast < duration < double >> (tickTimePoint - _engineStartTimePoint).count();
+                    duration_cast<duration<double >>(tickTimePoint - _engineStartTimePoint).count();
             tick(deltaTime);
         }
 
@@ -1735,7 +1741,7 @@ namespace Enix {
         // vkDestroyBuffer(_device, _indexBuffer, nullptr);
         // vkFreeMemory(_device, _indexBufferMemory, nullptr);
         //todo: change to use use raii so we don't need to call this manually
-        _model->releaseResources();
+        _meshAsset->model().releaseResources();
 
         vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);

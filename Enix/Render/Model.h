@@ -13,7 +13,7 @@ namespace Enix
         void createIndexBuffer();
 
 
-        Device& _device;
+        const Device& _device;
         std::vector<Vertex> _vertices;
         VkBuffer _vertexBuffer;
         VkDeviceMemory _vertexBufferMemory;
@@ -21,13 +21,13 @@ namespace Enix
         VkBuffer _indexBuffer;
         VkDeviceMemory _indexBufferMemory;
     public:
-        Model(Device& device, std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices);
-        void releaseResources();
+        Model(const Device& device, std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices);
+        void releaseResources() const;
         ~Model();
         Model(const Model& other) = delete;
         Model& operator=(const Model& other) = delete;
         
-        void bind(VkCommandBuffer commandBuffer);
-        void draw(VkCommandBuffer commandBuffer);
+        void bind(VkCommandBuffer commandBuffer) const;
+        void draw(VkCommandBuffer commandBuffer) const;
     };
 }

@@ -16,13 +16,17 @@ namespace Enix
         // implicitly cast to VkDevice, for convenience, consider remove it later
         operator VkDevice() const { return _device; }
 
-        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
         void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                           VkBuffer& buffer,
                           VkDeviceMemory& bufferMemory);
-        void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-        VkCommandBuffer beginSingleTimeCommands();
-        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+        void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const;
+        VkCommandBuffer beginSingleTimeCommands() const;
+        void endSingleTimeCommands(VkCommandBuffer commandBuffer) const;
         [[nodiscard]] VkDevice& device() const { return _device; }
+
+        void
+        createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer,
+                     VkDeviceMemory &bufferMemory) const;
     };
 }
