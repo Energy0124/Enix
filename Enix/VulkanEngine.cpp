@@ -136,9 +136,9 @@ namespace Enix {
         QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
 
         // Setup Platform/Renderer backends
-        ImGui_ImplGlfw_InitForVulkan(_window, true);
+        ImGui_ImplGlfw_InitForVulkan(&_window.window(), true);
         ImGui_ImplVulkan_InitInfo initInfo = {};
-        initInfo.Instance = _instance;
+        initInfo.Instance = _instance.instance();
         initInfo.PhysicalDevice = _physicalDevice;
         initInfo.Device = _device;
         initInfo.QueueFamily = indices.graphicsFamily.value();
@@ -159,7 +159,7 @@ namespace Enix {
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    VulkanEngine::VulkanEngine() : _window() {
+    VulkanEngine::VulkanEngine() : _window(), _instance(true) {
         VulkanEngine::init();
     }
 
@@ -232,7 +232,7 @@ namespace Enix {
     void VulkanEngine::recreateSwapChain() {
         int width = 0, height = 0;
         while (width == 0 || height == 0) {
-            glfwGetFramebufferSize(_window, &width, &height);
+            glfwGetFramebufferSize(&_window.window(), &width, &height);
             glfwWaitEvents();
         }
         vkDeviceWaitIdle(_device);
@@ -385,58 +385,6 @@ namespace Enix {
         return true;
     }
 
-    void VulkanEngine::createVulkanInstance() {
-        if (_enableValidationLayers && !checkValidationLayerSupport()) {
-            throw std::runtime_error("validation layers requested, but not available!");
-        }
-
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Enix Engine App";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "Enix Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
-
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;
-
-        const auto requiredExtensions = getRequiredExtensions();
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
-        createInfo.ppEnabledExtensionNames = requiredExtensions.data();
-
-        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-        // set validation layers if enabled
-        if (_enableValidationLayers) {
-            createInfo.enabledLayerCount = static_cast<uint32_t>(_validationLayers.size());
-            createInfo.ppEnabledLayerNames = _validationLayers.data();
-
-            populateDebugMessengerCreateInfo(debugCreateInfo);
-            createInfo.pNext = reinterpret_cast<VkDebugUtilsMessengerCreateInfoEXT *>(&debugCreateInfo);
-        } else {
-            createInfo.enabledLayerCount = 0;
-
-            createInfo.pNext = nullptr;
-        }
-
-        if (vkCreateInstance(&createInfo, nullptr, &_instance) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create instance!");
-        }
-
-        // check the list of supported extensions
-        // just for information purposes
-        uint32_t extensionCount = 0;
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-        std::vector<VkExtensionProperties> extensions(extensionCount);
-        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
-
-        std::cout << "available extensions:\n";
-        for (const auto &extension: extensions) {
-            std::cout << '\t' << extension.extensionName << '\n';
-        }
-    }
-
     VkResult VulkanEngine::createDebugUtilsMessengerExt(VkInstance instance,
                                                         const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
                                                         const VkAllocationCallbacks *pAllocator,
@@ -477,7 +425,7 @@ namespace Enix {
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         populateDebugMessengerCreateInfo(createInfo);
 
-        if (createDebugUtilsMessengerExt(_instance, &createInfo, nullptr, &_debugMessenger) != VK_SUCCESS) {
+        if (createDebugUtilsMessengerExt(_instance.instance(), &createInfo, nullptr, &_debugMessenger) != VK_SUCCESS) {
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }
@@ -557,7 +505,7 @@ namespace Enix {
             return capabilities.currentExtent;
         } else {
             int width, height;
-            glfwGetFramebufferSize(_window, &width, &height);
+            glfwGetFramebufferSize(&_window.window(), &width, &height);
 
             VkExtent2D actualExtent = {
                     static_cast<uint32_t>(width),
@@ -606,12 +554,12 @@ namespace Enix {
 
     void VulkanEngine::pickPhysicalDevice() {
         uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
+        vkEnumeratePhysicalDevices(_instance.instance(), &deviceCount, nullptr);
         if (deviceCount == 0) {
             throw std::runtime_error("failed to find GPUs with Vulkan support!");
         }
         std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
+        vkEnumeratePhysicalDevices(_instance.instance(), &deviceCount, devices.data());
 
         for (const auto &device: devices) {
             if (isDeviceSuitable(device)) {
@@ -671,9 +619,9 @@ namespace Enix {
 
     void VulkanEngine::createSwapChain() {
         int width = 0, height = 0;
-        glfwGetFramebufferSize(_window, &width, &height);
+        glfwGetFramebufferSize(&_window.window(), &width, &height);
         while (width == 0 || height == 0) {
-            glfwGetFramebufferSize(_window, &width, &height);
+            glfwGetFramebufferSize(&_window.window(), &width, &height);
             glfwWaitEvents();
         }
 
@@ -1642,10 +1590,10 @@ namespace Enix {
             throw std::runtime_error("GLFW: Vulkan not supported");
         }
         // create vk instance
-        createVulkanInstance();
+//        createVulkanInstance();
         setupDebugMessenger();
         // createSurface();
-        _window.createSurface(_instance, _surface);
+        _window.createSurface(_instance.instance(), _surface);
         pickPhysicalDevice();
         createLogicalDevice();
         createSwapChain();
@@ -1670,7 +1618,7 @@ namespace Enix {
         _enixDevice = std::make_unique<Device>(_device, _physicalDevice, _graphicsQueue, _commandPool);
 //        loadModel();
         _meshAsset = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
-                                                _workspaceRoot + _texturePath, *_enixDevice);
+                                                 _workspaceRoot + _texturePath, *_enixDevice);
     }
 
     int VulkanEngine::init() {
@@ -1686,7 +1634,7 @@ namespace Enix {
         double deltaTime;
         _engineStartTimePoint = steady_clock::now();
         // Main loop
-        while (!glfwWindowShouldClose(_window)) {
+        while (!glfwWindowShouldClose(&_window.window())) {
 
             steady_clock::time_point tickTimePoint = steady_clock::now();
             auto timeSpan = duration_cast<duration<double >>(tickTimePoint - _lastTickTimePoint);
@@ -1759,11 +1707,11 @@ namespace Enix {
         vkDestroyDevice(_device, nullptr);
 
         if (_enableValidationLayers) {
-            destroyDebugUtilsMessengerExt(_instance, _debugMessenger, nullptr);
+            destroyDebugUtilsMessengerExt(_instance.instance(), _debugMessenger, nullptr);
         }
 
-        vkDestroySurfaceKHR(_instance, _surface, nullptr);
-        vkDestroyInstance(_instance, nullptr);
+        vkDestroySurfaceKHR(_instance.instance(), _surface, nullptr);
+
 
         // glfwDestroyWindow(_window);
         // glfwTerminate();

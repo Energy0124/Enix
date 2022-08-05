@@ -15,9 +15,9 @@ namespace Enix
                              stagingBufferMemory);
 
         void* data;
-        vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        vkMapMemory(_device.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
         memcpy(data, _vertices.data(), (size_t)bufferSize);
-        vkUnmapMemory(_device, stagingBufferMemory);
+        vkUnmapMemory(_device.device(), stagingBufferMemory);
 
         _device.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _vertexBuffer,
@@ -25,8 +25,8 @@ namespace Enix
 
         _device.copyBuffer(stagingBuffer, _vertexBuffer, bufferSize);
 
-        vkDestroyBuffer(_device, stagingBuffer, nullptr);
-        vkFreeMemory(_device, stagingBufferMemory, nullptr);
+        vkDestroyBuffer(_device.device(), stagingBuffer, nullptr);
+        vkFreeMemory(_device.device(), stagingBufferMemory, nullptr);
     }
 
     void Model::createIndexBuffer()
@@ -39,9 +39,9 @@ namespace Enix
                              stagingBufferMemory);
 
         void* data;
-        vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        vkMapMemory(_device.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
         memcpy(data, _indices.data(), (size_t)bufferSize);
-        vkUnmapMemory(_device, stagingBufferMemory);
+        vkUnmapMemory(_device.device(), stagingBufferMemory);
 
         _device.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _indexBuffer,
@@ -49,8 +49,8 @@ namespace Enix
 
         _device.copyBuffer(stagingBuffer, _indexBuffer, bufferSize);
 
-        vkDestroyBuffer(_device, stagingBuffer, nullptr);
-        vkFreeMemory(_device, stagingBufferMemory, nullptr);
+        vkDestroyBuffer(_device.device(), stagingBuffer, nullptr);
+        vkFreeMemory(_device.device(), stagingBufferMemory, nullptr);
     }
 
     Model::Model(const Device& device, std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices): _device(device),
@@ -62,12 +62,12 @@ namespace Enix
 
     void Model::releaseResources() const {
         // destroy vertex buffer
-        vkDestroyBuffer(_device, _vertexBuffer, nullptr);
-        vkFreeMemory(_device, _vertexBufferMemory, nullptr);
+        vkDestroyBuffer(_device.device(), _vertexBuffer, nullptr);
+        vkFreeMemory(_device.device(), _vertexBufferMemory, nullptr);
 
         // destroy index buffer
-        vkDestroyBuffer(_device, _indexBuffer, nullptr);
-        vkFreeMemory(_device, _indexBufferMemory, nullptr);
+        vkDestroyBuffer(_device.device(), _indexBuffer, nullptr);
+        vkFreeMemory(_device.device(), _indexBufferMemory, nullptr);
     }
 
     Model::~Model()

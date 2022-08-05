@@ -19,6 +19,7 @@
 #include "Render/Model.h"
 #include "Render/Window.h"
 #include "Asset/MeshAsset.h"
+#include "Render/Instance.h"
 
 
 namespace Enix {
@@ -89,7 +90,7 @@ namespace Enix {
         std::string _workspaceRoot = "../";
         std::string _modelPath = "Models/viking_room.obj";
         std::string _texturePath = "Textures/viking_room.png";
-        VkInstance _instance = nullptr;
+        Instance _instance;
         VkDebugUtilsMessengerEXT _debugMessenger;
 
         bool _cleanedUp = false;
@@ -240,7 +241,7 @@ namespace Enix {
 
         VkFormat findDepthFormat();
 
-        bool hasStencilComponent(VkFormat format);
+        static bool hasStencilComponent(VkFormat format);
 
         void createDepthResources();
 

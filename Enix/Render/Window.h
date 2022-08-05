@@ -15,9 +15,9 @@ namespace Enix
         Window();
         ~Window();
 
-        [[nodiscard]] operator GLFWwindow*() const
+        [[nodiscard]] GLFWwindow& window() const
         {
-            return _window;
+            return *_window;
         }
 
         [[nodiscard]] bool framebufferResized() const
