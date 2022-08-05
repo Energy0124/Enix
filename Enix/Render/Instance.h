@@ -14,10 +14,14 @@ private:
 
     VkInstance _instance = nullptr;
     bool _enableValidationLayers;
+    VkDebugUtilsMessengerEXT _debugMessenger{VK_NULL_HANDLE};
+
+    void setupDebugMessenger();
 
     bool checkValidationLayerSupport();
 
-    [[nodiscard]] std::vector<const char *> getRequiredExtensions() const;
+    [[nodiscard]]
+    std::vector<const char *> getRequiredExtensions() const;
 
     static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 
@@ -25,13 +29,25 @@ private:
     debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
                   const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData);
 
+
+    static VkResult
+    createDebugUtilsMessengerExt(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+                                 const VkAllocationCallbacks *pAllocator,
+                                 VkDebugUtilsMessengerEXT *pDebugMessenger);
+
+    void createVkInstance();
+    static void destroyDebugUtilsMessengerExt(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
+                                       const VkAllocationCallbacks *pAllocator);
 public:
     explicit Instance(bool enableValidationLayers);
 
     ~Instance();
 
-    [[nodiscard]]  VkInstance instance() const {
+    [[nodiscard]]
+    VkInstance instance() const {
         return _instance;
     }
+
+
 
 };

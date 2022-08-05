@@ -10,6 +10,31 @@
 #include "GLFW/glfw3.h"
 
 Instance::Instance(bool enableValidationLayers) : _enableValidationLayers(enableValidationLayers) {
+
+    createVkInstance();
+    setupDebugMessenger();
+}
+
+
+Instance::~Instance() {
+    if (_enableValidationLayers) {
+        destroyDebugUtilsMessengerExt(_instance, _debugMessenger, nullptr);
+    }
+
+    vkDestroyInstance(_instance, nullptr);
+
+}
+
+void Instance::destroyDebugUtilsMessengerExt(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
+                                             const VkAllocationCallbacks *pAllocator) {
+    auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
+            vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
+    if (func != nullptr) {
+        func(instance, debugMessenger, pAllocator);
+    }
+}
+
+void Instance::createVkInstance() {
     if (_enableValidationLayers && !checkValidationLayerSupport()) {
         throw std::runtime_error("validation layers requested, but not available!");
     }
@@ -49,7 +74,7 @@ Instance::Instance(bool enableValidationLayers) : _enableValidationLayers(enable
     }
 
     // check the list of supported extensions
-    // just for information purposes
+// just for information purposes
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
     std::vector<VkExtensionProperties> extensions(extensionCount);
@@ -59,12 +84,8 @@ Instance::Instance(bool enableValidationLayers) : _enableValidationLayers(enable
     for (const auto &extension: extensions) {
         std::cout << '\t' << extension.extensionName << '\n';
     }
-
 }
 
-Instance::~Instance() {
-    vkDestroyInstance(_instance, nullptr);
-}
 
 bool Instance::checkValidationLayerSupport() {
     uint32_t layerCount;
@@ -111,6 +132,30 @@ VKAPI_ATTR VkBool32 VKAPI_CALL Instance::debugCallback(
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
     return VK_FALSE;
+}
+
+VkResult Instance::createDebugUtilsMessengerExt(VkInstance instance,
+                                                const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+                                                const VkAllocationCallbacks *pAllocator,
+                                                VkDebugUtilsMessengerEXT *pDebugMessenger) {
+    auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(
+            instance, "vkCreateDebugUtilsMessengerEXT"));
+    if (func != nullptr) {
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    } else {
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+}
+
+void Instance::setupDebugMessenger() {
+    if (!_enableValidationLayers) return;
+
+    VkDebugUtilsMessengerCreateInfoEXT createInfo;
+    populateDebugMessengerCreateInfo(createInfo);
+
+    if (createDebugUtilsMessengerExt(_instance, &createInfo, nullptr, &_debugMessenger) != VK_SUCCESS) {
+        throw std::runtime_error("failed to set up debug messenger!");
+    }
 }
 
 void Instance::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo) {

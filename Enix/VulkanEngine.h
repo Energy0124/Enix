@@ -116,10 +116,6 @@ namespace Enix {
         std::vector<VkFence> _inFlightFences;
         uint32_t _currentFrame = 0;
         bool _framebufferResized = false;
-        // VkBuffer _vertexBuffer;
-        // VkDeviceMemory _vertexBufferMemory;
-        // VkBuffer _indexBuffer;
-        // VkDeviceMemory _indexBufferMemory;
         std::vector<VkBuffer> _uniformBuffers;
         std::vector<VkDeviceMemory> _uniformBuffersMemory;
         VkImage _textureImage;
@@ -138,25 +134,9 @@ namespace Enix {
         std::chrono::time_point <std::chrono::steady_clock> _engineStartTimePoint;
         double _timeSinceEngineStart;
 
-        static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
-
-        std::vector<const char *> getRequiredExtensions();
-
-        bool checkValidationLayerSupport();
-
-        void createVulkanInstance();
-
-        static VkResult createDebugUtilsMessengerExt(VkInstance instance,
-                                                     const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
-                                                     const VkAllocationCallbacks *pAllocator,
-                                                     VkDebugUtilsMessengerEXT *pDebugMessenger);
 
         static void destroyDebugUtilsMessengerExt(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
                                                   const VkAllocationCallbacks *pAllocator);
-
-        void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
-
-        void setupDebugMessenger();
 
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
@@ -175,8 +155,6 @@ namespace Enix {
         void pickPhysicalDevice();
 
         void createLogicalDevice();
-
-        void createSurface();
 
         void createSwapChain();
 
@@ -204,14 +182,10 @@ namespace Enix {
                           VkBuffer &buffer, VkDeviceMemory &
         bufferMemory);
 
-        void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-
         void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
-        // void createVertexBuffer();
-        // void createIndexBuffer();
         void createDescriptorSetLayout();
 
         void createUniformBuffers();
@@ -245,15 +219,7 @@ namespace Enix {
 
         void createDepthResources();
 
-        void loadModel();
-
         void initVulkan();
-
-        static void glfwErrorCallback(int error, const char *description);
-
-        static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                      VkDebugUtilsMessageTypeFlagsEXT messageType,
-                                      const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData);
 
         static std::vector<char> readFile(const std::string &filename);
 

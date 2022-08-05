@@ -11,6 +11,7 @@ namespace Enix
 
     Device::~Device()
     {
+        // todo: implement this
     }
 
     uint32_t Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
