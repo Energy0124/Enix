@@ -100,7 +100,7 @@ namespace Enix {
         std::vector<VkSemaphore> _renderFinishedSemaphores;
         std::vector<VkFence> _inFlightFences;
         uint32_t _currentFrame = 0;
-        bool _framebufferResized = false;
+//        bool _framebufferResized = false;
         std::vector<VkBuffer> _uniformBuffers;
         std::vector<VkDeviceMemory> _uniformBuffersMemory;
         VkImage _textureImage;

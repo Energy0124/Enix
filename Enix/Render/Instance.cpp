@@ -8,6 +8,7 @@
 #include <cstring>
 #include "Instance.h"
 #include "GLFW/glfw3.h"
+#include "spdlog/spdlog.h"
 
 Instance::Instance(bool enableValidationLayers) : _enableValidationLayers(enableValidationLayers) {
 
@@ -129,7 +130,25 @@ VKAPI_ATTR VkBool32 VKAPI_CALL Instance::debugCallback(
         VkDebugUtilsMessageTypeFlagsEXT messageType,
         const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
         void *pUserData) {
-    std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+
+    switch (messageSeverity) {
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+            spdlog::debug("[validation] {0}", pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+            spdlog::info("[validation] {0}", pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            spdlog::warn("[validation] {0}", pCallbackData->pMessage);
+            break;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+            spdlog::error("[validation] {0}", pCallbackData->pMessage);
+            break;
+        default:
+            spdlog::info("[validation] {0}", pCallbackData->pMessage);
+            break;
+
+    }
 
     return VK_FALSE;
 }

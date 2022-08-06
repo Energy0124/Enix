@@ -24,12 +24,15 @@
 
 #include <tiny_obj_loader.h>
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
+
+#include <spdlog/spdlog.h>
 
 #include "VulkanEngine.h"
 #include "Asset/MeshAsset.h"
+
 
 // for temporary debugging purposes
 static auto t1 = std::chrono::high_resolution_clock::now();
@@ -149,6 +152,7 @@ namespace Enix {
 
     VulkanEngine::VulkanEngine()
             : _window(), _instance(_enableValidationLayers), _surface(_instance.instance(), _window.window()) {
+        spdlog::debug("init engine");
         VulkanEngine::init();
     }
 
@@ -305,8 +309,8 @@ namespace Enix {
         presentInfo.pResults = nullptr; // Optional
 
         result = vkQueuePresentKHR(_presentQueue, &presentInfo);
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _framebufferResized) {
-            _framebufferResized = false;
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _window.framebufferResized()) {
+            _window.setFramebufferResized(false);
             recreateSwapChain();
             return;
         } else if (result != VK_SUCCESS) {
@@ -1436,10 +1440,9 @@ namespace Enix {
     }
 
     void VulkanEngine::initVulkan() {
+
         // Setup Vulkan
-        if (!glfwVulkanSupported()) {
-            throw std::runtime_error("GLFW: Vulkan not supported");
-        }
+
         // create vk instance
 //        createVulkanInstance();
 //        setupDebugMessenger();
@@ -1493,7 +1496,7 @@ namespace Enix {
 
             _lastTickTimePoint = tickTimePoint;
 
-            std::cout << "deltaTime: " << deltaTime << std::endl;
+//            std::cout << "deltaTime: " << deltaTime << std::endl;
             _deltaTime = deltaTime;
             _timeSinceEngineStart =
                     duration_cast<duration<double >>(tickTimePoint - _engineStartTimePoint).count();
@@ -1510,6 +1513,8 @@ namespace Enix {
         if (_cleanedUp) {
             return 0;
         }
+
+        spdlog::debug("Cleaning up engine");
 
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();

@@ -12,6 +12,10 @@
 
 WindowSurface::WindowSurface(VkInstance &instance, GLFWwindow& window) : _instance(instance), _window(window) {
 
+    if (!glfwVulkanSupported()) {
+        throw std::runtime_error("GLFW: Vulkan not supported");
+    }
+
     if (glfwCreateWindowSurface(_instance, &_window, nullptr, &_surface) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create window surface!");
