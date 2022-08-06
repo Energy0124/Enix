@@ -7,6 +7,10 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory(glfw/glfw)
 
+option(SPDLOG_BUILD_EXAMPLE "" OFF)
+option(SPDLOG_INSTALL "" OFF)
+add_subdirectory(spdlog)
+
 add_subdirectory(glm)
 
 add_library(imgui STATIC)
