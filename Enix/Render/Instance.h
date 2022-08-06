@@ -12,7 +12,7 @@ private:
             "VK_LAYER_KHRONOS_validation"
     };
 
-    VkInstance _instance = nullptr;
+    VkInstance _instance{VK_NULL_HANDLE};
     bool _enableValidationLayers;
     VkDebugUtilsMessengerEXT _debugMessenger{VK_NULL_HANDLE};
 
@@ -36,18 +36,19 @@ private:
                                  VkDebugUtilsMessengerEXT *pDebugMessenger);
 
     void createVkInstance();
+
     static void destroyDebugUtilsMessengerExt(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
-                                       const VkAllocationCallbacks *pAllocator);
+                                              const VkAllocationCallbacks *pAllocator);
+
 public:
     explicit Instance(bool enableValidationLayers);
 
     ~Instance();
 
     [[nodiscard]]
-    VkInstance instance() const {
+    VkInstance& instance() {
         return _instance;
     }
-
 
 
 };

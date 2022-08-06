@@ -16,7 +16,7 @@ add_executable(Enix
         Render/Device.cpp
         Render/Model.h
         Render/Model.cpp
-        Asset/MeshAsset.cpp Asset/MeshAsset.h Render/Instance.cpp Render/Instance.h)
+        Asset/MeshAsset.cpp Asset/MeshAsset.h Render/Instance.cpp Render/Instance.h Render/WindowSurface.cpp Render/WindowSurface.h)
 
 
 set_property(TARGET Enix PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:Enix>)

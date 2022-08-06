@@ -29,13 +29,7 @@ namespace Enix
         auto app = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
         app->_framebufferResized = true;
     }
-    void Window::createSurface(VkInstance instance, VkSurfaceKHR& surface)
-    {
-        if (glfwCreateWindowSurface(instance, _window, nullptr, &surface) != VK_SUCCESS)
-        {
-            throw std::runtime_error("failed to create window surface!");
-        }
-    }
+
     void Window::initWindow()
     {
         // Setup GLFW window

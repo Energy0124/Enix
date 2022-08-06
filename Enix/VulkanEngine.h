@@ -20,6 +20,7 @@
 #include "Render/Window.h"
 #include "Asset/MeshAsset.h"
 #include "Render/Instance.h"
+#include "Render/WindowSurface.h"
 
 
 namespace Enix {
@@ -56,48 +57,32 @@ namespace Enix {
         const std::vector<const char *> _deviceExtensions{
                 VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
-        // std::vector<Vertex> _vertices{};
-        std::vector<Vertex> _verticesTest{
-                {{-0.5f, -0.5f, 0.0f},  {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-                {{0.5f,  -0.5f, 0.0f},  {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-                {{0.5f,  0.5f,  0.0f},  {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-                {{-0.5f, 0.5f,  0.0f},  {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-
-                {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-                {{0.5f,  -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-                {{0.5f,  0.5f,  -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-                {{-0.5f, 0.5f,  -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
-        };
-        // std::vector<uint32_t> _indices{};
-        std::vector<uint32_t> _indicesTest{
-                0, 1, 2, 2, 3, 0,
-                4, 5, 6, 6, 7, 4
-        };
-
-        // std::unordered_map<Vertex, uint32_t> _uniqueVertices{};
-
-        Window _window;
-
-        VkDescriptorPool _descriptorPool;
-        std::vector<VkDescriptorSet> _descriptorSets;
-        VkImageView _textureImageView;
-
 #ifdef NDEBUG
         const bool _enableValidationLayers = false;
 #else
         const bool _enableValidationLayers = true;
 #endif
+
+        Window _window;
+        Instance _instance;
+        WindowSurface _surface;
+        std::unique_ptr<Device> _enixDevice;
+        std::unique_ptr<MeshAsset> _meshAsset;
+
+
+        VkDescriptorPool _descriptorPool;
+        std::vector<VkDescriptorSet> _descriptorSets;
+        VkImageView _textureImageView;
         std::string _workspaceRoot = "../";
         std::string _modelPath = "Models/viking_room.obj";
         std::string _texturePath = "Textures/viking_room.png";
-        Instance _instance;
-        VkDebugUtilsMessengerEXT _debugMessenger;
+
 
         bool _cleanedUp = false;
         VkPhysicalDevice _physicalDevice;
         VkDevice _device;
         VkQueue _graphicsQueue;
-        VkSurfaceKHR _surface;
+//        VkSurfaceKHR _surface;
         VkQueue _presentQueue;
         VkSwapchainKHR _swapChain;
         std::vector<VkImage> _swapChainImages;
@@ -127,16 +112,11 @@ namespace Enix {
         VkDeviceMemory _depthImageMemory;
         VkImageView _depthImageView;
         std::chrono::steady_clock::time_point _lastTickTimePoint;
-        std::unique_ptr<Model> _model;
-        std::unique_ptr<MeshAsset> _meshAsset;
-        std::unique_ptr<Device> _enixDevice;
+
         double _deltaTime;
         std::chrono::time_point <std::chrono::steady_clock> _engineStartTimePoint;
         double _timeSinceEngineStart;
 
-
-        static void destroyDebugUtilsMessengerExt(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
-                                                  const VkAllocationCallbacks *pAllocator);
 
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 

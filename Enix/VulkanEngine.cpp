@@ -147,7 +147,8 @@ namespace Enix {
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    VulkanEngine::VulkanEngine() : _window(), _instance(true) {
+    VulkanEngine::VulkanEngine()
+            : _window(), _instance(_enableValidationLayers), _surface(_instance.instance(), _window.window()) {
         VulkanEngine::init();
     }
 
@@ -207,11 +208,11 @@ namespace Enix {
         vkDestroyImage(_device, _depthImage, nullptr);
         vkFreeMemory(_device, _depthImageMemory, nullptr);
 
-        for (auto & swapChainFramebuffer : _swapChainFramebuffers) {
+        for (auto &swapChainFramebuffer: _swapChainFramebuffers) {
             vkDestroyFramebuffer(_device, swapChainFramebuffer, nullptr);
         }
 
-        for (auto & swapChainImageView : _swapChainImageViews) {
+        for (auto &swapChainImageView: _swapChainImageViews) {
             vkDestroyImageView(_device, swapChainImageView, nullptr);
         }
         vkDestroySwapchainKHR(_device, _swapChain, nullptr);
@@ -336,7 +337,6 @@ namespace Enix {
     }
 
 
-
     QueueFamilyIndices VulkanEngine::findQueueFamilies(VkPhysicalDevice device) {
         QueueFamilyIndices indices;
 
@@ -351,7 +351,7 @@ namespace Enix {
                 indices.graphicsFamily = i;
             }
             VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface.surface(), &presentSupport);
             if (presentSupport) {
                 indices.presentFamily = i;
             }
@@ -367,22 +367,23 @@ namespace Enix {
     SwapChainSupportDetails VulkanEngine::querySwapChainSupport(VkPhysicalDevice device) {
         SwapChainSupportDetails details;
 
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, _surface, &details.capabilities);
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, _surface.surface(), &details.capabilities);
 
         uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface, &formatCount, nullptr);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface.surface(), &formatCount, nullptr);
 
         if (formatCount != 0) {
             details.formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface, &formatCount, details.formats.data());
+            vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface.surface(), &formatCount, details.formats.data());
         }
 
         uint32_t presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface, &presentModeCount, nullptr);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface.surface(), &presentModeCount, nullptr);
 
         if (presentModeCount != 0) {
             details.presentModes.resize(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface, &presentModeCount, details.presentModes.data());
+            vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface.surface(), &presentModeCount,
+                                                      details.presentModes.data());
         }
 
         return details;
@@ -548,7 +549,7 @@ namespace Enix {
 
         VkSwapchainCreateInfoKHR createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface = _surface;
+        createInfo.surface = _surface.surface();
         createInfo.minImageCount = imageCount;
         createInfo.imageFormat = surfaceFormat.format;
         createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -1443,7 +1444,7 @@ namespace Enix {
 //        createVulkanInstance();
 //        setupDebugMessenger();
         // createSurface();
-        _window.createSurface(_instance.instance(), _surface);
+//        _window.createSurface(_instance.instance(), _surface);
         pickPhysicalDevice();
         createLogicalDevice();
         createSwapChain();
@@ -1552,7 +1553,7 @@ namespace Enix {
         vkDestroyDevice(_device, nullptr);
 
 
-        vkDestroySurfaceKHR(_instance.instance(), _surface, nullptr);
+
 
 
         // glfwDestroyWindow(_window);
