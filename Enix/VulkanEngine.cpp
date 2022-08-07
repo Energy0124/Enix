@@ -124,16 +124,16 @@ namespace Enix {
         }
 
 
-        QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
+        QueueFamilyIndices indices = findQueueFamilies(_device.physicalDevice());
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForVulkan(&_window.window(), true);
         ImGui_ImplVulkan_InitInfo initInfo = {};
         initInfo.Instance = _instance.instance();
-        initInfo.PhysicalDevice = _physicalDevice;
+        initInfo.PhysicalDevice = _device.physicalDevice();
         initInfo.Device = _device;
         initInfo.QueueFamily = indices.graphicsFamily.value();
-        initInfo.Queue = _presentQueue;
+        initInfo.Queue = _device.presentQueue();
         initInfo.PipelineCache = VK_NULL_HANDLE;
         initInfo.DescriptorPool = _imguiDescriptorPool;
         initInfo.Subpass = 0;
@@ -150,8 +150,11 @@ namespace Enix {
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    VulkanEngine::VulkanEngine()
-            : _window(), _instance(_enableValidationLayers), _surface(_instance.instance(), _window.window()) {
+    VulkanEngine::VulkanEngine() :
+            _window(),
+            _instance(_enableValidationLayers),
+            _surface(_instance.instance(), _window.window()),
+            _device(_enableValidationLayers, _instance.instance(), _surface.surface()) {
         spdlog::debug("init engine");
         VulkanEngine::init();
     }
@@ -292,7 +295,7 @@ namespace Enix {
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, _inFlightFences[_currentFrame]) != VK_SUCCESS) {
+        if (vkQueueSubmit(_device.graphicsQueue(), 1, &submitInfo, _inFlightFences[_currentFrame]) != VK_SUCCESS) {
             throw std::runtime_error("failed to submit draw command buffer!");
         }
 
@@ -308,7 +311,7 @@ namespace Enix {
         presentInfo.pImageIndices = &imageIndex;
         presentInfo.pResults = nullptr; // Optional
 
-        result = vkQueuePresentKHR(_presentQueue, &presentInfo);
+        result = vkQueuePresentKHR(_device.presentQueue(), &presentInfo);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _window.framebufferResized()) {
             _window.setFramebufferResized(false);
             recreateSwapChain();
@@ -433,101 +436,6 @@ namespace Enix {
         }
     }
 
-    bool VulkanEngine::checkDeviceExtensionSupport(VkPhysicalDevice device) {
-        uint32_t extensionCount;
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
-
-        std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
-
-        std::set<std::string> requiredExtensions(_deviceExtensions.begin(), _deviceExtensions.end());
-        for (const auto &[extensionName, specVersion]: availableExtensions) {
-            requiredExtensions.erase(extensionName);
-        }
-        return requiredExtensions.empty();
-    }
-
-    bool VulkanEngine::isDeviceSuitable(VkPhysicalDevice device) {
-        QueueFamilyIndices indices = findQueueFamilies(device);
-
-        bool extensionsSupported = checkDeviceExtensionSupport(device);
-
-        bool swapChainAdequate = false;
-        if (extensionsSupported) {
-            SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
-            swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
-        }
-
-        VkPhysicalDeviceFeatures supportedFeatures;
-        vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
-
-        return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
-    }
-
-    void VulkanEngine::pickPhysicalDevice() {
-        uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(_instance.instance(), &deviceCount, nullptr);
-        if (deviceCount == 0) {
-            throw std::runtime_error("failed to find GPUs with Vulkan support!");
-        }
-        std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(_instance.instance(), &deviceCount, devices.data());
-
-        for (const auto &device: devices) {
-            if (isDeviceSuitable(device)) {
-                _physicalDevice = device;
-                break;
-            }
-        }
-        if (_physicalDevice == VK_NULL_HANDLE) {
-            throw std::runtime_error("failed to find a suitable GPU!");
-        }
-    }
-
-    void VulkanEngine::createLogicalDevice() {
-        QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
-
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-        std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
-
-        float queuePriority = 1.0f;
-        for (uint32_t queueFamily: uniqueQueueFamilies) {
-            VkDeviceQueueCreateInfo queueCreateInfo{};
-            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queueCreateInfo.queueFamilyIndex = queueFamily;
-            queueCreateInfo.queueCount = 1;
-            queueCreateInfo.pQueuePriorities = &queuePriority;
-            queueCreateInfos.push_back(queueCreateInfo);
-        }
-
-        VkPhysicalDeviceFeatures deviceFeatures{};
-        deviceFeatures.samplerAnisotropy = VK_TRUE;
-
-        VkDeviceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-        createInfo.pQueueCreateInfos = queueCreateInfos.data();
-        createInfo.pEnabledFeatures = &deviceFeatures;
-
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(_deviceExtensions.size());
-        createInfo.ppEnabledExtensionNames = _deviceExtensions.data();
-
-        if (_enableValidationLayers) {
-            createInfo.enabledLayerCount = static_cast<uint32_t>(_validationLayers.size());
-            createInfo.ppEnabledLayerNames = _validationLayers.data();
-        } else {
-            createInfo.enabledLayerCount = 0;
-        }
-
-        if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_device) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create logical device!");
-        }
-
-        vkGetDeviceQueue(_device, indices.graphicsFamily.value(), 0, &_graphicsQueue);
-
-        vkGetDeviceQueue(_device, indices.presentFamily.value(), 0, &_presentQueue);
-    }
-
 
     void VulkanEngine::createSwapChain() {
         int width = 0, height = 0;
@@ -539,7 +447,7 @@ namespace Enix {
 
         vkDeviceWaitIdle(_device);
 
-        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(_physicalDevice);
+        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(_device.physicalDevice());
 
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -561,7 +469,7 @@ namespace Enix {
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
+        QueueFamilyIndices indices = findQueueFamilies(_device.physicalDevice());
         uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
         if (indices.graphicsFamily != indices.presentFamily) {
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -861,24 +769,13 @@ namespace Enix {
         }
     }
 
-    void VulkanEngine::createCommandPool() {
-        QueueFamilyIndices queueFamilyIndices = findQueueFamilies(_physicalDevice);
-
-        VkCommandPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
-        if (vkCreateCommandPool(_device, &poolInfo, nullptr, &_commandPool) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create command pool!");
-        }
-    }
 
     void VulkanEngine::createCommandBuffers() {
         _commandBuffers.resize(_maxFramesInFlight);
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = _commandPool;
+        allocInfo.commandPool = _device.commandPool();
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = static_cast<uint32_t>(_commandBuffers.size());
 
@@ -979,7 +876,7 @@ namespace Enix {
 
     uint32_t VulkanEngine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
         VkPhysicalDeviceMemoryProperties memProperties;
-        vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
+        vkGetPhysicalDeviceMemoryProperties(_device.physicalDevice(), &memProperties);
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
             if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
                 return i;
@@ -1098,56 +995,6 @@ namespace Enix {
 
         endSingleTimeCommands(commandBuffer);
     }
-
-    // void VulkanEngine::createVertexBuffer()
-    // {
-    //     VkDeviceSize bufferSize = sizeof(_vertices[0]) * _vertices.size();
-    //
-    //
-    //     VkBuffer stagingBuffer;
-    //     VkDeviceMemory stagingBufferMemory;
-    //     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-    //                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-    //                  stagingBufferMemory);
-    //
-    //     void* data;
-    //     vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    //     memcpy(data, _vertices.data(), (size_t)bufferSize);
-    //     vkUnmapMemory(_device, stagingBufferMemory);
-    //
-    //     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-    //                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _vertexBuffer,
-    //                  _vertexBufferMemory);
-    //
-    //     copyBuffer(stagingBuffer, _vertexBuffer, bufferSize);
-    //
-    //     vkDestroyBuffer(_device, stagingBuffer, nullptr);
-    //     vkFreeMemory(_device, stagingBufferMemory, nullptr);
-    // }
-    //
-    // void VulkanEngine::createIndexBuffer()
-    // {
-    //     VkDeviceSize bufferSize = sizeof(_indices[0]) * _indices.size();
-    //     VkBuffer stagingBuffer;
-    //     VkDeviceMemory stagingBufferMemory;
-    //     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-    //                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-    //                  stagingBufferMemory);
-    //
-    //     void* data;
-    //     vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    //     memcpy(data, _indices.data(), (size_t)bufferSize);
-    //     vkUnmapMemory(_device, stagingBufferMemory);
-    //
-    //     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-    //                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _indexBuffer,
-    //                  _indexBufferMemory);
-    //
-    //     copyBuffer(stagingBuffer, _indexBuffer, bufferSize);
-    //
-    //     vkDestroyBuffer(_device, stagingBuffer, nullptr);
-    //     vkFreeMemory(_device, stagingBufferMemory, nullptr);
-    // }
 
     void VulkanEngine::createDescriptorSetLayout() {
         VkDescriptorSetLayoutBinding uboLayoutBinding{};
@@ -1323,7 +1170,7 @@ namespace Enix {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = _commandPool;
+        allocInfo.commandPool = _device.commandPool();
         allocInfo.commandBufferCount = 1;
 
         VkCommandBuffer commandBuffer;
@@ -1346,10 +1193,10 @@ namespace Enix {
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandBuffer;
 
-        vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(_graphicsQueue);
+        vkQueueSubmit(_device.graphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(_device.graphicsQueue());
 
-        vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer);
+        vkFreeCommandBuffers(_device, _device.commandPool(), 1, &commandBuffer);
     }
 
     VkImageView VulkanEngine::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
@@ -1386,7 +1233,7 @@ namespace Enix {
         samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         samplerInfo.anisotropyEnable = VK_TRUE;
         VkPhysicalDeviceProperties properties{};
-        vkGetPhysicalDeviceProperties(_physicalDevice, &properties);
+        vkGetPhysicalDeviceProperties(_device.physicalDevice(), &properties);
         samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
         samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
         samplerInfo.unnormalizedCoordinates = VK_FALSE;
@@ -1406,7 +1253,7 @@ namespace Enix {
                                                VkFormatFeatureFlags features) {
         for (VkFormat format: candidates) {
             VkFormatProperties props;
-            vkGetPhysicalDeviceFormatProperties(_physicalDevice, format, &props);
+            vkGetPhysicalDeviceFormatProperties(_device.physicalDevice(), format, &props);
             if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
                 return format;
             } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
@@ -1448,14 +1295,14 @@ namespace Enix {
 //        setupDebugMessenger();
         // createSurface();
 //        _window.createSurface(_instance.instance(), _surface);
-        pickPhysicalDevice();
-        createLogicalDevice();
+//        pickPhysicalDevice();
+//        createLogicalDevice();
         createSwapChain();
         createImageViews();
         createRenderPass();
         createDescriptorSetLayout();
         createGraphicsPipeline();
-        createCommandPool();
+//        createCommandPool();
         createDepthResources();
         createFramebuffers();
         createTextureImage();
@@ -1469,10 +1316,9 @@ namespace Enix {
         createCommandBuffers();
         createSyncObjects();
         // temporary solution, todo: refactor this, move create device to a proper place
-        _enixDevice = std::make_unique<Device>(_device, _physicalDevice, _graphicsQueue, _commandPool);
 //        loadModel();
         _meshAsset = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
-                                                 _workspaceRoot + _texturePath, *_enixDevice);
+                                                 _workspaceRoot + _texturePath, _device);
     }
 
     int VulkanEngine::init() {
@@ -1552,17 +1398,6 @@ namespace Enix {
             vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
             vkDestroyFence(_device, _inFlightFences[i], nullptr);
         }
-
-        vkDestroyCommandPool(_device, _commandPool, nullptr);
-
-        vkDestroyDevice(_device, nullptr);
-
-
-
-
-
-        // glfwDestroyWindow(_window);
-        // glfwTerminate();
 
         _cleanedUp = true;
         return 0;

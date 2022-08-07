@@ -24,20 +24,7 @@
 
 
 namespace Enix {
-    struct QueueFamilyIndices {
-        std::optional<uint32_t> graphicsFamily;
-        std::optional<uint32_t> presentFamily;
 
-        [[nodiscard]] bool isComplete() const {
-            return graphicsFamily.has_value() && presentFamily.has_value();
-        }
-    };
-
-    struct SwapChainSupportDetails {
-        VkSurfaceCapabilitiesKHR capabilities;
-        std::vector<VkSurfaceFormatKHR> formats;
-        std::vector<VkPresentModeKHR> presentModes;
-    };
 
     struct UniformBufferObject {
         alignas(16) glm::mat4 model;
@@ -63,27 +50,33 @@ namespace Enix {
         const bool _enableValidationLayers = true;
 #endif
 
-        Window _window;
-        Instance _instance;
-        WindowSurface _surface;
-        std::unique_ptr<Device> _enixDevice;
-        std::unique_ptr<MeshAsset> _meshAsset;
 
-
-        VkDescriptorPool _descriptorPool;
-        std::vector<VkDescriptorSet> _descriptorSets;
-        VkImageView _textureImageView;
         std::string _workspaceRoot = "../";
         std::string _modelPath = "Models/viking_room.obj";
         std::string _texturePath = "Textures/viking_room.png";
 
+        // Vulkan
+        Window _window;
+        Instance _instance;
+        WindowSurface _surface;
+        Device _device;
+//        std::unique_ptr<Device> _enixDevice;
+        std::unique_ptr<MeshAsset> _meshAsset;
+
+//        VkDevice _device;
+//        VkPhysicalDevice _physicalDevice;
+//        VkQueue _graphicsQueue;
+//        VkQueue _presentQueue;
+
+        VkDescriptorPool _descriptorPool;
+        std::vector<VkDescriptorSet> _descriptorSets;
+        VkImageView _textureImageView;
+
+
 
         bool _cleanedUp = false;
-        VkPhysicalDevice _physicalDevice;
-        VkDevice _device;
-        VkQueue _graphicsQueue;
-//        VkSurfaceKHR _surface;
-        VkQueue _presentQueue;
+
+
         VkSwapchainKHR _swapChain;
         std::vector<VkImage> _swapChainImages;
         VkFormat _swapChainImageFormat;
@@ -94,7 +87,6 @@ namespace Enix {
         VkPipelineLayout _pipelineLayout;
         VkPipeline _graphicsPipeline;
         std::vector<VkFramebuffer> _swapChainFramebuffers;
-        VkCommandPool _commandPool;
         std::vector<VkCommandBuffer> _commandBuffers;
         std::vector<VkSemaphore> _imageAvailableSemaphores;
         std::vector<VkSemaphore> _renderFinishedSemaphores;
@@ -148,7 +140,7 @@ namespace Enix {
 
         void createFramebuffers();
 
-        void createCommandPool();
+//        void createCommandPool();
 
         void createCommandBuffers();
 
