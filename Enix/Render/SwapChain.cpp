@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <array>
 #include "SwapChain.h"
+#include "spdlog/spdlog.h"
 
 namespace Enix {
     void SwapChain::createSwapChain() {
@@ -135,6 +136,8 @@ namespace Enix {
     }
 
     void SwapChain::cleanupSwapChain() {
+        spdlog::debug("cleaning up swap chain");
+
         vkDestroyImageView(_device, _depthImageView, nullptr);
         vkDestroyImage(_device, _depthImage, nullptr);
         vkFreeMemory(_device, _depthImageMemory, nullptr);
@@ -150,9 +153,16 @@ namespace Enix {
     }
 
     void SwapChain::recreateSwapChain() {
+        spdlog::debug("recreate swap chain");
         _window.waitForFocus();
         vkDeviceWaitIdle(_device);
         cleanupSwapChain();
+
+        createSwapChainResources();
+    }
+
+    void SwapChain::createSwapChainResources() {
+        spdlog::debug("creating swap chain resources");
         createSwapChain();
         createImageViews();
         createDepthResources();
@@ -162,12 +172,14 @@ namespace Enix {
     SwapChain::SwapChain(Device &device, WindowSurface &surface, Window &window, RenderPass &renderPass)
             : _device(device), _surface(surface), _window(window), _renderPass(renderPass) {
 
-        createSwapChain();
+        createSwapChainResources();
     }
 
     SwapChain::~SwapChain() {
         cleanupSwapChain();
     }
+
+
 
 
 }

@@ -10,9 +10,9 @@
 
 namespace Enix{
     class RenderPass {
-        VkRenderPass _renderPass;
+        VkRenderPass _renderPass{VK_NULL_HANDLE};
 
-        VkFormat _swapChainImageFormat;
+        VkFormat _swapChainImageFormat = VK_FORMAT_UNDEFINED;
 
         Device& _device;
     public:

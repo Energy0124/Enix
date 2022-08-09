@@ -13,7 +13,7 @@
 #include "Window.h"
 #include "RenderPass.h"
 
-namespace Enix{
+namespace Enix {
     class SwapChain {
         VkSwapchainKHR _swapChain;
         std::vector<VkImage> _swapChainImages;
@@ -26,27 +26,24 @@ namespace Enix{
         VkFormat _swapChainImageFormat;
         VkExtent2D _swapChainExtent;
 
-        Device& _device;
-        WindowSurface& _surface;
-        Window& _window;
-        RenderPass& _renderPass;
+        Device &_device;
+        WindowSurface &_surface;
+        Window &_window;
+        RenderPass &_renderPass;
     public:
         SwapChain(Device &device, WindowSurface &surface, Window &window, RenderPass &renderPass);
 
         virtual ~SwapChain();
 
         void recreateSwapChain();
+
     private:
         void createSwapChain();
 
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 
-
-
-
         void cleanupSwapChain();
-
 
         void createDepthResources();
 
@@ -54,6 +51,44 @@ namespace Enix{
 
         void createImageViews();
 
+        void createSwapChainResources();
+
+    public:
+        [[nodiscard]] VkSwapchainKHR swapChain() const {
+            return _swapChain;
+        }
+
+        [[nodiscard]] const std::vector<VkImage> &swapChainImages() const {
+            return _swapChainImages;
+        }
+
+        [[nodiscard]] const std::vector<VkImageView> &swapChainImageViews() const {
+            return _swapChainImageViews;
+        }
+
+        [[nodiscard]] const std::vector<VkFramebuffer> &swapChainFramebuffers() const {
+            return _swapChainFramebuffers;
+        }
+
+        [[nodiscard]] VkImage depthImage() const {
+            return _depthImage;
+        }
+
+        [[nodiscard]] VkDeviceMemory depthImageMemory() const {
+            return _depthImageMemory;
+        }
+
+        [[nodiscard]] VkImageView depthImageView() const {
+            return _depthImageView;
+        }
+
+        [[nodiscard]] VkFormat swapChainImageFormat() const {
+            return _swapChainImageFormat;
+        }
+
+        [[nodiscard]] const VkExtent2D &swapChainExtent() const {
+            return _swapChainExtent;
+        }
     };
 
 }
