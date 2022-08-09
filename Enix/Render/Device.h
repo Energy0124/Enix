@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <vulkan/vulkan.h>
+#include "GLFW/glfw3.h"
 
 
 namespace Enix {
@@ -47,7 +48,6 @@ namespace Enix {
 
         void createLogicalDevice();
 
-        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
         bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
@@ -83,6 +83,26 @@ namespace Enix {
         [[nodiscard]] VkQueue presentQueue() const { return _presentQueue; }
         [[nodiscard]] VkCommandPool commandPool() const { return _commandPool; }
 
+
+        void createImage(int texWidth, int texHeight, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+                         VkMemoryPropertyFlags properties, VkImage &image, VkDeviceMemory &imageMemory);
+
+        VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+
+        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
+        VkFormat findDepthFormat();
+
+        VkFormat
+        findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
+                            VkFormatFeatureFlags features);
+        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+
+        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
+
+        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
+
+        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow *window);
 
     };
 }

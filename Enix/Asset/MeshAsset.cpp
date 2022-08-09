@@ -4,6 +4,7 @@
 
 #include "MeshAsset.h"
 #include "tiny_obj_loader.h"
+#include "stb_image.h"
 
 #include <utility>
 
@@ -62,7 +63,13 @@ namespace Enix {
     }
 
     void MeshAsset::loadTexture() {
-        // todo: implement this
+        int texWidth, texHeight, texChannels;
+        std::string filename = _texturePath;
+        stbi_uc *pixels = stbi_load(filename.data(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        VkDeviceSize imageSize = texWidth * texHeight * 4;
 
+        if (!pixels) {
+            throw std::runtime_error("failed to load texture image!");
+        }
     }
 } // Enix

@@ -5,37 +5,30 @@
 
 #include "GLFW/glfw3.h"
 
-namespace Enix
-{
-    Window::Window()
-    {
+namespace Enix {
+    Window::Window() {
         initWindow();
     }
 
-    Window::~Window()
-    {
+    Window::~Window() {
         glfwDestroyWindow(_window);
         glfwTerminate();
     }
 
 
-    void Window::glfwErrorCallback(int error, const char* description)
-    {
+    void Window::glfwErrorCallback(int error, const char *description) {
         std::cerr << "GLFW Error " << error << ": " << description << std::endl;
     }
 
-    void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height)
-    {
-        auto app = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+    void Window::framebufferResizeCallback(GLFWwindow *window, int width, int height) {
+        auto app = reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
         app->_framebufferResized = true;
     }
 
-    void Window::initWindow()
-    {
+    void Window::initWindow() {
         // Setup GLFW window
         glfwSetErrorCallback(glfwErrorCallback);
-        if (!glfwInit())
-        {
+        if (!glfwInit()) {
             throw std::runtime_error("Failed to initialize GLFW");
         }
 
@@ -43,5 +36,14 @@ namespace Enix
         _window = glfwCreateWindow(1280, 720, "Enix Engine", nullptr, nullptr);
         glfwSetWindowUserPointer(_window, this);
         glfwSetFramebufferSizeCallback(_window, framebufferResizeCallback);
+    }
+
+    void Window::waitForFocus() {
+        int width = 0, height = 0;
+        glfwGetFramebufferSize(_window, &width, &height);
+        while (width == 0 || height == 0) {
+            glfwGetFramebufferSize(_window, &width, &height);
+            glfwWaitEvents();
+        }
     }
 }

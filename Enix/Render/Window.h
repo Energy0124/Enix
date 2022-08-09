@@ -32,5 +32,6 @@ namespace Enix
         static void glfwErrorCallback(int error, const char* description);
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
         void initWindow();
+        void waitForFocus();
     };
 }
