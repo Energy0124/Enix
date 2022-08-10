@@ -22,6 +22,7 @@
 #include "Render/Instance.h"
 #include "Render/WindowSurface.h"
 #include "Render/SwapChain.h"
+#include "Render/GraphicsPipeline.h"
 
 
 namespace Enix {
@@ -32,9 +33,7 @@ namespace Enix {
         alignas(16) glm::mat4 view;
         alignas(16) glm::mat4 proj;
     };
-    struct MeshPushConstant {
-        alignas(16) glm::mat4 modelMatrix{1.f};
-    };
+
 
     class VulkanEngine : public Engine {
     private:
@@ -63,6 +62,7 @@ namespace Enix {
         Device _device;
         RenderPass _renderPass;
         SwapChain _swapChain;
+        GraphicsPipeline _graphicsPipeline;
 
 //        std::unique_ptr<Device> _enixDevice;
         std::unique_ptr<MeshAsset> _meshAsset;
@@ -93,9 +93,9 @@ namespace Enix {
 //        VkImageView _depthImageView;
 
 
-        VkDescriptorSetLayout _descriptorSetLayout;
-        VkPipelineLayout _pipelineLayout;
-        VkPipeline _graphicsPipeline;
+//        VkDescriptorSetLayout _descriptorSetLayout;
+//        VkPipelineLayout _pipelineLayout;
+//        VkPipeline _graphicsPipeline;
         std::vector<VkCommandBuffer> _commandBuffers;
         std::vector<VkSemaphore> _imageAvailableSemaphores;
         std::vector<VkSemaphore> _renderFinishedSemaphores;
@@ -120,10 +120,6 @@ namespace Enix {
         QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 
-        VkShaderModule createShaderModule(const std::vector<char> &code);
-
-        void createGraphicsPipeline();
-
         void createCommandBuffers();
 
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
@@ -138,10 +134,6 @@ namespace Enix {
 
         void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
-        void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-
-        void createDescriptorSetLayout();
-
         void createUniformBuffers();
 
         void createDescriptorPool();
@@ -155,8 +147,6 @@ namespace Enix {
         void createTextureSampler();
 
         void initVulkan();
-
-        static std::vector<char> readFile(const std::string &filename);
 
         void initImgui();
 
