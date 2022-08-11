@@ -20,9 +20,11 @@ namespace Enix
         std::vector<uint32_t> _indices;
         VkBuffer _indexBuffer;
         VkDeviceMemory _indexBufferMemory;
+
+        void releaseResources() const;
     public:
         Model(const Device& device, std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices);
-        void releaseResources() const;
+
         ~Model();
         Model(const Model& other) = delete;
         Model& operator=(const Model& other) = delete;

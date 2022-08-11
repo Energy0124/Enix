@@ -64,7 +64,6 @@ namespace Enix {
         SwapChain _swapChain;
         GraphicsPipeline _graphicsPipeline;
 
-//        std::unique_ptr<Device> _enixDevice;
         std::unique_ptr<MeshAsset> _meshAsset;
 
 //        VkDevice _device;
@@ -74,7 +73,7 @@ namespace Enix {
 
         VkDescriptorPool _descriptorPool;
         std::vector<VkDescriptorSet> _descriptorSets;
-        VkImageView _textureImageView;
+//        VkImageView _textureImageView;
 
 
 
@@ -104,9 +103,9 @@ namespace Enix {
 //        bool _framebufferResized = false;
         std::vector<VkBuffer> _uniformBuffers;
         std::vector<VkDeviceMemory> _uniformBuffersMemory;
-        VkImage _textureImage;
-        VkDeviceMemory _textureImageMemory;
-        VkSampler _textureSampler;
+//        VkImage _textureImage;
+//        VkDeviceMemory _textureImageMemory;
+
         ImGuiIO *_imguiIo;
         VkDescriptorPool _imguiDescriptorPool;
 
@@ -139,12 +138,6 @@ namespace Enix {
         void createDescriptorPool();
 
         void createDescriptorSets();
-
-        void createTextureImage();
-
-        void createTextureImageView();
-
-        void createTextureSampler();
 
         void initVulkan();
 

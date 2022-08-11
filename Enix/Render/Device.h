@@ -60,6 +60,9 @@ namespace Enix {
         explicit Device(bool enableValidationLayers, VkInstance &instance, VkSurfaceKHR &surface);
 
         ~Device();
+        Device(const Device &) = delete;
+        Device &operator=(const Device &) = delete;
+
 
         [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 

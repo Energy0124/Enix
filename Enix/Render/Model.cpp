@@ -1,11 +1,10 @@
 ﻿#include "Model.h"
+#include "spdlog/spdlog.h"
 
 #include <stdexcept>
 
-namespace Enix
-{
-    void Model::createVertexBuffers()
-    {
+namespace Enix {
+    void Model::createVertexBuffers() {
         VkDeviceSize bufferSize = sizeof(_vertices[0]) * _vertices.size();
 
         VkBuffer stagingBuffer;
@@ -14,9 +13,9 @@ namespace Enix
                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
                              stagingBufferMemory);
 
-        void* data;
+        void *data;
         vkMapMemory(_device.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, _vertices.data(), (size_t)bufferSize);
+        memcpy(data, _vertices.data(), (size_t) bufferSize);
         vkUnmapMemory(_device.device(), stagingBufferMemory);
 
         _device.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
@@ -29,8 +28,7 @@ namespace Enix
         vkFreeMemory(_device.device(), stagingBufferMemory, nullptr);
     }
 
-    void Model::createIndexBuffer()
-    {
+    void Model::createIndexBuffer() {
         VkDeviceSize bufferSize = sizeof(_indices[0]) * _indices.size();
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
@@ -38,9 +36,9 @@ namespace Enix
                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
                              stagingBufferMemory);
 
-        void* data;
+        void *data;
         vkMapMemory(_device.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, _indices.data(), (size_t)bufferSize);
+        memcpy(data, _indices.data(), (size_t) bufferSize);
         vkUnmapMemory(_device.device(), stagingBufferMemory);
 
         _device.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
@@ -53,9 +51,10 @@ namespace Enix
         vkFreeMemory(_device.device(), stagingBufferMemory, nullptr);
     }
 
-    Model::Model(const Device& device, std::vector<Vertex>&& vertices, std::vector<uint32_t>&& indices): _device(device),
-        _vertices(vertices), _indices(indices)
-    {
+    Model::Model(const Device &device, std::vector<Vertex> &&vertices, std::vector<uint32_t> &&indices)
+            : _device(device), _vertices(vertices), _indices(indices) {
+
+        spdlog::info("Model::Model");
         createVertexBuffers();
         createIndexBuffer();
     }
@@ -70,10 +69,9 @@ namespace Enix
         vkFreeMemory(_device.device(), _indexBufferMemory, nullptr);
     }
 
-    Model::~Model()
-    {
-        // todo: fix this later, we should use raii here
-        // releaseResources();
+    Model::~Model() {
+        spdlog::info("Model::~Model()");
+        releaseResources();
     }
 
     void Model::bind(VkCommandBuffer commandBuffer) const {

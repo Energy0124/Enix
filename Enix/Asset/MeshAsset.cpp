@@ -5,20 +5,25 @@
 #include "MeshAsset.h"
 #include "tiny_obj_loader.h"
 #include "stb_image.h"
+#include "TextureAsset.h"
+#include "spdlog/spdlog.h"
 
 #include <utility>
 
 namespace Enix {
-    MeshAsset::MeshAsset(std::string modelPath, std::string texturePath, const Device &device)
+    MeshAsset::MeshAsset(std::string modelPath, std::string texturePath, Device &device)
             : _modelPath(std::move(modelPath)),
-              _texturePath(std::move(texturePath)) {
+              _texturePath(std::move(texturePath)),
+              _textureAsset(_texturePath) {
         loadModel(device);
-        loadTexture();
+        loadTexture(device);
     }
 
     MeshAsset::~MeshAsset() = default;
 
-    void MeshAsset::loadModel(const Device &device) {
+    void MeshAsset::loadModel(Device &device) {
+        spdlog::info("Loading model: {}", _modelPath);
+
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
@@ -62,14 +67,8 @@ namespace Enix {
         _model = std::make_unique<Model>(device, std::move(vertices), std::move(indices));
     }
 
-    void MeshAsset::loadTexture() {
-        int texWidth, texHeight, texChannels;
-        std::string filename = _texturePath;
-        stbi_uc *pixels = stbi_load(filename.data(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-        VkDeviceSize imageSize = texWidth * texHeight * 4;
+    void MeshAsset::loadTexture(Device &device) {
 
-        if (!pixels) {
-            throw std::runtime_error("failed to load texture image!");
-        }
+        _texture = std::make_unique<Texture>(device, _textureAsset);
     }
 } // Enix

@@ -81,9 +81,9 @@ void Instance::createVkInstance() {
     std::vector<VkExtensionProperties> extensions(extensionCount);
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
-    std::cout << "available extensions:\n";
+    spdlog::info("available extensions:");
     for (const auto &extension: extensions) {
-        std::cout << '\t' << extension.extensionName << '\n';
+        spdlog::info("\t{}", extension.extensionName);
     }
 }
 
