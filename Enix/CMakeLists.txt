@@ -19,7 +19,7 @@ add_executable(Enix
         Asset/MeshAsset.cpp Asset/MeshAsset.h
         Render/Instance.cpp Render/Instance.h
         Render/WindowSurface.cpp Render/WindowSurface.h
-        Render/SwapChain.cpp Render/SwapChain.h Render/RenderPass.cpp Render/RenderPass.h Render/Image.cpp Render/Image.h Render/VulkanUtility.h Render/GraphicsPipeline.cpp Render/GraphicsPipeline.h Render/Texture.cpp Render/Texture.h Asset/TextureAsset.cpp Asset/TextureAsset.h)
+        Render/SwapChain.cpp Render/SwapChain.h Render/RenderPass.cpp Render/RenderPass.h Render/Image.cpp Render/Image.h Render/VulkanUtility.h Render/GraphicsPipeline.cpp Render/GraphicsPipeline.h Render/Texture.cpp Render/Texture.h Asset/TextureAsset.cpp Asset/TextureAsset.h Render/Renderer.cpp Render/Renderer.h)
 
 
 set_property(TARGET Enix PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:Enix>)
