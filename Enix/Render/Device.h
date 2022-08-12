@@ -51,9 +51,9 @@ namespace Enix {
 
         bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
-        bool isDeviceSuitable(VkPhysicalDevice device);
+        bool isDeviceSuitable(VkPhysicalDevice physicalDevice);
 
-        QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+
 
         void createCommandPool();
     public:
@@ -63,6 +63,7 @@ namespace Enix {
         Device(const Device &) = delete;
         Device &operator=(const Device &) = delete;
 
+        [[nodiscard]] QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice);
 
         [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 

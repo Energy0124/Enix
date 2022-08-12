@@ -113,21 +113,21 @@ namespace Enix {
         vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer);
     }
 
-    QueueFamilyIndices Device::findQueueFamilies(VkPhysicalDevice device) {
+    QueueFamilyIndices Device::findQueueFamilies(VkPhysicalDevice physicalDevice) {
         QueueFamilyIndices indices;
 
         uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
 
         std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
         int i = 0;
         for (const auto &queueFamily: queueFamilies) {
             if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 indices.graphicsFamily = i;
             }
             VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, _surface, &presentSupport);
             if (presentSupport) {
                 indices.presentFamily = i;
             }
@@ -140,19 +140,19 @@ namespace Enix {
         return indices;
     }
 
-    bool Device::isDeviceSuitable(VkPhysicalDevice device) {
-        QueueFamilyIndices indices = findQueueFamilies(device);
+    bool Device::isDeviceSuitable(VkPhysicalDevice physicalDevice) {
+        QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
-        bool extensionsSupported = checkDeviceExtensionSupport(device);
+        bool extensionsSupported = checkDeviceExtensionSupport(physicalDevice);
 
         bool swapChainAdequate = false;
         if (extensionsSupported) {
-            SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+            SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
             swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
         }
 
         VkPhysicalDeviceFeatures supportedFeatures;
-        vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+        vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);
 
         return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
     }

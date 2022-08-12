@@ -40,9 +40,6 @@ namespace Enix {
     private:
         void createSwapChain();
 
-        QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-
-
         void cleanupSwapChain();
 
         void createDepthResources();

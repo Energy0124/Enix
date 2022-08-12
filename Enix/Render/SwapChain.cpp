@@ -35,7 +35,7 @@ namespace Enix {
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices = findQueueFamilies(_device.physicalDevice());
+        QueueFamilyIndices indices = _device.findQueueFamilies(_device.physicalDevice());
         uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
         if (indices.graphicsFamily != indices.presentFamily) {
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -61,34 +61,6 @@ namespace Enix {
 
         _swapChainImageFormat = surfaceFormat.format;
         _swapChainExtent = extent;
-    }
-
-
-    QueueFamilyIndices SwapChain::findQueueFamilies(VkPhysicalDevice device) {
-        QueueFamilyIndices indices;
-
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-
-        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-        int i = 0;
-        for (const auto &queueFamily: queueFamilies) {
-            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                indices.graphicsFamily = i;
-            }
-            VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface.surface(), &presentSupport);
-            if (presentSupport) {
-                indices.presentFamily = i;
-            }
-            if (indices.isComplete()) {
-                break;
-            }
-            i++;
-        }
-
-        return indices;
     }
 
 

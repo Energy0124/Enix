@@ -108,7 +108,7 @@ namespace Enix {
         }
 
 
-        QueueFamilyIndices indices = findQueueFamilies(_device.physicalDevice());
+        QueueFamilyIndices indices = _device.findQueueFamilies(_device.physicalDevice());
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForVulkan(&_window.window(), true);
@@ -300,34 +300,6 @@ namespace Enix {
             ImGui::RenderPlatformWindowsDefault();
         }
         drawFrame();
-    }
-
-
-    QueueFamilyIndices VulkanEngine::findQueueFamilies(VkPhysicalDevice device) {
-        QueueFamilyIndices indices;
-
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-
-        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-        int i = 0;
-        for (const auto &queueFamily: queueFamilies) {
-            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                indices.graphicsFamily = i;
-            }
-            VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, _surface.surface(), &presentSupport);
-            if (presentSupport) {
-                indices.presentFamily = i;
-            }
-            if (indices.isComplete()) {
-                break;
-            }
-            i++;
-        }
-
-        return indices;
     }
 
     void VulkanEngine::createCommandBuffers() {
@@ -595,14 +567,6 @@ namespace Enix {
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
 
-//        cleanupSwapChain();
-
-//        vkDestroySampler(_device, _textureSampler, nullptr);
-//        vkDestroyImageView(_device, _textureImageView, nullptr);
-//
-//        vkDestroyImage(_device, _textureImage, nullptr);
-//        vkFreeMemory(_device, _textureImageMemory, nullptr);
-
         for (size_t i = 0; i < _maxFramesInFlight; i++) {
             vkDestroyBuffer(_device, _uniformBuffers[i], nullptr);
             vkFreeMemory(_device, _uniformBuffersMemory[i], nullptr);
@@ -610,14 +574,6 @@ namespace Enix {
 
         vkDestroyDescriptorPool(_device, _imguiDescriptorPool, nullptr);
         vkDestroyDescriptorPool(_device, _descriptorPool, nullptr);
-//        vkDestroyDescriptorSetLayout(_device, _descriptorSetLayout, nullptr);
-
-//        _meshAsset->model().releaseResources();
-
-//        vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
-//        vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
-
-//        vkDestroyRenderPass(_device, _renderPass, nullptr);
 
         for (size_t i = 0; i < _maxFramesInFlight; ++i) {
             vkDestroySemaphore(_device, _imageAvailableSemaphores[i], nullptr);
