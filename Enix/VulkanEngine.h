@@ -125,14 +125,6 @@ namespace Enix {
 
         void createSyncObjects();
 
-        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-
-        void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                          VkBuffer &buffer, VkDeviceMemory &
-        bufferMemory);
-
-        void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-
         void createUniformBuffers();
 
         void createDescriptorPool();
