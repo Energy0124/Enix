@@ -34,6 +34,7 @@
 #include "Renderer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include <stb_image.h>
 
 
@@ -470,38 +471,13 @@ namespace Enix {
     void Renderer::initVulkan() {
 
         // Setup Vulkan
-
-        // create vk instance
-//        createVulkanInstance();
-//        setupDebugMessenger();
-        // createSurface();
-//        _window.createSurface(_instance.instance(), _surface);
-//        pickPhysicalDevice();
-//        createLogicalDevice();
-//        createSwapChain();
-//        createImageViews();
-//        createRenderPass();
-//        createDescriptorSetLayout();
-//        createGraphicsPipeline();
-//        createCommandPool();
-//        createDepthResources();
-//        createFramebuffers();
-//        createTextureImage();
-//        createTextureImageView();
-//        createTextureSampler();
-        // createVertexBuffer();
-        // createIndexBuffer();
-
         _meshAsset = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
                                                  _workspaceRoot + _texturePath, _device);
-
         createUniformBuffers();
         createDescriptorPool();
         createDescriptorSets();
         createCommandBuffers();
         createSyncObjects();
-//        loadModel();
-
     }
 
     void Renderer::init() {
