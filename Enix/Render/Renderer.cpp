@@ -369,6 +369,8 @@ namespace Enix {
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+            // todo: move creation of textureImageView and textureSampler to another class
             imageInfo.imageView = _meshAsset->texture().textureImageView();
             imageInfo.sampler = _meshAsset->texture().textureSampler();
 
@@ -477,8 +479,17 @@ namespace Enix {
     }
 
     void Renderer::initVulkan() {
-
+        //todo: move create render objects to a later stage
+        createRenderObjects();
         // Setup Vulkan
+        createUniformBuffers();
+        createDescriptorPool();
+        createDescriptorSets();
+        createCommandBuffers();
+        createSyncObjects();
+    }
+
+    void Renderer::createRenderObjects() {
         _meshAsset = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
                                                  _workspaceRoot + _texturePath, _device);
         _meshAsset2 = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
@@ -493,11 +504,6 @@ namespace Enix {
                            {0,    0,    0},
                            {1,    1,    1}}));
         _camera->front = {-2.0f, -2.0f, -2.0f};
-        createUniformBuffers();
-        createDescriptorPool();
-        createDescriptorSets();
-        createCommandBuffers();
-        createSyncObjects();
     }
 
     void Renderer::init() {

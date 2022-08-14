@@ -46,7 +46,6 @@ namespace Enix {
     int VulkanEngine::init() {
         spdlog::debug("init engine");
 
-        _renderer.init();
         return 0;
     }
 

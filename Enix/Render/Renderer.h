@@ -128,6 +128,7 @@ namespace Enix {
         void draw();
 
 
+        void createRenderObjects();
     };
 
 } // Enix
