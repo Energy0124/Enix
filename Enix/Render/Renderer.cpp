@@ -32,6 +32,7 @@
 #include "Render/GraphicsPipeline.h"
 #include "VulkanEngine.h"
 #include "Renderer.h"
+#include "Core/MeshActor.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -78,6 +79,8 @@ namespace Enix {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
+
+        updateCamera();
         drawFrame();
     }
 
@@ -124,18 +127,16 @@ namespace Enix {
 
 
     void Renderer::updateUniformBuffer(uint32_t currentImage) {
-        static auto startTime = std::chrono::high_resolution_clock::now();
 
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
         UniformBufferObject ubo{};
-        ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.proj = glm::perspective(glm::radians(45.0f),
-                                    _swapChain.swapChainExtent().width /
-                                    static_cast<float>(_swapChain.swapChainExtent().height), 0.1f, 10.0f);
-        ubo.proj[1][1] *= -1;
+//        ubo.model = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
+//        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+//        ubo.proj = glm::perspective(glm::radians(45.0f),
+//                                    _swapChain.swapChainExtent().width /
+//                                    static_cast<float>(_swapChain.swapChainExtent().height), 0.1f, 10.0f);
+        ubo.view = _camera->viewMatrix();
+        ubo.proj = _camera->projectionMatrix();
 
         void *data;
         vkMapMemory(_device, _uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
@@ -247,11 +248,8 @@ namespace Enix {
 
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline.graphicsPipeline());
 
-        // VkBuffer vertexBuffers[] = {_vertexBuffer};
-        // VkDeviceSize offsets[] = {0};
-        // vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-        // vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
         _meshAsset->model().bind(commandBuffer);
+        _actor->meshAsset()->model().bind(commandBuffer);
 
         VkViewport viewport{};
         viewport.x = 0.0f;
@@ -274,6 +272,9 @@ namespace Enix {
         MeshPushConstant constant{
                 glm::rotate(glm::mat4(1.0f), static_cast<float>(_engine.timeSinceEngineStart()) * glm::radians(90.0f),
                             glm::vec3(0.0f, 0.0f, 1.0f))};
+//        MeshPushConstant constant{
+//                glm::rotate(glm::mat4(1.0f), glm::radians(0.0f),
+//                            glm::vec3(0.0f, 0.0f, 1.0f))};
         //upload the matrix to the GPU via push constant
         vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
                            VK_SHADER_STAGE_VERTEX_BIT, 0,
@@ -281,6 +282,13 @@ namespace Enix {
 
         // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
         _meshAsset->model().draw(commandBuffer);
+
+        MeshPushConstant constant2{_actor->transform.modelMatrix()};
+        //upload the matrix to the GPU via push constant
+        vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
+                           VK_SHADER_STAGE_VERTEX_BIT, 0,
+                           sizeof(MeshPushConstant), &constant2);
+        _actor->meshAsset()->model().draw(commandBuffer);
 
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), _commandBuffers[_currentFrame]);
 
@@ -473,6 +481,18 @@ namespace Enix {
         // Setup Vulkan
         _meshAsset = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
                                                  _workspaceRoot + _texturePath, _device);
+        _meshAsset2 = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
+                                                  _workspaceRoot + _texturePath, _device);
+        Transform t = {{1, 0, 0},
+                       {0, 0, 0},
+                       {1, 1, 1}};
+        _actor = std::make_unique<MeshActor>(t, _meshAsset2);
+
+        _camera = std::make_unique<Camera>(
+                Transform({{2.0f, 2.0f, 2.0f},
+                           {0,    0,    0},
+                           {1,    1,    1}}));
+        _camera->front = {-2.0f, -2.0f, -2.0f};
         createUniformBuffers();
         createDescriptorPool();
         createDescriptorSets();
@@ -509,6 +529,10 @@ namespace Enix {
             vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
             vkDestroyFence(_device, _inFlightFences[i], nullptr);
         }
+    }
+
+    void Renderer::updateCamera() {
+        _camera->aspect = _swapChain.swapChainExtent().width / static_cast<float>(_swapChain.swapChainExtent().height);
     }
 
 } // Enix

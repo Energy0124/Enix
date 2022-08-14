@@ -33,6 +33,9 @@ namespace Enix{
 #include "Render/WindowSurface.h"
 #include "Render/SwapChain.h"
 #include "Render/GraphicsPipeline.h"
+#include "Core/Actor.h"
+#include "Core/Camera.h"
+#include "Core/MeshActor.h"
 
 
 namespace Enix {
@@ -66,7 +69,10 @@ namespace Enix {
         SwapChain _swapChain;
         GraphicsPipeline _graphicsPipeline;
 
-        std::unique_ptr<MeshAsset> _meshAsset;
+        std::shared_ptr<MeshAsset> _meshAsset;
+        std::shared_ptr<MeshAsset> _meshAsset2;
+        std::shared_ptr<MeshActor> _actor;
+        std::shared_ptr<Camera> _camera;
 
         VkDescriptorPool _descriptorPool;
         VkDescriptorPool _imguiDescriptorPool;
@@ -111,6 +117,7 @@ namespace Enix {
 
         void drawUI();
 
+        void updateCamera();
     public:
         Renderer(VulkanEngine &engine);
 
@@ -119,6 +126,8 @@ namespace Enix {
         void init();
 
         void draw();
+
+
     };
 
 } // Enix
