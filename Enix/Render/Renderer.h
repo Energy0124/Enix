@@ -118,6 +118,7 @@ namespace Enix {
         void drawUI();
 
         void updateCamera();
+        void createRenderObjects();
     public:
         Renderer(VulkanEngine &engine);
 
@@ -127,8 +128,10 @@ namespace Enix {
 
         void draw();
 
+        std::shared_ptr<Camera> &camera() {
+            return _camera;
+        }
 
-        void createRenderObjects();
     };
 
 } // Enix

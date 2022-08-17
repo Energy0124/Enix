@@ -85,44 +85,8 @@ namespace Enix {
     }
 
     void Renderer::drawUI() {
-        ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
-        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspaceFlags);
-        if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("New")) {
-                }
-                if (ImGui::MenuItem("Open", "Ctrl+O")) {
-                }
-                if (ImGui::MenuItem("Save", "Ctrl+S")) {
-                }
-                if (ImGui::MenuItem("Save As..")) {
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Edit")) {
-                if (ImGui::MenuItem("Undo", "CTRL+Z")) {
-                }
-                if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {
-                } // Disabled item
-                ImGui::Separator();
-                if (ImGui::MenuItem("Cut", "CTRL+X")) {
-                }
-                if (ImGui::MenuItem("Copy", "CTRL+C")) {
-                }
-                if (ImGui::MenuItem("Paste", "CTRL+V")) {
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-        }
-        ImGui::ShowDemoWindow();
-        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
-        ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
-
-        float fps = ImGui::GetIO().Framerate;
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / fps, fps);
-        ImGui::End();
+        _engine.drawUI();
     }
 
 
@@ -335,9 +299,9 @@ namespace Enix {
     void Renderer::createDescriptorPool() {
         std::array<VkDescriptorPoolSize, 2> poolSizes{};
         poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        poolSizes[0].descriptorCount = static_cast<uint32_t>(_maxFramesInFlight);
+        poolSizes[0].descriptorCount = static_cast<uint32_t>(_maxFramesInFlight) * 256;
         poolSizes[1].type = VK_DESCRIPTOR_TYPE_SAMPLER;
-        poolSizes[1].descriptorCount = static_cast<uint32_t>(_maxFramesInFlight);
+        poolSizes[1].descriptorCount = static_cast<uint32_t>(_maxFramesInFlight) * 256;
 
         VkDescriptorPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -479,14 +443,16 @@ namespace Enix {
     }
 
     void Renderer::initVulkan() {
-        //todo: move create render objects to a later stage
-        createRenderObjects();
+
         // Setup Vulkan
         createUniformBuffers();
         createDescriptorPool();
-        createDescriptorSets();
         createCommandBuffers();
         createSyncObjects();
+
+        //todo: move create render objects to a later stage
+        createRenderObjects();
+        createDescriptorSets();
     }
 
     void Renderer::createRenderObjects() {

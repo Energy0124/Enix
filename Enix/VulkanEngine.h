@@ -9,6 +9,7 @@
 
 #include "Engine.h"
 #include "Render/Renderer.h"
+#include "UI/AppUI.h"
 
 
 namespace Enix {
@@ -26,6 +27,8 @@ namespace Enix {
         double _deltaTime;
         std::chrono::time_point <std::chrono::steady_clock> _engineStartTimePoint;
         double _timeSinceEngineStart;
+
+        AppUI _appUI;
 
 
     public:
@@ -47,5 +50,9 @@ namespace Enix {
         [[nodiscard]] double timeSinceEngineStart() const;
 
         Window &window();
+
+        Renderer &renderer(){
+            return _renderer;
+        }
     };
 }
