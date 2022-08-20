@@ -233,26 +233,36 @@ namespace Enix {
                                 1,
                                 &_descriptorSets[_currentFrame], 0, nullptr);
 
-        MeshPushConstant constant{
-                glm::rotate(glm::mat4(1.0f), static_cast<float>(_engine.timeSinceEngineStart()) * glm::radians(90.0f),
-                            glm::vec3(0.0f, 0.0f, 1.0f))};
 //        MeshPushConstant constant{
-//                glm::rotate(glm::mat4(1.0f), glm::radians(0.0f),
+//                glm::rotate(glm::mat4(1.0f), static_cast<float>(_engine.timeSinceEngineStart()) * glm::radians(90.0f),
 //                            glm::vec3(0.0f, 0.0f, 1.0f))};
-        //upload the matrix to the GPU via push constant
-        vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
-                           VK_SHADER_STAGE_VERTEX_BIT, 0,
-                           sizeof(MeshPushConstant), &constant);
+////        MeshPushConstant constant{
+////                glm::rotate(glm::mat4(1.0f), glm::radians(0.0f),
+////                            glm::vec3(0.0f, 0.0f, 1.0f))};
+//        //upload the matrix to the GPU via push constant
+//        vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
+//                           VK_SHADER_STAGE_VERTEX_BIT, 0,
+//                           sizeof(MeshPushConstant), &constant);
 
         // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
-        _meshAsset->model().draw(commandBuffer);
+//        _meshAsset->model().draw(commandBuffer);
 
-        MeshPushConstant constant2{_actor->transform.modelMatrix()};
-        //upload the matrix to the GPU via push constant
-        vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
-                           VK_SHADER_STAGE_VERTEX_BIT, 0,
-                           sizeof(MeshPushConstant), &constant2);
-        _actor->meshAsset()->model().draw(commandBuffer);
+//        MeshPushConstant constant2{_actor->transform.modelMatrix()};
+//        //upload the matrix to the GPU via push constant
+//        vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
+//                           VK_SHADER_STAGE_VERTEX_BIT, 0,
+//                           sizeof(MeshPushConstant), &constant2);
+//        _actor->meshAsset()->model().draw(commandBuffer);
+
+        for (auto& actor: _meshActors) {
+            MeshPushConstant constant{actor->transform.modelMatrix()};
+            //upload the matrix to the GPU via push constant
+            vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
+                               VK_SHADER_STAGE_VERTEX_BIT, 0,
+                               sizeof(MeshPushConstant), &constant);
+            actor->meshAsset()->model().draw(commandBuffer);
+        }
+
 
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), _commandBuffers[_currentFrame]);
 
@@ -460,11 +470,14 @@ namespace Enix {
                                                  _workspaceRoot + _texturePath, _device);
         _meshAsset2 = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
                                                   _workspaceRoot + _texturePath, _device);
-        Transform t = {{1, 0, 0},
+        Transform t = {{0, 0, 0},
                        {0, 0, 0},
                        {1, 1, 1}};
-        _actor = std::make_unique<MeshActor>(t, _meshAsset2);
-
+        _actor = std::make_unique<MeshActor>("actor 1",t, _meshAsset);;
+        _meshActors.push_back(_actor);
+        _meshActors.push_back(std::make_unique<MeshActor>("actor 2",Transform{{5, 0, 0},
+                                                                    {0, 0, 0},
+                                                                    {1, 1, 1}}, _meshAsset));
         _camera = std::make_unique<Camera>(
                 Transform({{2.0f, 2.0f, 2.0f},
                            {0,    0,    0},

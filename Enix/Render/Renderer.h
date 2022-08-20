@@ -5,7 +5,7 @@
 #pragma once
 
 // forward declarations
-namespace Enix{
+namespace Enix {
     class VulkanEngine;
 }
 
@@ -72,8 +72,9 @@ namespace Enix {
         std::shared_ptr<MeshAsset> _meshAsset;
         std::shared_ptr<MeshAsset> _meshAsset2;
         std::shared_ptr<MeshActor> _actor;
-        std::shared_ptr<Camera> _camera;
 
+        std::shared_ptr<Camera> _camera;
+        std::vector<std::shared_ptr<MeshActor>> _meshActors{};
         VkDescriptorPool _descriptorPool;
         VkDescriptorPool _imguiDescriptorPool;
         std::vector<VkDescriptorSet> _descriptorSets;
@@ -118,7 +119,9 @@ namespace Enix {
         void drawUI();
 
         void updateCamera();
+
         void createRenderObjects();
+
     public:
         Renderer(VulkanEngine &engine);
 
@@ -130,6 +133,10 @@ namespace Enix {
 
         std::shared_ptr<Camera> &camera() {
             return _camera;
+        }
+
+        std::vector<std::shared_ptr<MeshActor>> &meshActors() {
+            return _meshActors;
         }
 
     };

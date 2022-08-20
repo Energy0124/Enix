@@ -16,6 +16,12 @@ namespace Enix {
         glm::vec3 scale{1.0f, 1.0f, 1.0f};
 
         glm::mat4 modelMatrix();
+
+        glm::mat4 rotationMatrix();
+
+        glm::mat4 translationMatrix();
+
+        glm::mat4 scaleMatrix();
     };
 
 } // Enix

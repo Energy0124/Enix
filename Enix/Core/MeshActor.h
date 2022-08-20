@@ -10,7 +10,7 @@ namespace Enix {
 
     class MeshActor : public Actor {
     public:
-        MeshActor(Transform transform, std::shared_ptr<MeshAsset> meshAsset);
+        MeshActor(std::string name, Transform transform, std::shared_ptr<MeshAsset> meshAsset);
 
     public:
         [[nodiscard]] std::shared_ptr<MeshAsset> &meshAsset() {

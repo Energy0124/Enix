@@ -7,7 +7,7 @@
 #include <utility>
 
 namespace Enix {
-    MeshActor::MeshActor(Enix::Transform transform, std::shared_ptr<MeshAsset> meshAsset) : Actor(
-            transform), _meshAsset(std::move(meshAsset)) {}
+    MeshActor::MeshActor(std::string name, Transform transform, std::shared_ptr<MeshAsset> meshAsset) : Actor(std::move(name),
+                                                                                                              transform), _meshAsset(std::move(meshAsset)) {}
 }
 

@@ -5,13 +5,19 @@
 #include "Camera.h"
 
 namespace Enix {
-    Camera::Camera(const Transform &transform) : Actor(transform) {
+    Camera::Camera(const Transform &transform) : Actor(std::string(), transform) {
 
 
     }
 
-    glm::mat4 Camera::viewMatrix() const {
-        return glm::lookAt(transform.position, transform.position + front, up);
+    glm::mat4 Camera::viewMatrix() {
+//        return glm::inverse(transform.modelMatrix());
+        front = glm::normalize(front);
+        up = glm::normalize(up);
+        auto view = glm::lookAt(transform.position, transform.position + front, up);
+        // the resulted coordinate system is same as blender, right-handed, z is up, x is right, y is forward
+
+        return view;
 
     }
 

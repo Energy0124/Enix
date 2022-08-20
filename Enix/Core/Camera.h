@@ -8,12 +8,12 @@
 
 namespace Enix {
 
-    class Camera : Actor {
+    class Camera : public Actor {
 
     public:
         explicit Camera(const Transform &transform);
 
-        glm::mat4 viewMatrix() const;
+        glm::mat4 viewMatrix();
         glm::mat4 projectionMatrix() const;
         glm::vec3 front{1.0f, 0.0f, 0.0f};
         glm::vec3 right{0.0f, 1.0f, 0.0f};

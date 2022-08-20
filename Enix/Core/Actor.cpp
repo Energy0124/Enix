@@ -8,6 +8,6 @@
 #include <utility>
 
 namespace Enix {
-    Actor::Actor(Transform transform)
-            : transform(transform) {}
+    Actor::Actor(std::string name, Transform transform)
+            : transform(transform), name(std::move(name)) {}
 } // Enix

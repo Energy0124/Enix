@@ -23,6 +23,10 @@ namespace Enix {
         bool _showDemo;
 
         VulkanEngine& _engine;
+
+        void CameraControl();
+
+        void ActorControls();
     };
 
 } // Enix
