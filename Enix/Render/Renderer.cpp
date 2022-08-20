@@ -203,7 +203,7 @@ namespace Enix {
         renderPassInfo.renderArea.extent = _swapChain.swapChainExtent();
 
         std::array<VkClearValue, 2> clearValues = {};
-        clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        clearValues[0].color = _camera->clearColor;
         clearValues[1].depthStencil = {1.0f, 0};
 
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -212,8 +212,7 @@ namespace Enix {
 
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline.graphicsPipeline());
 
-        _meshAsset->model().bind(commandBuffer);
-        _actor->meshAsset()->model().bind(commandBuffer);
+
 
         VkViewport viewport{};
         viewport.x = 0.0f;
@@ -255,6 +254,7 @@ namespace Enix {
 //        _actor->meshAsset()->model().draw(commandBuffer);
 
         for (auto& actor: _meshActors) {
+            actor->meshAsset()->model().bind(commandBuffer);
             MeshPushConstant constant{actor->transform.modelMatrix()};
             //upload the matrix to the GPU via push constant
             vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
@@ -468,8 +468,8 @@ namespace Enix {
     void Renderer::createRenderObjects() {
         _meshAsset = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
                                                  _workspaceRoot + _texturePath, _device);
-        _meshAsset2 = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
-                                                  _workspaceRoot + _texturePath, _device);
+        _meshAsset2 = std::make_unique<MeshAsset>(_workspaceRoot + _model2Path,
+                                                  _workspaceRoot + _texture2Path, _device);
         Transform t = {{0, 0, 0},
                        {0, 0, 0},
                        {1, 1, 1}};
@@ -478,8 +478,11 @@ namespace Enix {
         _meshActors.push_back(std::make_unique<MeshActor>("actor 2",Transform{{5, 0, 0},
                                                                     {0, 0, 0},
                                                                     {1, 1, 1}}, _meshAsset));
+        _meshActors.push_back(std::make_unique<MeshActor>("actor 3",Transform{{0, 7, 0},
+                                                                    {0, 0, 0},
+                                                                    {1, 1, 1}}, _meshAsset2));
         _camera = std::make_unique<Camera>(
-                Transform({{2.0f, 2.0f, 2.0f},
+                Transform({{5.0f, 10.0f, 5.0f},
                            {0,    0,    0},
                            {1,    1,    1}}));
         _camera->front = {-2.0f, -2.0f, -2.0f};

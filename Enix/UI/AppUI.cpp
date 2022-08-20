@@ -67,15 +67,9 @@ namespace Enix {
             ImGui::DragFloat("aspect", &renderer.camera()->aspect, 0.01f);
             ImGui::DragFloat("near", &renderer.camera()->near, 0.01f);
             ImGui::DragFloat("far", &renderer.camera()->far, 0.01f);
-            ImGui::DragFloat("transform.position.x", &renderer.camera()->transform.position.x, 0.01f);
-            ImGui::DragFloat("transform.position.y", &renderer.camera()->transform.position.y, 0.01f);
-            ImGui::DragFloat("transform.position.z", &renderer.camera()->transform.position.z, 0.01f);
-            ImGui::DragFloat("front.x", &renderer.camera()->front.x, 0.01f);
-            ImGui::DragFloat("front.y", &renderer.camera()->front.y, 0.01f);
-            ImGui::DragFloat("front.z", &renderer.camera()->front.z, 0.01f);
-            ImGui::DragFloat("up.x", &renderer.camera()->up.x, 0.01f);
-            ImGui::DragFloat("up.y", &renderer.camera()->up.y, 0.01f);
-            ImGui::DragFloat("up.z", &renderer.camera()->up.z, 0.01f);
+            ImGui::DragScalarN("position", ImGuiDataType_Float,&renderer.camera()->transform.position, 3, 0.01f);
+            ImGui::DragScalarN("front", ImGuiDataType_Float,&renderer.camera()->front, 3, 0.01f);
+            ImGui::DragScalarN("up", ImGuiDataType_Float,&renderer.camera()->up, 3, 0.01f);
             ImGui::Separator();
             ImGui::TreePop();
         }
@@ -89,15 +83,9 @@ namespace Enix {
                 ImGui::PushID(i);
                 if (ImGui::TreeNode("Actor %s", actor->name.c_str())) {
                     ImGui::Text("transform");
-                    ImGui::DragFloat("position.x", &actor->transform.position.x, 0.01f);
-                    ImGui::DragFloat("position.y", &actor->transform.position.y, 0.01f);
-                    ImGui::DragFloat("position.z", &actor->transform.position.z, 0.01f);
-                    ImGui::DragFloat("rotation.x", &actor->transform.rotation.x, 0.1f);
-                    ImGui::DragFloat("rotation.y", &actor->transform.rotation.y, 0.1f);
-                    ImGui::DragFloat("rotation.z", &actor->transform.rotation.z, 0.1f);
-                    ImGui::DragFloat("scale.x", &actor->transform.scale.x, 0.01f);
-                    ImGui::DragFloat("scale.y", &actor->transform.scale.y, 0.01f);
-                    ImGui::DragFloat("scale.z", &actor->transform.scale.z, 0.01f);
+                    ImGui::DragScalarN("position", ImGuiDataType_Float, &actor->transform.position, 3, 0.01f);
+                    ImGui::DragScalarN("rotation", ImGuiDataType_Float, &actor->transform.rotation, 3, 0.1f);
+                    ImGui::DragScalarN("scale", ImGuiDataType_Float, &actor->transform.scale, 3, 0.1f);
                     ImGui::Separator();
                     ImGui::TreePop();
                 }

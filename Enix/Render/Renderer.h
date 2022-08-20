@@ -57,7 +57,9 @@ namespace Enix {
 
         std::string _workspaceRoot = "../";
         std::string _modelPath = "Models/viking_room.obj";
+        std::string _model2Path = "Models/untitled.obj";
         std::string _texturePath = "Textures/viking_room.png";
+        std::string _texture2Path = "Textures/untitled.png";
 
 
         // Vulkan

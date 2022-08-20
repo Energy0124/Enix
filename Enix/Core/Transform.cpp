@@ -7,7 +7,7 @@
 namespace Enix {
     glm::mat4 Transform::modelMatrix() {
 
-        return scaleMatrix() * rotationMatrix() * translationMatrix();
+        return translationMatrix() * rotationMatrix() * scaleMatrix();
     }
 
     glm::mat4 Transform::rotationMatrix() {
