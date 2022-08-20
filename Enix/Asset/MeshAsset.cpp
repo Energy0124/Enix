@@ -13,10 +13,10 @@
 namespace Enix {
     MeshAsset::MeshAsset(std::string modelPath, std::string texturePath, Device &device)
             : _modelPath(std::move(modelPath)),
-              _texturePath(std::move(texturePath)),
-              _textureAsset(_texturePath) {
+              _texturePath(std::move(texturePath)) //, _textureAsset(_texturePath)
+    {
         loadModel(device);
-        loadTexture(device);
+//        loadTexture(device);
     }
 
     MeshAsset::~MeshAsset() = default;
@@ -67,8 +67,8 @@ namespace Enix {
         _model = std::make_unique<Model>(device, std::move(vertices), std::move(indices));
     }
 
-    void MeshAsset::loadTexture(Device &device) {
-
-        _texture = std::make_unique<Texture>(device, _textureAsset);
-    }
+//    void MeshAsset::loadTexture(Device &device) {
+//
+//        _texture = std::make_unique<Texture>(device, _textureAsset);
+//    }
 } // Enix

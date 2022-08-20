@@ -70,13 +70,11 @@ namespace Enix {
         RenderPass _renderPass;
         SwapChain _swapChain;
         GraphicsPipeline _graphicsPipeline;
+//
+//        std::shared_ptr<MeshAsset> _meshAsset;
+//        std::shared_ptr<MeshAsset> _meshAsset2;
+//        std::shared_ptr<MeshActor> _actor;
 
-        std::shared_ptr<MeshAsset> _meshAsset;
-        std::shared_ptr<MeshAsset> _meshAsset2;
-        std::shared_ptr<MeshActor> _actor;
-
-        std::shared_ptr<Camera> _camera;
-        std::vector<std::shared_ptr<MeshActor>> _meshActors{};
         VkDescriptorPool _descriptorPool;
         VkDescriptorPool _imguiDescriptorPool;
         std::vector<VkDescriptorSet> _descriptorSets;
@@ -89,6 +87,9 @@ namespace Enix {
         std::vector<VkSemaphore> _imageAvailableSemaphores;
         std::vector<VkSemaphore> _renderFinishedSemaphores;
         std::vector<VkFence> _inFlightFences;
+
+        std::shared_ptr<Camera> _camera;
+        std::vector<std::shared_ptr<MeshActor>> _meshActors{};
 
         ImGuiIO *_imguiIo;
 
@@ -123,7 +124,6 @@ namespace Enix {
         void updateCamera();
 
         void createRenderObjects();
-
     public:
         Renderer(VulkanEngine &engine);
 

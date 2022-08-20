@@ -54,7 +54,7 @@ namespace Enix {
     Model::Model(const Device &device, std::vector<Vertex> &&vertices, std::vector<uint32_t> &&indices)
             : _device(device), _vertices(vertices), _indices(indices) {
 
-        spdlog::info("Model::Model");
+        spdlog::info("Creating Model");
         createVertexBuffers();
         createIndexBuffer();
     }

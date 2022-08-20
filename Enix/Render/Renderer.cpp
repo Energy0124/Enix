@@ -213,7 +213,6 @@ namespace Enix {
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline.graphicsPipeline());
 
 
-
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
@@ -253,7 +252,11 @@ namespace Enix {
 //                           sizeof(MeshPushConstant), &constant2);
 //        _actor->meshAsset()->model().draw(commandBuffer);
 
-        for (auto& actor: _meshActors) {
+        for (auto &actor: _meshActors) {
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline.pipelineLayout(),
+                                    1,
+                                    1,
+                                    &actor->material()->descriptorSets()[0], 0, nullptr);
             actor->meshAsset()->model().bind(commandBuffer);
             MeshPushConstant constant{actor->transform.modelMatrix()};
             //upload the matrix to the GPU via push constant
@@ -317,21 +320,22 @@ namespace Enix {
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
         poolInfo.pPoolSizes = poolSizes.data();
-        poolInfo.maxSets = static_cast<uint32_t>(_maxFramesInFlight);
+        poolInfo.maxSets = static_cast<uint32_t>(_maxFramesInFlight) * 256;
         if (vkCreateDescriptorPool(_device, &poolInfo, nullptr, &_descriptorPool) != VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor pool!");
         }
     }
 
     void Renderer::createDescriptorSets() {
-        std::vector<VkDescriptorSetLayout> layouts(_maxFramesInFlight, _graphicsPipeline.descriptorSetLayout());
+        std::vector<VkDescriptorSetLayout> layouts(_maxFramesInFlight, _graphicsPipeline.descriptorSetLayouts()[0]);
         VkDescriptorSetAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         allocInfo.descriptorPool = _descriptorPool;
         allocInfo.descriptorSetCount = static_cast<uint32_t>(_maxFramesInFlight);
         allocInfo.pSetLayouts = layouts.data();
         _descriptorSets.resize(_maxFramesInFlight);
-        if (vkAllocateDescriptorSets(_device, &allocInfo, _descriptorSets.data()) != VK_SUCCESS) {
+        VkResult result = vkAllocateDescriptorSets(_device, &allocInfo, _descriptorSets.data());
+        if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
 
@@ -341,14 +345,14 @@ namespace Enix {
             bufferInfo.offset = 0;
             bufferInfo.range = sizeof(UniformBufferObject);
 
-            VkDescriptorImageInfo imageInfo{};
-            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+//            VkDescriptorImageInfo imageInfo{};
+//            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+//
+//            // todo: move creation of textureImageView and textureSampler to another class
+//            imageInfo.imageView = _meshAsset->texture().textureImageView();
+//            imageInfo.sampler = _meshAsset->texture().textureSampler();
 
-            // todo: move creation of textureImageView and textureSampler to another class
-            imageInfo.imageView = _meshAsset->texture().textureImageView();
-            imageInfo.sampler = _meshAsset->texture().textureSampler();
-
-            std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+            std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
             descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[0].dstSet = _descriptorSets[i];
             descriptorWrites[0].dstBinding = 0;
@@ -359,13 +363,13 @@ namespace Enix {
             descriptorWrites[0].pImageInfo = nullptr; // Optional
             descriptorWrites[0].pTexelBufferView = nullptr; // Optional
 
-            descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites[1].dstSet = _descriptorSets[i];
-            descriptorWrites[1].dstBinding = 1;
-            descriptorWrites[1].dstArrayElement = 0;
-            descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            descriptorWrites[1].descriptorCount = 1;
-            descriptorWrites[1].pImageInfo = &imageInfo;
+//            descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+//            descriptorWrites[1].dstSet = _descriptorSets[i];
+//            descriptorWrites[1].dstBinding = 1;
+//            descriptorWrites[1].dstArrayElement = 0;
+//            descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+//            descriptorWrites[1].descriptorCount = 1;
+//            descriptorWrites[1].pImageInfo = &imageInfo;
 
             vkUpdateDescriptorSets(_device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0,
                                    nullptr);
@@ -466,25 +470,34 @@ namespace Enix {
     }
 
     void Renderer::createRenderObjects() {
-        _meshAsset = std::make_unique<MeshAsset>(_workspaceRoot + _modelPath,
+
+
+        auto meshAsset = std::make_shared<MeshAsset>(_workspaceRoot + _modelPath,
                                                  _workspaceRoot + _texturePath, _device);
-        _meshAsset2 = std::make_unique<MeshAsset>(_workspaceRoot + _model2Path,
+        auto meshAsset2 = std::make_shared<MeshAsset>(_workspaceRoot + _model2Path,
                                                   _workspaceRoot + _texture2Path, _device);
+
+        auto textureAsset = std::make_shared<TextureAsset>(meshAsset->texturePath());
+        auto textureAsset2 = std::make_shared<TextureAsset>(meshAsset2->texturePath());
+
+        auto material = std::make_shared<Material>(textureAsset, _device, _descriptorPool, _graphicsPipeline);
+        auto material2 = std::make_shared<Material>(textureAsset2, _device, _descriptorPool, _graphicsPipeline);
+
         Transform t = {{0, 0, 0},
                        {0, 0, 0},
                        {1, 1, 1}};
-        _actor = std::make_unique<MeshActor>("actor 1",t, _meshAsset);;
-        _meshActors.push_back(_actor);
-        _meshActors.push_back(std::make_unique<MeshActor>("actor 2",Transform{{5, 0, 0},
-                                                                    {0, 0, 0},
-                                                                    {1, 1, 1}}, _meshAsset));
-        _meshActors.push_back(std::make_unique<MeshActor>("actor 3",Transform{{0, 7, 0},
-                                                                    {0, 0, 0},
-                                                                    {1, 1, 1}}, _meshAsset2));
+        auto actor = std::make_shared<MeshActor>("actor 1", t, meshAsset, material);
+        _meshActors.push_back(actor);
+        _meshActors.push_back(std::make_unique<MeshActor>("actor 2", Transform{{5, 0, 0},
+                                                                               {0, 0, 0},
+                                                                               {1, 1, 1}}, meshAsset, material));
+        _meshActors.push_back(std::make_unique<MeshActor>("actor 3", Transform{{0, 7, 0},
+                                                                               {0, 0, 0},
+                                                                               {1, 1, 1}}, meshAsset2, material2));
         _camera = std::make_unique<Camera>(
                 Transform({{5.0f, 10.0f, 5.0f},
-                           {0,    0,    0},
-                           {1,    1,    1}}));
+                           {0,    0,     0},
+                           {1,    1,     1}}));
         _camera->front = {-2.0f, -2.0f, -2.0f};
     }
 
@@ -496,7 +509,7 @@ namespace Enix {
 
     void Renderer::cleanUp() {
 
-        spdlog::debug("Cleaning up engine");
+        spdlog::debug("Cleaning up renderer");
 
         vkDeviceWaitIdle(_device);
 

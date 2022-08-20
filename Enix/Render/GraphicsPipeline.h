@@ -17,7 +17,7 @@ namespace Enix {
     };
 
     class GraphicsPipeline {
-        VkDescriptorSetLayout _descriptorSetLayout;
+        std::vector<VkDescriptorSetLayout> _descriptorSetLayouts;
         VkPipeline _graphicsPipeline;
         VkPipelineLayout _pipelineLayout;
         VkShaderModule _vertShaderModule;
@@ -36,8 +36,8 @@ namespace Enix {
 
         virtual ~GraphicsPipeline();
 
-         [[nodiscard]] VkDescriptorSetLayout descriptorSetLayout() const {
-            return _descriptorSetLayout;
+         [[nodiscard]] std::vector<VkDescriptorSetLayout>& descriptorSetLayouts() {
+            return _descriptorSetLayouts;
         }
 
          [[nodiscard]] VkPipeline graphicsPipeline() const {

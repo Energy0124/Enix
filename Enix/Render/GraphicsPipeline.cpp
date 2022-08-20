@@ -17,20 +17,30 @@ namespace Enix {
         uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
         uboLayoutBinding.pImmutableSamplers = nullptr;
 
-        VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-        samplerLayoutBinding.binding = 1;
-        samplerLayoutBinding.descriptorCount = 1;
-        samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        samplerLayoutBinding.pImmutableSamplers = nullptr;
-        samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-        std::array<VkDescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
+        std::array<VkDescriptorSetLayoutBinding, 1> bindings = {uboLayoutBinding};
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
         layoutInfo.pBindings = bindings.data();
 
-        if (vkCreateDescriptorSetLayout(_device, &layoutInfo, nullptr, &_descriptorSetLayout) != VK_SUCCESS) {
+        if (vkCreateDescriptorSetLayout(_device, &layoutInfo, nullptr, &_descriptorSetLayouts[0]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create descriptor set layout!");
+        }
+
+        VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+        samplerLayoutBinding.binding = 0;
+        samplerLayoutBinding.descriptorCount = 1;
+        samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        samplerLayoutBinding.pImmutableSamplers = nullptr;
+        samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        std::array<VkDescriptorSetLayoutBinding, 1> bindings2 = {samplerLayoutBinding};
+        VkDescriptorSetLayoutCreateInfo layoutInfo2{};
+        layoutInfo2.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo2.bindingCount = static_cast<uint32_t>(bindings2.size());
+        layoutInfo2.pBindings = bindings2.data();
+
+        if (vkCreateDescriptorSetLayout(_device, &layoutInfo2, nullptr, &_descriptorSetLayouts[1]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor set layout!");
         }
     }
@@ -179,8 +189,8 @@ namespace Enix {
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = 1; // Optional
-        pipelineLayoutInfo.pSetLayouts = &_descriptorSetLayout; // Optional
+        pipelineLayoutInfo.setLayoutCount = 2; // Optional
+        pipelineLayoutInfo.pSetLayouts = _descriptorSetLayouts.data(); // Optional
         pipelineLayoutInfo.pushConstantRangeCount = 1; // Optional
         pipelineLayoutInfo.pPushConstantRanges = &push_constant; // Optional
 
@@ -218,13 +228,16 @@ namespace Enix {
     GraphicsPipeline::GraphicsPipeline(std::string workspaceRoot, Device &device, SwapChain &swapChain,
                                        RenderPass &renderPass)
             : _device(device), _swapChain(swapChain), _renderPass(renderPass),
-              _workspaceRoot(std::move(workspaceRoot)) {
+              _workspaceRoot(std::move(workspaceRoot)), _descriptorSetLayouts(2, VK_NULL_HANDLE) {
         createDescriptorSetLayout();
         createGraphicsPipeline();
     }
 
     GraphicsPipeline::~GraphicsPipeline() {
-        vkDestroyDescriptorSetLayout(_device, _descriptorSetLayout, nullptr);
+
+        for (auto descriptorSetLayout: _descriptorSetLayouts) {
+            vkDestroyDescriptorSetLayout(_device, descriptorSetLayout, nullptr);
+        }
         vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
 

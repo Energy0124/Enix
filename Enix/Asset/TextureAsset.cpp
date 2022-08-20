@@ -22,7 +22,7 @@ namespace Enix {
     }
 
     TextureAsset::~TextureAsset() {
-        spdlog::info("Freeing texture: {}", _path);
+        spdlog::info("Freeing TextureAsset: {}", _path);
         stbi_image_free(_pixels);
 
 

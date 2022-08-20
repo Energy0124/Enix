@@ -16,13 +16,13 @@ namespace Enix {
         std::string _modelPath;
         std::string _texturePath;
 
-        TextureAsset _textureAsset;
+//        TextureAsset _textureAsset;
 
         std::unique_ptr<Model> _model;
-        std::unique_ptr<Texture> _texture;
+//        std::unique_ptr<Texture> _texture;
 
         void loadModel(Device &device);
-        void loadTexture(Device &device);
+//        void loadTexture(Device &device);
 
 
     public:
@@ -35,8 +35,11 @@ namespace Enix {
             return *_model;
         }
 
-        [[nodiscard]] const Texture &texture() const {
-            return *_texture;
+//        [[nodiscard]] const Texture &texture() const {
+//            return *_texture;
+//        }
+        [[nodiscard]] const std::string &texturePath() const {
+            return _texturePath;
         }
 
     };
