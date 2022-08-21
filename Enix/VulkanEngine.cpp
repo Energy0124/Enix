@@ -33,6 +33,7 @@ namespace Enix {
             _window(), _renderer(*this), _appUI(*this) {
         spdlog::debug("construct engine");
 
+        init();
     }
 
     VulkanEngine::~VulkanEngine() {
@@ -52,11 +53,13 @@ namespace Enix {
 
     void VulkanEngine::tick(double deltaTime) {
         glfwPollEvents();
-
+        _scene->tick(deltaTime);
         _renderer.draw();
     }
 
     int VulkanEngine::run() {
+        loadScene();
+
         using namespace std::chrono;
         double deltaTime;
         _engineStartTimePoint = steady_clock::now();
@@ -97,8 +100,16 @@ namespace Enix {
         return _timeSinceEngineStart;
     }
 
-    Window &VulkanEngine::window()  {
+    Window &VulkanEngine::window() {
         return _window;
+    }
+
+    void VulkanEngine::loadScene() {
+
+        _scene = std::make_shared<Scene>();
+
+        // todo: create a scene and pass the scene to renderer to create render object
+        _renderer.createRenderObjects(_scene);
     }
 
 }

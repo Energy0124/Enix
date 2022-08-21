@@ -10,12 +10,14 @@
 #include "Engine.h"
 #include "Render/Renderer.h"
 #include "UI/AppUI.h"
+#include "Core/Scene.h"
 
 
 namespace Enix {
 
     class VulkanEngine : public Engine {
     private:
+        std::string _workspaceRoot = "../";
 
         // Vulkan
         Window _window;
@@ -25,9 +27,10 @@ namespace Enix {
         std::chrono::steady_clock::time_point _lastTickTimePoint;
 
         double _deltaTime;
-        std::chrono::time_point <std::chrono::steady_clock> _engineStartTimePoint;
+        std::chrono::time_point<std::chrono::steady_clock> _engineStartTimePoint;
         double _timeSinceEngineStart;
 
+        std::shared_ptr<Scene> _scene = nullptr;
         AppUI _appUI;
 
 
@@ -51,8 +54,14 @@ namespace Enix {
 
         Window &window();
 
-        Renderer &renderer(){
+        Renderer &renderer() {
             return _renderer;
         }
+
+        std::shared_ptr<Scene> &scene() {
+            return _scene;
+        }
+
+        void loadScene();
     };
 }

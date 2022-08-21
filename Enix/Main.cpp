@@ -34,7 +34,6 @@ int main(int argc, char* argv[])
         spdlog::debug("Starting engine");
 
         Enix::VulkanEngine vkEngine;
-        // vkEngine.init();
         vkEngine.run();
         // manual clean up of vulkan engine
         vkEngine.cleanUp();

@@ -345,12 +345,6 @@ namespace Enix {
             bufferInfo.offset = 0;
             bufferInfo.range = sizeof(UniformBufferObject);
 
-//            VkDescriptorImageInfo imageInfo{};
-//            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-//
-//            // todo: move creation of textureImageView and textureSampler to another class
-//            imageInfo.imageView = _meshAsset->texture().textureImageView();
-//            imageInfo.sampler = _meshAsset->texture().textureSampler();
 
             std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
             descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -362,14 +356,6 @@ namespace Enix {
             descriptorWrites[0].pBufferInfo = &bufferInfo;
             descriptorWrites[0].pImageInfo = nullptr; // Optional
             descriptorWrites[0].pTexelBufferView = nullptr; // Optional
-
-//            descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-//            descriptorWrites[1].dstSet = _descriptorSets[i];
-//            descriptorWrites[1].dstBinding = 1;
-//            descriptorWrites[1].dstArrayElement = 0;
-//            descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-//            descriptorWrites[1].descriptorCount = 1;
-//            descriptorWrites[1].pImageInfo = &imageInfo;
 
             vkUpdateDescriptorSets(_device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0,
                                    nullptr);
@@ -464,12 +450,11 @@ namespace Enix {
         createCommandBuffers();
         createSyncObjects();
 
-        //todo: move create render objects to a later stage
-        createRenderObjects();
         createDescriptorSets();
+
     }
 
-    void Renderer::createRenderObjects() {
+    void Renderer::createRenderObjects(std::shared_ptr<Scene> scene) {
 
 
         auto meshAsset = std::make_shared<MeshAsset>(_workspaceRoot + _modelPath,
@@ -499,6 +484,9 @@ namespace Enix {
                            {0,    0,     0},
                            {1,    1,     1}}));
         _camera->front = {-2.0f, -2.0f, -2.0f};
+
+        scene->mainCamera = _camera;
+        scene->meshActors = _meshActors;
     }
 
     void Renderer::init() {

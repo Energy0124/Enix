@@ -17,6 +17,7 @@ namespace Enix {
         std::string name;
         Transform transform;
 
+        virtual void tick(float deltaTime);
 
     };
 

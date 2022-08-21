@@ -36,6 +36,7 @@ namespace Enix {
 #include "Core/Actor.h"
 #include "Core/Camera.h"
 #include "Core/MeshActor.h"
+#include "Core/Scene.h"
 
 
 namespace Enix {
@@ -123,7 +124,7 @@ namespace Enix {
 
         void updateCamera();
 
-        void createRenderObjects();
+
     public:
         Renderer(VulkanEngine &engine);
 
@@ -132,7 +133,7 @@ namespace Enix {
         void init();
 
         void draw();
-
+        void createRenderObjects(std::shared_ptr<Scene> scene);
         std::shared_ptr<Camera> &camera() {
             return _camera;
         }

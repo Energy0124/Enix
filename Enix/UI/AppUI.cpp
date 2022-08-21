@@ -61,22 +61,22 @@ namespace Enix {
     }
 
     void AppUI::CameraControl() {
-        Renderer &renderer = _engine.renderer();
+        auto& camera= _engine.scene()->mainCamera;
         if (ImGui::TreeNode("Camera")) {
-            ImGui::DragFloat("fov", &renderer.camera()->fov, 0.01f);
-            ImGui::DragFloat("aspect", &renderer.camera()->aspect, 0.01f);
-            ImGui::DragFloat("near", &renderer.camera()->near, 0.01f);
-            ImGui::DragFloat("far", &renderer.camera()->far, 0.01f);
-            ImGui::DragScalarN("position", ImGuiDataType_Float,&renderer.camera()->transform.position, 3, 0.01f);
-            ImGui::DragScalarN("front", ImGuiDataType_Float,&renderer.camera()->front, 3, 0.01f);
-            ImGui::DragScalarN("up", ImGuiDataType_Float,&renderer.camera()->up, 3, 0.01f);
+            ImGui::DragFloat("fov", &camera->fov, 0.01f);
+            ImGui::DragFloat("aspect", &camera->aspect, 0.01f);
+            ImGui::DragFloat("near", &camera->near, 0.01f);
+            ImGui::DragFloat("far", &camera->far, 0.01f);
+            ImGui::DragScalarN("position", ImGuiDataType_Float,&camera->transform.position, 3, 0.01f);
+            ImGui::DragScalarN("front", ImGuiDataType_Float,&camera->front, 3, 0.01f);
+            ImGui::DragScalarN("up", ImGuiDataType_Float,&camera->up, 3, 0.01f);
             ImGui::Separator();
             ImGui::TreePop();
         }
     }
 
     void AppUI::ActorControls() {
-        auto &meshActors = _engine.renderer().meshActors();
+        auto &meshActors = _engine.scene()->meshActors;
         if (ImGui::TreeNode("Actors")) {
             for (int i = 0; i < meshActors.size(); i++) {
                 auto &actor = meshActors[i];

@@ -10,4 +10,8 @@
 namespace Enix {
     Actor::Actor(std::string name, Transform transform)
             : transform(transform), name(std::move(name)) {}
+
+    void Actor::tick(float deltaTime) {
+
+    }
 } // Enix
