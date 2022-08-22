@@ -1,7 +1,7 @@
 //
 // Created by Energy on 2022/08/14.
 //
-
+#include <glm/gtc/matrix_inverse.hpp>
 #include "Transform.h"
 
 namespace Enix {
@@ -28,5 +28,9 @@ namespace Enix {
         glm::mat4 m = glm::mat4(1.0f);
         m = glm::scale(m, scale);
         return m;
+    }
+
+    glm::mat3 Transform::normalMatrix() {
+        return glm::inverseTranspose(glm::mat3(modelMatrix()));
     }
 } // Enix

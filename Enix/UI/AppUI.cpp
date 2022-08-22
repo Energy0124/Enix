@@ -48,7 +48,7 @@ namespace Enix {
         if (_showDemo) {
             ImGui::ShowDemoWindow(&_showDemo);
         }
-        ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+        ImGui::Begin("Inspector");
 
         CameraControl();
 
@@ -70,6 +70,7 @@ namespace Enix {
             ImGui::DragScalarN("position", ImGuiDataType_Float,&camera->transform.position, 3, 0.01f);
             ImGui::DragScalarN("front", ImGuiDataType_Float,&camera->front, 3, 0.01f);
             ImGui::DragScalarN("up", ImGuiDataType_Float,&camera->up, 3, 0.01f);
+            ImGui::ColorEdit4("ClearColor", (float*)&camera->clearColor, ImGuiColorEditFlags_DisplayHSV | ImGuiColorEditFlags_AlphaPreview);
             ImGui::Separator();
             ImGui::TreePop();
         }

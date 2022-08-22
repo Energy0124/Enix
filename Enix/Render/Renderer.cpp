@@ -91,16 +91,10 @@ namespace Enix {
 
 
     void Renderer::updateUniformBuffer(uint32_t currentImage) {
-
-
         UniformBufferObject ubo{};
-//        ubo.model = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f));
-//        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-//        ubo.proj = glm::perspective(glm::radians(45.0f),
-//                                    _swapChain.swapChainExtent().width /
-//                                    static_cast<float>(_swapChain.swapChainExtent().height), 0.1f, 10.0f);
         ubo.view = _camera->viewMatrix();
         ubo.proj = _camera->projectionMatrix();
+        ubo.cameraPosition = _camera->transform.position;
 
         void *data;
         vkMapMemory(_device, _uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
@@ -231,37 +225,16 @@ namespace Enix {
                                 1,
                                 &_descriptorSets[_currentFrame], 0, nullptr);
 
-//        MeshPushConstant constant{
-//                glm::rotate(glm::mat4(1.0f), static_cast<float>(_engine.timeSinceEngineStart()) * glm::radians(90.0f),
-//                            glm::vec3(0.0f, 0.0f, 1.0f))};
-////        MeshPushConstant constant{
-////                glm::rotate(glm::mat4(1.0f), glm::radians(0.0f),
-////                            glm::vec3(0.0f, 0.0f, 1.0f))};
-//        //upload the matrix to the GPU via push constant
-//        vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
-//                           VK_SHADER_STAGE_VERTEX_BIT, 0,
-//                           sizeof(MeshPushConstant), &constant);
-
-        // vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indices.size()), 1, 0, 0, 0);
-//        _meshAsset->model().draw(commandBuffer);
-
-//        MeshPushConstant constant2{_actor->transform.modelMatrix()};
-//        //upload the matrix to the GPU via push constant
-//        vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
-//                           VK_SHADER_STAGE_VERTEX_BIT, 0,
-//                           sizeof(MeshPushConstant), &constant2);
-//        _actor->meshAsset()->model().draw(commandBuffer);
-
         for (auto &actor: _meshActors) {
             vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline.pipelineLayout(),
                                     1,
                                     1,
                                     &actor->material()->descriptorSets()[0], 0, nullptr);
             actor->meshAsset()->model().bind(commandBuffer);
-            MeshPushConstant constant{actor->transform.modelMatrix()};
+            MeshPushConstant constant{actor->transform.modelMatrix(), actor->transform.normalMatrix()};
             //upload the matrix to the GPU via push constant
             vkCmdPushConstants(_commandBuffers[_currentFrame], _graphicsPipeline.pipelineLayout(),
-                               VK_SHADER_STAGE_VERTEX_BIT, 0,
+                               VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
                                sizeof(MeshPushConstant), &constant);
             actor->meshAsset()->model().draw(commandBuffer);
         }

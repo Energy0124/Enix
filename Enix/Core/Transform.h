@@ -22,6 +22,8 @@ namespace Enix {
         glm::mat4 translationMatrix();
 
         glm::mat4 scaleMatrix();
+
+        glm::mat3 normalMatrix();
     };
 
 } // Enix

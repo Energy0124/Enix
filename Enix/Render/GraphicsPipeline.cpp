@@ -14,7 +14,7 @@ namespace Enix {
         uboLayoutBinding.binding = 0;
         uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         uboLayoutBinding.descriptorCount = 1;
-        uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         uboLayoutBinding.pImmutableSamplers = nullptr;
 
         std::array<VkDescriptorSetLayoutBinding, 1> bindings = {uboLayoutBinding};
@@ -184,8 +184,8 @@ namespace Enix {
         push_constant.offset = 0;
         //this push constant range takes up the size of a MeshPushConstant struct
         push_constant.size = sizeof(MeshPushConstant);
-        //this push constant range is accessible only in the vertex shader
-        push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        //this push constant range is accessible in both vertex and frag shaders
+        push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
