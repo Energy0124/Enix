@@ -7,6 +7,7 @@
 #include <string>
 #include "Transform.h"
 #include "Asset/MeshAsset.h"
+#include "Input/InputSystem.h"
 
 namespace Enix {
 
@@ -18,6 +19,8 @@ namespace Enix {
         Transform transform;
 
         virtual void tick(float deltaTime);
+        [[nodiscard]] const InputSystem& inputSystem() const;
+
 
     };
 

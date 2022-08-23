@@ -4,6 +4,7 @@
 
 #include "Actor.h"
 #include "MeshActor.h"
+#include "VulkanEngine.h"
 
 #include <utility>
 
@@ -13,5 +14,9 @@ namespace Enix {
 
     void Actor::tick(float deltaTime) {
 
+    }
+
+    const InputSystem &Actor::inputSystem() const {
+       return VulkanEngine::getInstance().inputSystem();
     }
 } // Enix

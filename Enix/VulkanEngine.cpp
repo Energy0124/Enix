@@ -30,10 +30,11 @@ void DEBUG_logTimer(const std::string &&message) {
 namespace Enix {
 
     VulkanEngine::VulkanEngine() :
-            _window(), _renderer(*this), _appUI(*this) {
+            _window(), _renderer(*this), _appUI(*this), _inputSystem(_window) {
         spdlog::debug("construct engine");
-
+        _instance = this;
         init();
+
     }
 
     VulkanEngine::~VulkanEngine() {

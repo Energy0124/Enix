@@ -15,6 +15,9 @@ namespace Enix {
 
         glm::mat4 viewMatrix();
         glm::mat4 projectionMatrix() const;
+
+        void tick(float deltaTime) override;
+
         glm::vec3 front{1.0f, 0.0f, 0.0f};
         glm::vec3 right{0.0f, 1.0f, 0.0f};
         glm::vec3 up{0.0f, 0.0f, 1.0f};
@@ -23,6 +26,8 @@ namespace Enix {
         float near{0.1f};
         float far{100.0f};
         VkClearColorValue clearColor{0.0f, 0.0f, 0.0f, 1.0f};
+
+        glm::vec3 worldUp{0.0f, 0.0f, 1.0f};
     private:
 
 

@@ -21,8 +21,8 @@ namespace Enix {
     }
 
     void Window::framebufferResizeCallback(GLFWwindow *window, int width, int height) {
-        auto app = reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
-        app->_framebufferResized = true;
+        auto pWindow = reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
+        pWindow->_framebufferResized = true;
     }
 
     void Window::initWindow() {
@@ -36,6 +36,16 @@ namespace Enix {
         _window = glfwCreateWindow(1280, 720, "Enix Engine", nullptr, nullptr);
         glfwSetWindowUserPointer(_window, this);
         glfwSetFramebufferSizeCallback(_window, framebufferResizeCallback);
+
+        glfwSetKeyCallback(_window, keyCallback);
+    }
+    void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    {
+        auto pWindow = reinterpret_cast<Window *>(glfwGetWindowUserPointer(window));
+        if (pWindow)
+        {
+            pWindow->onKey(key, scancode, action, mods);
+        }
     }
 
     void Window::waitForFocus() {
@@ -45,5 +55,10 @@ namespace Enix {
             glfwGetFramebufferSize(_window, &width, &height);
             glfwWaitEvents();
         }
+    }
+
+    void Window::onKey(int key, int scanCode, int action, int mods) {
+        for (auto& func : _onKeyFunc)
+            func(key, scanCode, action, mods);
     }
 }

@@ -21,6 +21,7 @@ namespace Enix {
 
         // Vulkan
         Window _window;
+        InputSystem _inputSystem;
         Renderer _renderer;
 
         bool _cleanedUp = false;
@@ -33,12 +34,16 @@ namespace Enix {
         std::shared_ptr<Scene> _scene = nullptr;
         AppUI _appUI;
 
-
+        static VulkanEngine* _instance; // singleton
     public:
         VulkanEngine();
 
         ~VulkanEngine() override;
 
+        static VulkanEngine& getInstance()
+        {
+            return *_instance;
+        }
         void drawUI() override;
 
         void tick(double deltaTime) override;
@@ -58,10 +63,16 @@ namespace Enix {
             return _renderer;
         }
 
+        InputSystem &inputSystem() {
+            return _inputSystem;
+        }
+
         std::shared_ptr<Scene> &scene() {
             return _scene;
         }
 
         void loadScene();
     };
+
+    inline VulkanEngine* VulkanEngine::_instance = nullptr;
 }
