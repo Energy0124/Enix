@@ -454,7 +454,7 @@ namespace Enix {
                                                                                {1, 1, 1}}, meshAsset2, material2));
         _camera = std::make_unique<Camera>(
                 Transform({{5.0f, 10.0f, 5.0f},
-                           {0,    0,     0},
+                           {-150.f, -30.f, 0},
                            {1,    1,     1}}));
         _camera->front = {-2.0f, -2.0f, -2.0f};
 

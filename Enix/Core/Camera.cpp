@@ -13,6 +13,10 @@ namespace Enix {
     glm::mat4 Camera::viewMatrix() {
 //        return glm::inverse(transform.modelMatrix());
         // todo: update front, right, up according to transform.rotation
+
+        front.y = glm::cos(glm::radians(transform.rotation.x)) * glm::cos(glm::radians(transform.rotation.y));
+        front.z = glm::sin(glm::radians(transform.rotation.y));
+        front.x = glm::sin(glm::radians(transform.rotation.x)) * glm::cos(glm::radians(transform.rotation.y));
         front = glm::normalize(front);
         right = glm::normalize(glm::cross(front, worldUp));
         up = glm::normalize(glm::cross(right, front));
