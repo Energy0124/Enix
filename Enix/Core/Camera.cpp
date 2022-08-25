@@ -11,8 +11,8 @@ namespace Enix {
     }
 
     glm::mat4 Camera::viewMatrix() {
-//        return glm::inverse(transform.modelMatrix());
-        // todo: update front, right, up according to transform.rotation
+
+        // update front, right, up according to transform.rotation
         using glm::sin;
         using glm::cos;
         using glm::cross;
