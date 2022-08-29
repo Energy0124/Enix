@@ -20,7 +20,11 @@ public:
 
     WindowSurface(VkInstance &instance, GLFWwindow &window);
 
-    virtual ~WindowSurface();
+    ~WindowSurface();
+
+    WindowSurface(const WindowSurface &) = delete;
+
+    WindowSurface &operator=(const WindowSurface &) = delete;
 
     VkSurfaceKHR &surface() {
         return _surface;

@@ -20,13 +20,9 @@ namespace Enix {
         using glm::dot;
         using glm::radians;
 
-
-
         float yaw = radians(transform.rotation.z);
         float pitch = radians(transform.rotation.x);
         float roll = radians(transform.rotation.y);
-
-
 
         front.x = sin(yaw) * cos(pitch);
         front.y = cos(yaw) * cos(pitch);

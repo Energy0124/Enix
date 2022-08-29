@@ -45,8 +45,12 @@ public:
 
     ~Instance();
 
+    Instance(const Instance &) = delete;
+
+    Instance &operator=(const Instance &) = delete;
+
     [[nodiscard]]
-    VkInstance& instance() {
+    VkInstance &instance() {
         return _instance;
     }
 

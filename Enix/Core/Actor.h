@@ -15,11 +15,14 @@ namespace Enix {
     public:
         Actor(std::string name, Transform transform);
 
+        virtual ~Actor() = default;
+
         std::string name;
         Transform transform;
 
         virtual void tick(float deltaTime);
-        [[nodiscard]] const InputSystem& inputSystem() const;
+
+        [[nodiscard]] const InputSystem &inputSystem() const;
 
 
     };

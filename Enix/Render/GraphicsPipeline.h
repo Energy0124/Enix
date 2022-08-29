@@ -31,31 +31,34 @@ namespace Enix {
         const std::string _workspaceRoot;
 
     private:
-    public:
-        GraphicsPipeline(std::string workspaceRoot, Device &device, SwapChain &swapChain,
-                         RenderPass &renderPass);
-
-        virtual ~GraphicsPipeline();
-
-         [[nodiscard]] std::vector<VkDescriptorSetLayout>& descriptorSetLayouts() {
-            return _descriptorSetLayouts;
-        }
-
-         [[nodiscard]] VkPipeline graphicsPipeline() const {
-            return _graphicsPipeline;
-        }
-
-         [[nodiscard]] VkPipelineLayout pipelineLayout() const {
-            return _pipelineLayout;
-        }
-
-    private:
         void createGraphicsPipeline();
 
         VkShaderModule createShaderModule(const std::vector<char> &code);
 
-
         void createDescriptorSetLayout();
+
+    public:
+        GraphicsPipeline(std::string workspaceRoot, Device &device, SwapChain &swapChain,
+                         RenderPass &renderPass);
+
+        ~GraphicsPipeline();
+
+        GraphicsPipeline(const GraphicsPipeline &) = delete;
+
+        GraphicsPipeline &operator=(const GraphicsPipeline &) = delete;
+
+        [[nodiscard]] std::vector<VkDescriptorSetLayout> &descriptorSetLayouts() {
+            return _descriptorSetLayouts;
+        }
+
+        [[nodiscard]] VkPipeline graphicsPipeline() const {
+            return _graphicsPipeline;
+        }
+
+        [[nodiscard]] VkPipelineLayout pipelineLayout() const {
+            return _pipelineLayout;
+        }
+
 
     };
 

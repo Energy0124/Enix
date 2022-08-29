@@ -3,12 +3,8 @@
 add_executable(Enix
         Main.cpp
         Engine.h
-        OpenGLEngine.h
-        OpenGLEngine.cpp
         VulkanEngine.h
         VulkanEngine.cpp
-        VulkanEngineImgui.h
-        VulkanEngineImgui.cpp
         Render/Vertex.h
         Render/Window.h
         Render/Window.cpp
@@ -19,7 +15,7 @@ add_executable(Enix
         Asset/MeshAsset.cpp Asset/MeshAsset.h
         Render/Instance.cpp Render/Instance.h
         Render/WindowSurface.cpp Render/WindowSurface.h
-        Render/SwapChain.cpp Render/SwapChain.h Render/RenderPass.cpp Render/RenderPass.h Render/Image.cpp Render/Image.h Render/VulkanUtility.h Render/GraphicsPipeline.cpp Render/GraphicsPipeline.h Render/Texture.cpp Render/Texture.h Asset/TextureAsset.cpp Asset/TextureAsset.h Render/Renderer.cpp Render/Renderer.h
+        Render/SwapChain.cpp Render/SwapChain.h Render/RenderPass.cpp Render/RenderPass.h Render/VulkanUtility.h Render/GraphicsPipeline.cpp Render/GraphicsPipeline.h Render/Texture.cpp Render/Texture.h Asset/TextureAsset.cpp Asset/TextureAsset.h Render/Renderer.cpp Render/Renderer.h
         Core/Actor.cpp Core/Actor.h Core/MeshActor.cpp Core/MeshActor.h Core/Transform.cpp Core/Transform.h Core/Camera.cpp Core/Camera.h UI/AppUI.cpp UI/AppUI.h Render/Material.cpp Render/Material.h Core/Scene.cpp Core/Scene.h Input/InputSystem.cpp Input/InputSystem.h)
 
 

@@ -27,30 +27,30 @@ namespace Enix {
         bool _cleanedUp = false;
         std::chrono::steady_clock::time_point _lastTickTimePoint;
 
-        double _deltaTime;
-        std::chrono::time_point<std::chrono::steady_clock> _engineStartTimePoint;
-        double _timeSinceEngineStart;
+        double _deltaTime = 0;
+        std::chrono::time_point<std::chrono::steady_clock> _engineStartTimePoint{};
+        double _timeSinceEngineStart = 0;
 
         std::shared_ptr<Scene> _scene = nullptr;
         AppUI _appUI;
 
-        static VulkanEngine* _instance; // singleton
+        static VulkanEngine *_instance; // singleton
     public:
         VulkanEngine();
 
         ~VulkanEngine() override;
 
-        static VulkanEngine& getInstance()
-        {
+        static VulkanEngine &getInstance() {
             return *_instance;
         }
+
         void drawUI() override;
 
         void tick(double deltaTime) override;
 
-        int init() override;
+        int init();
 
-        int cleanUp() override;
+        int cleanUp();
 
         int run() override;
 
@@ -74,5 +74,5 @@ namespace Enix {
         void loadScene();
     };
 
-    inline VulkanEngine* VulkanEngine::_instance = nullptr;
+    inline VulkanEngine *VulkanEngine::_instance = nullptr;
 }

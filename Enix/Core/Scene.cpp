@@ -6,7 +6,7 @@
 
 namespace Enix {
     void Scene::tick(double deltaTime) {
-        for (auto &actor : meshActors) {
+        for (auto &actor: meshActors) {
             actor->tick(deltaTime);
         }
         mainCamera->tick(deltaTime);

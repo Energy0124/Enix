@@ -124,16 +124,21 @@ namespace Enix {
 
         void updateCamera();
 
+        void init();
 
     public:
         Renderer(VulkanEngine &engine);
 
         ~Renderer();
 
-        void init();
+        Renderer &operator=(const Renderer &) = delete;
+
+        Renderer(const Renderer &) = delete;
 
         void draw();
-        void createRenderObjects(std::shared_ptr<Scene> scene);
+
+        void createRenderObjects(const std::shared_ptr<Scene>& scene);
+
         std::shared_ptr<Camera> &camera() {
             return _camera;
         }

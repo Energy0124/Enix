@@ -33,7 +33,6 @@ namespace Enix {
         };
         bool _enableValidationLayers;
 
-
         VkPhysicalDevice _physicalDevice{VK_NULL_HANDLE};
         VkDevice _device{VK_NULL_HANDLE};
         VkQueue _graphicsQueue{VK_NULL_HANDLE};
@@ -43,24 +42,23 @@ namespace Enix {
         VkInstance &_instance;
         VkSurfaceKHR &_surface;
 
-
         void pickPhysicalDevice();
 
         void createLogicalDevice();
-
 
         bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
         bool isDeviceSuitable(VkPhysicalDevice physicalDevice);
 
-
-
         void createCommandPool();
+
     public:
         explicit Device(bool enableValidationLayers, VkInstance &instance, VkSurfaceKHR &surface);
 
         ~Device();
+
         Device(const Device &) = delete;
+
         Device &operator=(const Device &) = delete;
 
         [[nodiscard]] QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice);
@@ -80,11 +78,16 @@ namespace Enix {
 
 
         [[nodiscard]] VkDevice device() const { return _device; }
+
         // for convenience
         [[nodiscard]] operator VkDevice() const { return _device; }
+
         [[nodiscard]] VkPhysicalDevice physicalDevice() const { return _physicalDevice; }
+
         [[nodiscard]] VkQueue graphicsQueue() const { return _graphicsQueue; }
+
         [[nodiscard]] VkQueue presentQueue() const { return _presentQueue; }
+
         [[nodiscard]] VkCommandPool commandPool() const { return _commandPool; }
 
 
@@ -100,6 +103,7 @@ namespace Enix {
         VkFormat
         findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
                             VkFormatFeatureFlags features);
+
         SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);

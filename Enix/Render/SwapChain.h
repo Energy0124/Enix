@@ -30,12 +30,6 @@ namespace Enix {
         WindowSurface &_surface;
         Window &_window;
         RenderPass &_renderPass;
-    public:
-        SwapChain(Device &device, WindowSurface &surface, Window &window, RenderPass &renderPass);
-
-        virtual ~SwapChain();
-
-        void recreateSwapChain();
 
     private:
         void createSwapChain();
@@ -51,6 +45,16 @@ namespace Enix {
         void createSwapChainResources();
 
     public:
+        SwapChain(Device &device, WindowSurface &surface, Window &window, RenderPass &renderPass);
+
+        ~SwapChain();
+
+        SwapChain(const SwapChain &) = delete;
+
+        SwapChain &operator=(const SwapChain &) = delete;
+
+        void recreateSwapChain();
+
         [[nodiscard]] VkSwapchainKHR swapChain() const {
             return _swapChain;
         }

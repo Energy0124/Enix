@@ -15,15 +15,15 @@ namespace Enix {
         glm::vec3 rotation{};
         glm::vec3 scale{1.0f, 1.0f, 1.0f};
 
-        glm::mat4 modelMatrix();
+        [[nodiscard]] glm::mat4 modelMatrix();
 
-        glm::mat4 rotationMatrix();
+        [[nodiscard]] glm::mat4 rotationMatrix();
 
-        glm::mat4 translationMatrix();
+        [[nodiscard]] glm::mat4 translationMatrix();
 
-        glm::mat4 scaleMatrix();
+        [[nodiscard]] glm::mat4 scaleMatrix();
 
-        glm::mat3 normalMatrix();
+        [[nodiscard]] glm::mat3 normalMatrix();
     };
 
 } // Enix

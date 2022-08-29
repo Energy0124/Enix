@@ -17,10 +17,24 @@ namespace Enix {
 
         Device &_device;
         TextureAsset &_textureAsset;
+
+    private:
+        void createTexture();
+
+        void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+        void createTextureSampler();
+
+        void createTextureImageView();
+
     public:
-        Texture(Device& device, TextureAsset& pixels);
+        Texture(Device &device, TextureAsset &pixels);
 
         virtual ~Texture();
+
+        Texture(const Texture &) = delete;
+
+        Texture &operator=(const Texture &) = delete;
 
         [[nodiscard]] VkImage textureImage() const {
             return _textureImage;
@@ -38,12 +52,6 @@ namespace Enix {
             return _textureImageView;
         }
 
-    private:
-        void createTexture();
-        void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-
-        void createTextureSampler();
-        void createTextureImageView();
     };
 
 } // Enix

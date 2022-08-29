@@ -37,9 +37,7 @@ namespace Enix {
 
     }
 
-    VulkanEngine::~VulkanEngine() {
-
-    }
+    VulkanEngine::~VulkanEngine() = default;
 
     void VulkanEngine::drawUI() {
 

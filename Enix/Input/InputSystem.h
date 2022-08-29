@@ -9,12 +9,11 @@
 namespace Enix {
 
     class InputSystem {
-    public:
-        explicit InputSystem(Window &window);
+
 
     private:
         std::array<bool, GLFW_KEY_LAST> _pressedKeys{false};
-        Window& _window;
+        Window &_window;
 
         void onKey(int key, int code, int action, int mods);
 
@@ -23,7 +22,12 @@ namespace Enix {
         void keyReleased(int key);
 
     public:
+        explicit InputSystem(Window &window);
+
+        ~InputSystem();
+
         [[nodiscard]] bool isKeyPressed(int key) const;
+
     };
 
 } // Enix

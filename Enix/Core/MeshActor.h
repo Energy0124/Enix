@@ -15,8 +15,8 @@ namespace Enix {
     public:
         MeshActor(std::string name, Transform transform, std::shared_ptr<MeshAsset> meshAsset,
                   std::shared_ptr<Material> material);
+        ~MeshActor() override = default;
 
-    public:
         [[nodiscard]] std::shared_ptr<MeshAsset> &meshAsset() {
             return _meshAsset;
         }
@@ -25,7 +25,7 @@ namespace Enix {
             _meshAsset = meshAsset;
         }
 
-        [[nodiscard]] const std::shared_ptr<Material> &material() const{
+        [[nodiscard]] const std::shared_ptr<Material> &material() const {
             return _material;
         }
 

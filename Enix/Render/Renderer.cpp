@@ -427,7 +427,7 @@ namespace Enix {
 
     }
 
-    void Renderer::createRenderObjects(std::shared_ptr<Scene> scene) {
+    void Renderer::createRenderObjects(const std::shared_ptr<Scene>& scene) {
 
 
         auto meshAsset = std::make_shared<MeshAsset>(_workspaceRoot + _modelPath,

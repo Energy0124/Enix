@@ -10,6 +10,7 @@ namespace Enix {
             onKey(key, scanCode, action, mods);
         });
     }
+    InputSystem::~InputSystem() = default;
 
     void InputSystem::onKey(int key, int code, int action, int mods) {
         switch (action) {
@@ -35,4 +36,6 @@ namespace Enix {
     bool InputSystem::isKeyPressed(int key) const {
         return _pressedKeys[key];
     }
+
+
 } // Enix

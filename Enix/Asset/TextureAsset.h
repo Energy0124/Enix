@@ -16,7 +16,7 @@ namespace Enix {
     public:
         explicit TextureAsset(std::string path);
 
-        virtual ~TextureAsset();
+        ~TextureAsset();
 
         [[nodiscard]] const stbi_uc *pixels() const {
             return _pixels;

@@ -5,7 +5,7 @@
 #pragma once
 
 // forward declarations
-namespace Enix{
+namespace Enix {
     class VulkanEngine;
 }
 
@@ -13,20 +13,22 @@ namespace Enix {
 
     class AppUI {
 
-    public:
-
-        explicit AppUI(VulkanEngine &vulkanEngine);
-
-        void onDraw();
-
-    private:
         bool _showDemo;
 
-        VulkanEngine& _engine;
+        VulkanEngine &_engine;
 
         void CameraControl();
 
         void ActorControls();
+
+    public:
+
+        explicit AppUI(VulkanEngine &vulkanEngine);
+
+        virtual ~AppUI() = default;
+
+        void onDraw();
+
     };
 
 } // Enix
