@@ -17,7 +17,6 @@ namespace Enix {
     Device::~Device() {
 
         vkDestroyCommandPool(_device, _commandPool, nullptr);
-
         vkDestroyDevice(_device, nullptr);
     }
 
@@ -261,8 +260,8 @@ namespace Enix {
     }
 
     void Device::createImage(int texWidth, int texHeight, VkFormat format, VkImageTiling tiling,
-                                   VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image,
-                                   VkDeviceMemory &imageMemory) {
+                             VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage &image,
+                             VkDeviceMemory &imageMemory) {
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -314,7 +313,7 @@ namespace Enix {
     }
 
     void Device::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout,
-                                             VkImageLayout newLayout) {
+                                       VkImageLayout newLayout) {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
         VkImageMemoryBarrier barrier{};
@@ -379,7 +378,7 @@ namespace Enix {
     }
 
     VkFormat Device::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
-                                            VkFormatFeatureFlags features) {
+                                         VkFormatFeatureFlags features) {
         for (VkFormat format: candidates) {
             VkFormatProperties props;
             vkGetPhysicalDeviceFormatProperties(_physicalDevice, format, &props);
@@ -439,6 +438,36 @@ namespace Enix {
 
             return actualExtent;
         }
+    }
+
+    Device &Device::operator=(Device &&other) noexcept {
+        using std::swap;
+        swap(*this, other);
+        return *this;
+    }
+
+    Device::Device(Device &&other) noexcept
+            : _instance(other._instance), _surface(other._surface),
+              _enableValidationLayers(other._enableValidationLayers) {
+
+        _physicalDevice = other._physicalDevice;
+        _device = other._device;
+        _graphicsQueue = other._graphicsQueue;
+        _presentQueue = other._presentQueue;
+
+        other._device = nullptr;
+        other._commandPool = nullptr;
+    }
+
+    void swap(Device &first, Device &second) noexcept {
+        using std::swap;
+        swap(first._instance, second._instance);
+        swap(first._surface, second._surface);
+        swap(first._physicalDevice, second._physicalDevice);
+        swap(first._device, second._device);
+        swap(first._graphicsQueue, second._graphicsQueue);
+        swap(first._presentQueue, second._presentQueue);
+        swap(first._enableValidationLayers, second._enableValidationLayers);
     }
 
 }

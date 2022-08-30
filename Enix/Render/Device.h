@@ -61,6 +61,14 @@ namespace Enix {
 
         Device &operator=(const Device &) = delete;
 
+        Device(Device &&) noexcept;
+
+        Device &operator=(Device &&) noexcept ;
+
+        friend void swap(Device &first, Device &second) noexcept;
+
+
+
         [[nodiscard]] QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice);
 
         [[nodiscard]] uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
