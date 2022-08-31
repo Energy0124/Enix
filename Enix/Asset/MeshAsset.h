@@ -14,23 +14,16 @@ namespace Enix {
 
     class MeshAsset {
         std::string _modelPath;
-        std::string _texturePath;
         std::unique_ptr<Model> _model;
 
         void loadModel(Device &device);
 
     public:
 
-        MeshAsset(std::string modelPath, std::string texturePath, Device &device);
-
-        ~MeshAsset();
+        MeshAsset(std::string modelPath, Device &device);
 
         [[nodiscard]] const Model &model() const {
             return *_model;
-        }
-
-        [[nodiscard]] const std::string &texturePath() const {
-            return _texturePath;
         }
 
     };

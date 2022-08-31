@@ -427,16 +427,37 @@ namespace Enix {
 
     }
 
-    void Renderer::createRenderObjects(const std::shared_ptr<Scene>& scene) {
+    void Renderer::createRenderObjects(const std::shared_ptr<Scene> &scene) {
 
 
-        auto meshAsset = std::make_shared<MeshAsset>(_workspaceRoot + _modelPath,
-                                                 _workspaceRoot + _texturePath, _device);
-        auto meshAsset2 = std::make_shared<MeshAsset>(_workspaceRoot + _model2Path,
-                                                  _workspaceRoot + _texture2Path, _device);
+        std::vector<std::string> meshPaths{_workspaceRoot + _modelPath, _workspaceRoot + _model2Path};
 
-        auto textureAsset = std::make_shared<TextureAsset>(meshAsset->texturePath());
-        auto textureAsset2 = std::make_shared<TextureAsset>(meshAsset2->texturePath());
+        std::vector<std::string> texturePaths{_workspaceRoot + _texturePath, _workspaceRoot + _texture2Path};
+
+        std::vector<std::future<std::shared_ptr<MeshAsset>>> meshLoadResults{};
+        for (const auto &meshPath: meshPaths) {
+            meshLoadResults.emplace_back(_engine.threadPool().enqueue([&meshPath, this]() {
+                return std::make_shared<MeshAsset>(meshPath, this->_device);
+            }));
+        }
+
+        std::vector<std::future<std::shared_ptr<TextureAsset>>> textureLoadResults{};
+        for (const auto &texturePath: texturePaths) {
+            textureLoadResults.emplace_back(_engine.threadPool().enqueue([&texturePath, this]() {
+                return std::make_shared<TextureAsset>(texturePath);
+            }));
+        }
+
+//        auto meshAsset = std::make_shared<MeshAsset>(_workspaceRoot + _modelPath, _device);
+//        auto meshAsset2 = std::make_shared<MeshAsset>(_workspaceRoot + _model2Path, _device);
+
+        auto meshAsset = meshLoadResults[0].get();
+        auto meshAsset2 = meshLoadResults[1].get();
+
+//        auto textureAsset = std::make_shared<TextureAsset>(_workspaceRoot + _texturePath);
+//        auto textureAsset2 = std::make_shared<TextureAsset>(_workspaceRoot + _texture2Path);
+        auto textureAsset = textureLoadResults[0].get();
+        auto textureAsset2 = textureLoadResults[1].get();
 
         auto material = std::make_shared<Material>(textureAsset, _device, _descriptorPool, _graphicsPipeline);
         auto material2 = std::make_shared<Material>(textureAsset2, _device, _descriptorPool, _graphicsPipeline);
@@ -454,7 +475,7 @@ namespace Enix {
                                                                                {1, 1, 1}}, meshAsset2, material2));
         _camera = std::make_unique<Camera>(
                 Transform({{5.0f, 10.0f, 2.0f},
-                           {0.f, 0.f, -180},
+                           {0.f,  0.f,   -180},
                            {1,    1,     1}}));
         _camera->front = {-2.0f, -2.0f, -2.0f};
 

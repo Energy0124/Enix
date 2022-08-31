@@ -11,15 +11,12 @@
 #include <utility>
 
 namespace Enix {
-    MeshAsset::MeshAsset(std::string modelPath, std::string texturePath, Device &device)
-            : _modelPath(std::move(modelPath)),
-              _texturePath(std::move(texturePath)) //, _textureAsset(_texturePath)
+    MeshAsset::MeshAsset(std::string modelPath, Device &device)
+            : _modelPath(std::move(modelPath))
     {
         loadModel(device);
 //        loadTexture(device);
     }
-
-    MeshAsset::~MeshAsset() = default;
 
     void MeshAsset::loadModel(Device &device) {
         spdlog::info("Loading model: {}", _modelPath);

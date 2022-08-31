@@ -11,6 +11,7 @@
 #include "Render/Renderer.h"
 #include "UI/AppUI.h"
 #include "Core/Scene.h"
+#include "Core/ThreadPool.h"
 
 
 namespace Enix {
@@ -19,20 +20,20 @@ namespace Enix {
     private:
         std::string _workspaceRoot = "../";
 
-        // Vulkan
         Window _window;
         InputSystem _inputSystem;
         Renderer _renderer;
+        std::shared_ptr<Scene> _scene = nullptr;
+        AppUI _appUI;
+        ThreadPool _threadPool;
 
         bool _cleanedUp = false;
         std::chrono::steady_clock::time_point _lastTickTimePoint;
-
         double _deltaTime = 0;
         std::chrono::time_point<std::chrono::steady_clock> _engineStartTimePoint{};
         double _timeSinceEngineStart = 0;
 
-        std::shared_ptr<Scene> _scene = nullptr;
-        AppUI _appUI;
+
 
         static VulkanEngine *_instance; // singleton
     public:
@@ -67,7 +68,11 @@ namespace Enix {
             return _inputSystem;
         }
 
-        std::shared_ptr<Scene> &scene() {
+        ThreadPool &threadPool() {
+            return _threadPool;
+        }
+
+        [[nodiscard]] std::shared_ptr<Scene> &scene() {
             return _scene;
         }
 
