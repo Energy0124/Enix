@@ -437,11 +437,13 @@ namespace Enix {
 
         std::vector<std::string> meshPaths{_workspaceRoot + _modelPath,
                                            _workspaceRoot + _model2Path,
-                                           _workspaceRoot + "Models/sphere.obj"
+                                           _workspaceRoot + "Models/sphere.obj",
+                                           _workspaceRoot + "Models/plane.obj"
         };
         std::vector<std::string> texturePaths{_workspaceRoot + _texturePath,
                                               _workspaceRoot + _texture2Path,
-                                              _workspaceRoot + "Textures/SphereBaseColor.png"
+                                              _workspaceRoot + "Textures/SphereBaseColor.png",
+                                              _workspaceRoot + "Textures/battler.png",
         };
 
         // use thread pool to load meshes
@@ -465,14 +467,18 @@ namespace Enix {
         auto meshAsset = meshLoadResults[0].get();
         auto meshAsset2 = meshLoadResults[1].get();
         auto meshAsset3 = meshLoadResults[2].get();
+        auto meshAsset4 = meshLoadResults[3].get();
+
         auto textureAsset = textureLoadResults[0].get();
         auto textureAsset2 = textureLoadResults[1].get();
         auto textureAsset3 = textureLoadResults[2].get();
+        auto textureAsset4 = textureLoadResults[3].get();
 
         // create material
         auto material = std::make_shared<Material>(textureAsset, _device, _descriptorPool, _graphicsPipeline);
         auto material2 = std::make_shared<Material>(textureAsset2, _device, _descriptorPool, _graphicsPipeline);
         auto material3 = std::make_shared<Material>(textureAsset3, _device, _descriptorPool, _graphicsPipeline);
+        auto material4 = std::make_shared<Material>(textureAsset4, _device, _descriptorPool, _graphicsPipeline);
 
         // create actors
         Transform t = {{0, 0, 0},
@@ -486,9 +492,12 @@ namespace Enix {
         _meshActors.push_back(std::make_unique<MeshActor>("actor 3", Transform{{0, 7, 0},
                                                                                {0, 0, 0},
                                                                                {1, 1, 1}}, meshAsset2, material2));
-        _meshActors.push_back(std::make_unique<MeshActor>("sphere 1", Transform{{-2, -2, -1},
+        _meshActors.push_back(std::make_unique<MeshActor>("sphere 1", Transform{{-2, 2, 0},
                                                                                 {0,  0,  0},
                                                                                 {1,  1,  1}}, meshAsset3, material3));
+        _meshActors.push_back(std::make_unique<MeshActor>("plane 1", Transform{{0, 0, -2},
+                                                                                {0,  0,  0},
+                                                                                {1,  1,  1}}, meshAsset4, material4));
 
         // setup camera
         _camera = std::make_unique<Camera>(
@@ -497,7 +506,6 @@ namespace Enix {
                            {1,    1,     1}}));
         _camera->front = {-2.0f, -2.0f, -2.0f};
 
-        // todo: add light class and setup them here
         _pointLight = std::make_unique<PointLight>("point light 1", Transform{},
                                                    glm::vec3{1, 1, 1}, glm::vec3{1, 1, 1});
 
