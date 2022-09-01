@@ -33,6 +33,7 @@
 #include "VulkanEngine.h"
 #include "Renderer.h"
 #include "Core/MeshActor.h"
+#include "Core/PointLight.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 
@@ -95,6 +96,8 @@ namespace Enix {
         ubo.view = _camera->viewMatrix();
         ubo.proj = _camera->projectionMatrix();
         ubo.cameraPosition = _camera->transform.position;
+        ubo.lightPosition = _pointLight->transform.position;
+        ubo.lightColor = _pointLight->color;
 
         void *data;
         vkMapMemory(_device, _uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
@@ -484,8 +487,8 @@ namespace Enix {
                                                                                {0, 0, 0},
                                                                                {1, 1, 1}}, meshAsset2, material2));
         _meshActors.push_back(std::make_unique<MeshActor>("sphere 1", Transform{{-2, -2, -1},
-                                                                               {0, 0, 0},
-                                                                               {1, 1, 1}}, meshAsset3, material3));
+                                                                                {0,  0,  0},
+                                                                                {1,  1,  1}}, meshAsset3, material3));
 
         // setup camera
         _camera = std::make_unique<Camera>(
@@ -495,8 +498,11 @@ namespace Enix {
         _camera->front = {-2.0f, -2.0f, -2.0f};
 
         // todo: add light class and setup them here
+        _pointLight = std::make_unique<PointLight>("point light 1", Transform{},
+                                                   glm::vec3{1, 1, 1}, glm::vec3{1, 1, 1});
 
         scene->mainCamera = _camera;
+        scene->pointLight = _pointLight;
         scene->meshActors = _meshActors;
     }
 

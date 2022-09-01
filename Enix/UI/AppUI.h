@@ -21,6 +21,7 @@ namespace Enix {
 
         void ActorControls();
 
+        void LightControl();
     public:
 
         explicit AppUI(VulkanEngine &vulkanEngine);

@@ -44,6 +44,8 @@ namespace Enix {
         alignas(16) glm::mat4 view;
         alignas(16) glm::mat4 proj;
         alignas(16) glm::vec3 cameraPosition;
+        alignas(16) glm::vec3 lightPosition;
+        alignas(16) glm::vec3 lightColor;
     };
 
     class Renderer {
@@ -90,6 +92,7 @@ namespace Enix {
         std::vector<VkFence> _inFlightFences;
 
         std::shared_ptr<Camera> _camera;
+        std::shared_ptr<PointLight> _pointLight;
         std::vector<std::shared_ptr<MeshActor>> _meshActors{};
 
         ImGuiIO *_imguiIo;
@@ -137,7 +140,7 @@ namespace Enix {
 
         void draw();
 
-        void createRenderObjects(const std::shared_ptr<Scene>& scene);
+        void createRenderObjects(const std::shared_ptr<Scene> &scene);
 
         std::shared_ptr<Camera> &camera() {
             return _camera;

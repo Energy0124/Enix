@@ -9,6 +9,7 @@
 #include <memory>
 #include "Camera.h"
 #include "MeshActor.h"
+#include "PointLight.h"
 
 namespace Enix {
 
@@ -16,6 +17,7 @@ namespace Enix {
 
     public:
         std::shared_ptr<Camera> mainCamera = nullptr;
+        std::shared_ptr<PointLight> pointLight = nullptr;
         std::vector<std::shared_ptr<MeshActor>> meshActors{};
         void tick(double deltaTime);
     };

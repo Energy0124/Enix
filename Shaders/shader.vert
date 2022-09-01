@@ -4,6 +4,8 @@ layout(set = 0, binding = 0) uniform UniformBufferObject {
     mat4 view;
     mat4 proj;
     vec3 cameraPosition;
+    vec3 lightPosition;
+    vec3 lightColor;
 } ubo;
 
 layout(push_constant) uniform Push {
@@ -27,6 +29,7 @@ void main() {
     gl_Position = ubo.proj * ubo.view * push.modelMatrix * vec4(inPosition, 1.0);
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-    fragNormal = push.normalMatrix * inNormal;
+    //    fragNormal = push.normalMatrix * inNormal;
+    fragNormal =mat3(transpose(inverse(push.modelMatrix))) * inNormal;
     fragPosition = vec3(push.modelMatrix * vec4(inPosition, 1.0));
 }
