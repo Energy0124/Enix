@@ -74,6 +74,24 @@ namespace Enix {
         if (inputSystem().isKeyPressed(GLFW_KEY_F)) {
             transform.position -= up * deltaTime * speed;
         }
+        if (inputSystem().isKeyPressed(GLFW_KEY_E)) {
+            transform.rotation += glm::vec3{0, 0, 1} * deltaTime * speed * 50.f;
+        }
+        if (inputSystem().isKeyPressed(GLFW_KEY_Q)) {
+            transform.rotation -= glm::vec3{0, 0, 1} * deltaTime * speed * 50.f;
+        }
+        if (inputSystem().isKeyPressed(GLFW_KEY_T)) {
+            transform.rotation += glm::vec3{1, 0, 0} * deltaTime * speed * 50.f;
+        }
+        if (inputSystem().isKeyPressed(GLFW_KEY_G)) {
+            transform.rotation -= glm::vec3{1, 0, 0} * deltaTime * speed * 50.f;
+        }
+        if (inputSystem().isKeyPressed(GLFW_KEY_Z)) {
+            transform.rotation += glm::vec3{0, 1, 0} * deltaTime * speed * 50.f;
+        }
+        if (inputSystem().isKeyPressed(GLFW_KEY_C)) {
+            transform.rotation -= glm::vec3{0, 1, 0} * deltaTime * speed * 50.f;
+        }
 
     }
 } // Enix
