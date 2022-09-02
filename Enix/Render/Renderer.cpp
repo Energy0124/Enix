@@ -497,7 +497,7 @@ namespace Enix {
                                                                                 {1,  1,  1}}, meshAsset3, material3));
         _meshActors.push_back(std::make_unique<MeshActor>("plane 1", Transform{{0, 0, -2},
                                                                                 {0,  0,  0},
-                                                                                {1,  1,  1}}, meshAsset4, material4));
+                                                                                {1,  1,  1}}, meshAsset4, material2));
 
         // setup camera
         _camera = std::make_unique<Camera>(
