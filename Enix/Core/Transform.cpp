@@ -30,7 +30,7 @@ namespace Enix {
         return m;
     }
 
-    glm::mat3 Transform::normalMatrix() {
-        return glm::inverseTranspose(glm::mat3(modelMatrix()));
+    glm::mat4 Transform::normalMatrix() {
+        return glm::transpose(glm::inverse(modelMatrix()));
     }
 } // Enix

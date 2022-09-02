@@ -23,7 +23,7 @@ namespace Enix {
 
         [[nodiscard]] glm::mat4 scaleMatrix();
 
-        [[nodiscard]] glm::mat3 normalMatrix();
+        [[nodiscard]] glm::mat4 normalMatrix();
     };
 
 } // Enix

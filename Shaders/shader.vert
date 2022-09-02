@@ -10,7 +10,7 @@ layout(set = 0, binding = 0) uniform UniformBufferObject {
 
 layout(push_constant) uniform Push {
     mat4 modelMatrix;
-    mat3 normalMatrix;
+    mat4 normalMatrix;
 } push;
 
 
@@ -29,7 +29,7 @@ void main() {
     gl_Position = ubo.proj * ubo.view * push.modelMatrix * vec4(inPosition, 1.0);
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-    //    fragNormal = push.normalMatrix * inNormal;
-    fragNormal =mat3(transpose(inverse(push.modelMatrix))) * inNormal;
+    fragNormal = mat3(push.normalMatrix) * inNormal;
+//    fragNormal = mat3(transpose(inverse(push.modelMatrix))) * inNormal;
     fragPosition = vec3(push.modelMatrix * vec4(inPosition, 1.0));
 }

@@ -14,7 +14,7 @@
 namespace Enix {
     struct MeshPushConstant {
         alignas(16) glm::mat4 modelMatrix{1.f};
-        alignas(16) glm::mat3 normalMatrix{1.f};
+        alignas(16) glm::mat4 normalMatrix{1.f};
     };
 
     class GraphicsPipeline {
