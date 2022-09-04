@@ -12,6 +12,7 @@ vulkan and modern C++. And it is fun!
 - [x] Projection camera
 - [x] Keyboard input
 - [x] IMGUI
+- [x] Logging
 - [x] Model loading
 - [x] Texture loading
 - [x] Thread pool
