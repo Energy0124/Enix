@@ -498,3 +498,5 @@ glfw3ConfigVersion.cmake
 /ThirdParty/tinyobjloader/tinyobjloader-config.cmake
 /ThirdParty/tinyobjloader/tinyobjloader-config-version.cmake
 /ThirdParty/tinyobjloader/tinyobjloader-targets.cmake
+
+build
