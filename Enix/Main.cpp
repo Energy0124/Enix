@@ -35,6 +35,12 @@ int main(int argc, char* argv[])
         spdlog::critical(e.what());
         return EXIT_FAILURE;
     }
+    catch(...)
+    {
+        spdlog::critical("An unknown error occurred");
+        return EXIT_FAILURE;
+    }
+
     spdlog::debug("Exit");
     return EXIT_SUCCESS;
 }

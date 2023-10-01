@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 #include <set>
+#include <algorithm>
 
 namespace Enix {
     Device::Device(bool enableValidationLayers, VkInstance &instance, VkSurfaceKHR &surface)
