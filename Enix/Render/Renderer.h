@@ -71,6 +71,7 @@ namespace Enix {
         WindowSurface _surface;
         Device _device;
         RenderPass _renderPass;
+        RenderPass _imguiRenderPass;
         SwapChain _swapChain;
         GraphicsPipeline _graphicsPipeline;
 //
@@ -83,6 +84,7 @@ namespace Enix {
         std::vector<VkDescriptorSet> _descriptorSets;
 
         std::vector<VkCommandBuffer> _commandBuffers;
+        std::vector<VkCommandBuffer> _imguiCommandBuffers;
 
         std::vector<VkBuffer> _uniformBuffers;
         std::vector<VkDeviceMemory> _uniformBuffersMemory;
@@ -104,6 +106,8 @@ namespace Enix {
         void createCommandBuffers();
 
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+
+        void recordImGuiCommandBuffer(VkCommandBuffer imguiCommandBuffer, uint32_t imageIndex);
 
         void createSyncObjects();
 

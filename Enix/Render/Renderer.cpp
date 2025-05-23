@@ -41,16 +41,16 @@
 
 
 namespace Enix {
-    Renderer::Renderer(VulkanEngine &engine) :
-            _engine(engine),
-            _window(engine.window()),
-            _instance(_enableValidationLayers),
-            _surface(_instance.instance(), _window.window()),
-            _device(_enableValidationLayers, _instance.instance(),
-                    _surface.surface()),
-            _swapChain(_device, _surface, _window, _renderPass),
-            _renderPass(_device),
-            _graphicsPipeline(_workspaceRoot, _device, _swapChain, _renderPass) {
+    Renderer::Renderer(VulkanEngine &engine) : _engine(engine),
+                                               _window(engine.window()),
+                                               _instance(_enableValidationLayers),
+                                               _surface(_instance.instance(), _window.window()),
+                                               _device(_enableValidationLayers, _instance.instance(),
+                                                       _surface.surface()),
+                                               _swapChain(_device, _surface, _window, _renderPass),
+                                               _renderPass(_device),
+                                               _imguiRenderPass(_device, true),
+                                               _graphicsPipeline(_workspaceRoot, _device, _swapChain, _renderPass) {
         spdlog::debug("init engine");
 
         init();
@@ -60,33 +60,31 @@ namespace Enix {
         // try catch to avoid leaking exceptions in destructor
         try {
             cleanUp();
-        }
-        catch (const std::exception &e) {
+        } catch (const std::exception &e) {
             spdlog::error("Exception in VulkanEngine destructor: {}", e.what());
         }
     }
 
     void Renderer::draw() {
-        // Start the Dear ImGui frame
-        ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-
-        ImGui::NewFrame();
-        drawUI();
-        ImGui::Render();
-
-        // Update and Render additional Platform Windows
-        if (_imguiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-        }
+        // // Start the Dear ImGui frame
+        // ImGui_ImplVulkan_NewFrame();
+        // ImGui_ImplGlfw_NewFrame();
+        //
+        // ImGui::NewFrame();
+        // drawUI();
+        // ImGui::Render();
+        //
+        // // Update and Render additional Platform Windows
+        // if (_imguiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        //     ImGui::UpdatePlatformWindows();
+        //     ImGui::RenderPlatformWindowsDefault();
+        // }
 
         updateCamera();
         drawFrame();
     }
 
     void Renderer::drawUI() {
-
         _engine.drawUI();
     }
 
@@ -125,16 +123,21 @@ namespace Enix {
         vkResetCommandBuffer(_commandBuffers[_currentFrame], 0);
         recordCommandBuffer(_commandBuffers[_currentFrame], imageIndex);
 
+        // vkResetCommandBuffer(_imguiCommandBuffers[_currentFrame], 0);
+        // recordImGuiCommandBuffer(_imguiCommandBuffers[_currentFrame], imageIndex);
+
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
+        // VkCommandBuffer commandBuffers[] = { _commandBuffers[_currentFrame], _imguiCommandBuffers[_currentFrame] };
+        VkCommandBuffer commandBuffers[] = { _commandBuffers[_currentFrame] };
         VkSemaphore waitSemaphores[] = {_imageAvailableSemaphores[_currentFrame]};
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &_commandBuffers[_currentFrame];
+        submitInfo.commandBufferCount = std::size(commandBuffers);
+        submitInfo.pCommandBuffers = commandBuffers;
 
         VkSemaphore signalSemaphores[] = {_renderFinishedSemaphores[_currentFrame]};
         submitInfo.signalSemaphoreCount = 1;
@@ -170,6 +173,7 @@ namespace Enix {
 
     void Renderer::createCommandBuffers() {
         _commandBuffers.resize(_maxFramesInFlight);
+        _imguiCommandBuffers.resize(_maxFramesInFlight); // Separate command buffers for ImGui
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -177,7 +181,8 @@ namespace Enix {
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = static_cast<uint32_t>(_commandBuffers.size());
 
-        if (vkAllocateCommandBuffers(_device, &allocInfo, _commandBuffers.data()) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(_device, &allocInfo, _commandBuffers.data()) != VK_SUCCESS ||
+            vkAllocateCommandBuffers(_device, &allocInfo, _imguiCommandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
     }
@@ -243,12 +248,46 @@ namespace Enix {
         }
 
 
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), _commandBuffers[_currentFrame]);
+        // ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), _commandBuffers[_currentFrame]);
 
         vkCmdEndRenderPass(commandBuffer);
 
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("failed to record command buffer!");
+        }
+    }
+
+    // --- Separate Function for ImGui ---
+    void Renderer::recordImGuiCommandBuffer(VkCommandBuffer imguiCommandBuffer, uint32_t imageIndex) {
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(imguiCommandBuffer, &beginInfo) != VK_SUCCESS) {
+            throw std::runtime_error("failed to begin recording command buffer!");
+        }
+
+        // --- ImGui Render Pass ---
+        VkRenderPassBeginInfo imguiRenderPassInfo{};
+        imguiRenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        imguiRenderPassInfo.renderPass = _imguiRenderPass.renderPass();
+        imguiRenderPassInfo.framebuffer = _swapChain.swapChainFramebuffers()[imageIndex]; // Use same framebuffer
+        imguiRenderPassInfo.renderArea.offset = {0, 0};
+        imguiRenderPassInfo.renderArea.extent = _swapChain.swapChainExtent();
+
+        VkClearValue clearValue{};
+        clearValue.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+
+        imguiRenderPassInfo.clearValueCount = 1;
+        imguiRenderPassInfo.pClearValues = &clearValue;
+
+        vkCmdBeginRenderPass(imguiCommandBuffer, &imguiRenderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), imguiCommandBuffer);
+
+        vkCmdEndRenderPass(imguiCommandBuffer);
+
+        if (vkEndCommandBuffer(imguiCommandBuffer) != VK_SUCCESS) {
+            throw std::runtime_error("failed to record ImGui command buffer!");
         }
     }
 
@@ -342,19 +381,19 @@ namespace Enix {
         //1: create descriptor pool for IMGUI
         // the size of the pool is very oversize, but it's copied from imgui demo itself.
         VkDescriptorPoolSize poolSizes[] =
-                {
-                        {VK_DESCRIPTOR_TYPE_SAMPLER,                1000},
-                        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-                        {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          1000},
-                        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          1000},
-                        {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   1000},
-                        {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   1000},
-                        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         1000},
-                        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         1000},
-                        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-                        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-                        {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       1000}
-                };
+        {
+            {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}
+        };
         VkDescriptorPoolCreateInfo poolInfo = {};
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
@@ -410,7 +449,7 @@ namespace Enix {
         initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         initInfo.Allocator = VK_NULL_HANDLE;
         initInfo.CheckVkResultFn = VK_NULL_HANDLE;
-        ImGui_ImplVulkan_Init(&initInfo, _renderPass.renderPass());
+        ImGui_ImplVulkan_Init(&initInfo, _imguiRenderPass.renderPass());
 
         VkCommandBuffer commandBuffer = _device.beginSingleTimeCommands();
         ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
@@ -419,7 +458,6 @@ namespace Enix {
     }
 
     void Renderer::initVulkan() {
-
         // Setup Vulkan
         createUniformBuffers();
         createDescriptorPool();
@@ -427,27 +465,27 @@ namespace Enix {
         createSyncObjects();
 
         createDescriptorSets();
-
     }
 
     void Renderer::createRenderObjects(const std::shared_ptr<Scene> &scene) {
-
         // todo: scene should contain a list of resources and actor data
         //  and pass it here for loading and creating the GPU resources
 
-        std::vector<std::string> meshPaths{_workspaceRoot + _modelPath,
-                                           _workspaceRoot + _model2Path,
-                                           _workspaceRoot + "Models/sphere.obj",
-                                           _workspaceRoot + "Models/plane.obj"
+        std::vector<std::string> meshPaths{
+            _workspaceRoot + _modelPath,
+            _workspaceRoot + _model2Path,
+            _workspaceRoot + "Models/sphere.obj",
+            _workspaceRoot + "Models/plane.obj"
         };
-        std::vector<std::string> texturePaths{_workspaceRoot + _texturePath,
-                                              _workspaceRoot + _texture2Path,
-                                              _workspaceRoot + "Textures/SphereBaseColor.png",
-                                              _workspaceRoot + "Textures/battler.png",
+        std::vector<std::string> texturePaths{
+            _workspaceRoot + _texturePath,
+            _workspaceRoot + _texture2Path,
+            _workspaceRoot + "Textures/SphereBaseColor.png",
+            _workspaceRoot + "Textures/battler.png",
         };
 
         // use thread pool to load meshes
-        std::vector<std::future<std::shared_ptr<MeshAsset>>> meshLoadResults{};
+        std::vector<std::future<std::shared_ptr<MeshAsset> > > meshLoadResults{};
         for (const auto &meshPath: meshPaths) {
             meshLoadResults.emplace_back(_engine.threadPool().enqueue([&meshPath, this]() {
                 return std::make_shared<MeshAsset>(meshPath, this->_device);
@@ -455,7 +493,7 @@ namespace Enix {
         }
 
         // use thread pool to load meshes
-        std::vector<std::future<std::shared_ptr<TextureAsset>>> textureLoadResults{};
+        std::vector<std::future<std::shared_ptr<TextureAsset> > > textureLoadResults{};
         for (const auto &texturePath: texturePaths) {
             textureLoadResults.emplace_back(_engine.threadPool().enqueue([&texturePath, this]() {
                 return std::make_shared<TextureAsset>(texturePath);
@@ -481,29 +519,41 @@ namespace Enix {
         auto material4 = std::make_shared<Material>(textureAsset4, _device, _descriptorPool, _graphicsPipeline);
 
         // create actors
-        Transform t = {{0, 0, 0},
-                       {0, 0, 0},
-                       {1, 1, 1}};
+        Transform t = {
+            {0, 0, 0},
+            {0, 0, 0},
+            {1, 1, 1}
+        };
         auto actor = std::make_shared<MeshActor>("actor 1", t, meshAsset, material);
         _meshActors.push_back(actor);
-        _meshActors.push_back(std::make_unique<MeshActor>("actor 2", Transform{{5, 0, 0},
-                                                                               {0, 0, 0},
-                                                                               {1, 1, 1}}, meshAsset, material));
-        _meshActors.push_back(std::make_unique<MeshActor>("actor 3", Transform{{0, 7, 0},
-                                                                               {0, 0, 0},
-                                                                               {1, 1, 1}}, meshAsset2, material2));
-        _meshActors.push_back(std::make_unique<MeshActor>("sphere 1", Transform{{-2, 2, 0},
-                                                                                {0,  0,  0},
-                                                                                {1,  1,  1}}, meshAsset3, material3));
-        _meshActors.push_back(std::make_unique<MeshActor>("plane 1", Transform{{0, 0, -2},
-                                                                                {0,  0,  0},
-                                                                                {1,  1,  1}}, meshAsset4, material2));
+        _meshActors.push_back(std::make_unique<MeshActor>("actor 2", Transform{
+                                                              {5, 0, 0},
+                                                              {0, 0, 0},
+                                                              {1, 1, 1}
+                                                          }, meshAsset, material));
+        _meshActors.push_back(std::make_unique<MeshActor>("actor 3", Transform{
+                                                              {0, 7, 0},
+                                                              {0, 0, 0},
+                                                              {1, 1, 1}
+                                                          }, meshAsset2, material2));
+        _meshActors.push_back(std::make_unique<MeshActor>("sphere 1", Transform{
+                                                              {-2, 2, 0},
+                                                              {0, 0, 0},
+                                                              {1, 1, 1}
+                                                          }, meshAsset3, material3));
+        _meshActors.push_back(std::make_unique<MeshActor>("plane 1", Transform{
+                                                              {0, 0, -2},
+                                                              {0, 0, 0},
+                                                              {1, 1, 1}
+                                                          }, meshAsset4, material2));
 
         // setup camera
         _camera = std::make_unique<Camera>(
-                Transform({{5.0f, 10.0f, 2.0f},
-                           {0.f,  0.f,   -180},
-                           {1,    1,     1}}));
+            Transform({
+                {5.0f, 10.0f, 2.0f},
+                {0.f, 0.f, -180},
+                {1, 1, 1}
+            }));
         _camera->front = {-2.0f, -2.0f, -2.0f};
 
         _pointLight = std::make_unique<PointLight>("point light 1", Transform{},
@@ -521,7 +571,6 @@ namespace Enix {
     }
 
     void Renderer::cleanUp() {
-
         spdlog::debug("Cleaning up renderer");
 
         vkDeviceWaitIdle(_device);
@@ -548,5 +597,4 @@ namespace Enix {
     void Renderer::updateCamera() {
         _camera->aspect = _swapChain.swapChainExtent().width / static_cast<float>(_swapChain.swapChainExtent().height);
     }
-
 } // Enix

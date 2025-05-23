@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <array>
+
 #include "Render/Window.h"
 
 namespace Enix {

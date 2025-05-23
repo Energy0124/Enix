@@ -19,8 +19,12 @@ namespace Enix {
     private:
         void createRenderPass();
 
+        void createImGuiRenderPass();
+
     public:
         explicit RenderPass(Device &device);
+
+        explicit RenderPass(Device &device, bool isImgui);
 
         virtual ~RenderPass();
 

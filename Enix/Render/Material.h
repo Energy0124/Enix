@@ -5,6 +5,8 @@
 #pragma once
 
 #include <memory>
+#include <array>
+
 #include "Texture.h"
 #include "GraphicsPipeline.h"
 
