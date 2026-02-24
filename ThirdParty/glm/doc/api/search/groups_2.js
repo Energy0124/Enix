@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['exponential_20functions',['Exponential functions',['../a00242.html',1,'']]],
-  ['experimental_20extensions',['Experimental extensions',['../a00287.html',1,'']]]
+  ['exponential_20functions_4407',['Exponential functions',['../a00813.html',1,'']]],
+  ['experimental_20extensions_4408',['Experimental extensions',['../a00905.html',1,'']]]
 ];
