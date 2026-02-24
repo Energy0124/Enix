@@ -152,6 +152,10 @@ bool mouseRightPressed;
 float curr_quat[4];
 float prev_quat[4];
 float eye[3], lookat[3], up[3];
+float g_angleX = 0.0f; // in degree
+float g_angleY = 0.0f; // in degree
+bool g_show_wire = true;
+bool g_cull_face = false;
 
 GLFWwindow* window;
 
@@ -218,6 +222,68 @@ struct vec3 {
   }
 };
 
+struct mat3 {
+  float m[3][3];
+  mat3() {
+    m[0][0] = 1.0f;
+    m[0][1] = 0.0f;
+    m[0][2] = 0.0f;
+    m[1][0] = 0.0f;
+    m[1][1] = 1.0f;
+    m[1][2] = 0.0f;
+    m[2][0] = 0.0f;
+    m[2][1] = 0.0f;
+    m[2][2] = 1.0f;
+  }
+};
+
+struct mat4 {
+  float m[4][4];
+  mat4() {
+    m[0][0] = 1.0f;
+    m[0][1] = 0.0f;
+    m[0][2] = 0.0f;
+    m[0][3] = 0.0f;
+    m[1][0] = 0.0f;
+    m[1][1] = 1.0f;
+    m[1][2] = 0.0f;
+    m[1][3] = 0.0f;
+    m[2][0] = 0.0f;
+    m[2][1] = 0.0f;
+    m[2][2] = 1.0f;
+    m[2][3] = 0.0f;
+    m[3][0] = 0.0f;
+    m[3][1] = 0.0f;
+    m[3][2] = 0.0f;
+    m[3][3] = 1.0f;
+  }
+};
+
+
+void matmul3x3(const mat3 &a, const mat3 &b, mat3 &dst) {
+  for (size_t i = 0; i < 3; i++) {
+    for (size_t j = 0; j < 3; j++) {
+      float v = 0.0f;
+      for (size_t k = 0; k < 3; k++) {
+        v += a.m[i][k] * b.m[k][j];
+      }
+      dst.m[i][j] = v;
+    }
+  }
+}
+
+void matmul4x4(const mat4 &a, const mat4 &b, mat4 &dst) {
+  for (size_t i = 0; i < 4; i++) {
+    for (size_t j = 0; j < 4; j++) {
+      float v = 0.0f;
+      for (size_t k = 0; k < 4; k++) {
+        v += a.m[i][k] * b.m[k][j];
+      }
+      dst.m[i][j] = v;
+    }
+  }
+}
+
 void normalizeVector(vec3 &v) {
   float len2 = v.v[0] * v.v[0] + v.v[1] * v.v[1] + v.v[2] * v.v[2];
   if (len2 > 0.0f) {
@@ -227,6 +293,52 @@ void normalizeVector(vec3 &v) {
     v.v[1] /= len;
     v.v[2] /= len;
   }
+}
+
+// Maya-like turntable
+// Reference:
+// https://gamedev.stackexchange.com/questions/204367/implementing-a-maya-like-orbit-camera-in-vulkan-opengl
+//
+// angleX, angleY = angle in degree.
+// TODO: scale
+static void turntable(float angleX, float angleY, float center[3], float dst[4][4]) {
+  float pivot[3];
+  pivot[0] = center[0];
+  pivot[1] = center[1];
+  pivot[2] = center[2];
+
+  // rotate Y
+  const float kPI = 3.141592f;
+  float cosY = std::cos(kPI * angleY / 180.0f);
+  float sinY = std::sin(kPI * angleY / 180.0f);
+
+  mat3 rotY;
+  rotY.m[0][0] = cosY;
+  rotY.m[0][1] = 0.0f;
+  rotY.m[0][2] = -sinY;
+  rotY.m[1][0] = 0.0f;
+  rotY.m[1][1] = 1.0f;
+  rotY.m[1][2] = 0.0f;
+  rotY.m[2][0] = sinY;
+  rotY.m[2][1] = 0.0f;
+  rotY.m[2][2] = cosY;
+
+  float cosX = std::cos(kPI * angleX / 180.0f);
+  float sinX = std::sin(kPI * angleX / 180.0f);
+
+  mat3 rotX;
+  rotX.m[0][0] = 1.0f;
+  rotX.m[0][1] = 0.0f;
+  rotX.m[0][2] = 0.0f;
+  rotX.m[1][0] = 0.0f;
+  rotX.m[1][1] = cosX;
+  rotX.m[1][2] = sinX;
+  rotX.m[2][0] = 0.0f;
+  rotX.m[2][1] = -sinX;
+  rotX.m[2][2] = cosX;
+
+
+
 }
 
 /*
@@ -833,8 +945,19 @@ static void keyboardFunc(GLFWwindow* window, int key, int scancode, int action,
       mv_z += -1;
     // camera.move(mv_x * 0.05, mv_y * 0.05, mv_z * 0.05);
     // Close window
-    if (key == GLFW_KEY_Q || key == GLFW_KEY_ESCAPE)
+    if (key == GLFW_KEY_Q || key == GLFW_KEY_ESCAPE) {
       glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+
+    if (key == GLFW_KEY_W) {
+      // toggle wireframe
+      g_show_wire = !g_show_wire;
+    }
+
+    if (key == GLFW_KEY_C) {
+      // cull option
+      g_cull_face = !g_cull_face;
+    }
 
     // init_frame = true;
   }
@@ -898,7 +1021,11 @@ static void Draw(const std::vector<DrawObject>& drawObjects,
                  std::vector<tinyobj::material_t>& materials,
                  std::map<std::string, GLuint>& textures) {
   glPolygonMode(GL_FRONT, GL_FILL);
-  glPolygonMode(GL_BACK, GL_FILL);
+  if (g_cull_face) {
+    glPolygonMode(GL_BACK, GL_LINE);
+  } else {
+    glPolygonMode(GL_BACK, GL_FILL);
+  }
 
   glEnable(GL_POLYGON_OFFSET_FILL);
   glPolygonOffset(1.0, 1.0);
@@ -933,29 +1060,31 @@ static void Draw(const std::vector<DrawObject>& drawObjects,
   }
 
   // draw wireframe
-  glDisable(GL_POLYGON_OFFSET_FILL);
-  glPolygonMode(GL_FRONT, GL_LINE);
-  glPolygonMode(GL_BACK, GL_LINE);
+  if (g_show_wire) {
+    glDisable(GL_POLYGON_OFFSET_FILL);
+    glPolygonMode(GL_FRONT, GL_LINE);
+    glPolygonMode(GL_BACK, GL_LINE);
 
-  glColor3f(0.0f, 0.0f, 0.4f);
-  for (size_t i = 0; i < drawObjects.size(); i++) {
-    DrawObject o = drawObjects[i];
-    if (o.vb_id < 1) {
-      continue;
+    glColor3f(0.0f, 0.0f, 0.4f);
+    for (size_t i = 0; i < drawObjects.size(); i++) {
+      DrawObject o = drawObjects[i];
+      if (o.vb_id < 1) {
+        continue;
+      }
+
+      glBindBuffer(GL_ARRAY_BUFFER, o.vb_id);
+      glEnableClientState(GL_VERTEX_ARRAY);
+      glEnableClientState(GL_NORMAL_ARRAY);
+      glDisableClientState(GL_COLOR_ARRAY);
+      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+      glVertexPointer(3, GL_FLOAT, stride, (const void*)0);
+      glNormalPointer(GL_FLOAT, stride, (const void*)(sizeof(float) * 3));
+      glColorPointer(3, GL_FLOAT, stride, (const void*)(sizeof(float) * 6));
+      glTexCoordPointer(2, GL_FLOAT, stride, (const void*)(sizeof(float) * 9));
+
+      glDrawArrays(GL_TRIANGLES, 0, 3 * o.numTriangles);
+      CheckErrors("drawarrays");
     }
-
-    glBindBuffer(GL_ARRAY_BUFFER, o.vb_id);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glVertexPointer(3, GL_FLOAT, stride, (const void*)0);
-    glNormalPointer(GL_FLOAT, stride, (const void*)(sizeof(float) * 3));
-    glColorPointer(3, GL_FLOAT, stride, (const void*)(sizeof(float) * 6));
-    glTexCoordPointer(2, GL_FLOAT, stride, (const void*)(sizeof(float) * 9));
-
-    glDrawArrays(GL_TRIANGLES, 0, 3 * o.numTriangles);
-    CheckErrors("drawarrays");
   }
 }
 
@@ -994,6 +1123,11 @@ int main(int argc, char** argv) {
     glfwTerminate();
     return 1;
   }
+
+  std::cout << "W : Toggle wireframe\n";
+  std::cout << "C : Toggle face culling\n";
+  //std::cout << "K, J, H, L, P, N : Move camera\n";
+  std::cout << "Q, Esc : quit\n";
 
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
@@ -1042,15 +1176,25 @@ int main(int argc, char** argv) {
     GLfloat mat[4][4];
     gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], up[0],
               up[1], up[2]);
+
+    float center[3];
+    center[0] = 0.5 * (bmax[0] + bmin[0]);
+    center[1] = 0.5 * (bmax[1] + bmin[1]);
+    center[2] = 0.5 * (bmax[2] + bmin[2]);
+    float rotm[4][4];
+    turntable(g_angleX, g_angleY, center, rotm);
+
     build_rotmatrix(mat, curr_quat);
     glMultMatrixf(&mat[0][0]);
 
     // Fit to -1, 1
     glScalef(1.0f / maxExtent, 1.0f / maxExtent, 1.0f / maxExtent);
 
+#if 0
     // Centerize object.
     glTranslatef(-0.5 * (bmax[0] + bmin[0]), -0.5 * (bmax[1] + bmin[1]),
                  -0.5 * (bmax[2] + bmin[2]));
+#endif
 
     Draw(gDrawObjects, materials, textures);
 
