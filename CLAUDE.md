@@ -44,9 +44,9 @@ GLSL shaders live in `Shaders/` (`.vert`, `.frag`, `.comp`). SPV output is writt
 | `UI/` | `AppUI` — ImGui integration |
 
 ### Render pipeline
-`Renderer` drives two render passes:
+`Renderer` currently drives a single main render pass, with an additional ImGui pass defined but disabled/WIP:
 1. Main pass — Blinn-Phong shading via `GraphicsPipeline`
-2. ImGui pass — `_imguiRenderPass` with `_imguiCommandBuffers`
+2. ImGui pass (present but not currently recorded/submitted in `Renderer::drawFrame()`) — `_imguiRenderPass` with `_imguiCommandBuffers`
 
 Double-buffering with `_maxFramesInFlight = 2`. UBO contains: view/proj matrices, camera position, light position, light color.
 
