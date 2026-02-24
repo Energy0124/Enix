@@ -18,7 +18,7 @@ Build configurations in use:
 
 Shaders are compiled automatically via `glslc` as a CMake custom target (`Shaders`). The `Enix` executable target depends on `Shaders`.
 
-Compiled binaries go to `bin/`. The working directory at runtime is the repo root (set via `VS_DEBUGGER_WORKING_DIRECTORY`).
+Compiled binaries go to `bin/`. When launched via the provided CMake/Visual Studio settings, the working directory at runtime is `bin/`, and assets are resolved relative to the workspace root using the `../` prefix (see `_workspaceRoot = "../"` in `VulkanEngine.h`).
 
 ## Shader Compilation
 
