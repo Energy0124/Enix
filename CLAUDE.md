@@ -71,7 +71,7 @@ All engine code lives in the `Enix` namespace.
 - Member variables prefixed with `_` (e.g., `_window`, `_renderer`)
 - Forward-declare `VulkanEngine` where possible to reduce include overhead
 - Resource handles (Vulkan objects) are owned by their enclosing class; clean up in `cleanUp()` / destructor
-- `VulkanEngine` is a singleton — access via `VulkanEngine::getInstance()`
+- `VulkanEngine` behaves as a singleton, but is constructed explicitly in `Enix/Main.cpp`; `VulkanEngine::getInstance()` is only valid after that construction has occurred
 - Non-copyable render objects: delete copy constructor and copy-assignment operator
 
 ## Asset Paths
