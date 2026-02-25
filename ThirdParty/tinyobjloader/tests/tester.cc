@@ -858,6 +858,50 @@ void test_zero_face_idx_value_issue140() {
   TEST_CHECK(!err.empty());
 }
 
+void test_invalid_relative_vertex_index() {
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+
+  std::string warn;
+  std::string err;
+  bool ret =
+      tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err,
+                       "../models/invalid-relative-vertex-index.obj", gMtlBasePath);
+
+  if (!warn.empty()) {
+    std::cout << "WARN: " << warn << std::endl;
+  }
+
+  if (!err.empty()) {
+    std::cerr << "ERR: " << err << std::endl;
+  }
+  TEST_CHECK(false == ret);
+  TEST_CHECK(!err.empty());
+}
+
+void test_invalid_texture_vertex_index() {
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+
+  std::string warn;
+  std::string err;
+  bool ret =
+      tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err,
+                       "../models/invalid-relative-texture-vertex-index.obj", gMtlBasePath);
+
+  if (!warn.empty()) {
+    std::cout << "WARN: " << warn << std::endl;
+  }
+
+  if (!err.empty()) {
+    std::cerr << "ERR: " << err << std::endl;
+  }
+  TEST_CHECK(false == ret);
+  TEST_CHECK(!err.empty());
+}
+
 void test_texture_name_whitespace_issue145() {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
@@ -1364,6 +1408,118 @@ void test_face_missing_issue295() {
   TEST_CHECK((3 * 28) == shapes[0].mesh.indices.size()); // 28 triangle faces x 3
 }
 
+void test_comment_issue389() {
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+
+  std::string warn;
+  std::string err;
+  bool ret = tinyobj::LoadObj(
+      &attrib, &shapes, &materials, &warn, &err,
+      "../models/issue-389-comment.obj",
+      gMtlBasePath, /* triangualte */false);
+
+  TEST_CHECK(warn.empty());
+
+  if (!warn.empty()) {
+    std::cout << "WARN: " << warn << std::endl;
+  }
+
+  if (!err.empty()) {
+    std::cerr << "ERR: " << err << std::endl;
+  }
+
+  TEST_CHECK(true == ret);
+}
+
+void test_default_kd_for_multiple_materials_issue391() {
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+
+  std::string warn;
+  std::string err;
+  bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err,
+                              "../models/issue-391.obj", gMtlBasePath);
+  if (!warn.empty()) {
+    std::cout << "WARN: " << warn << std::endl;
+  }
+
+  if (!err.empty()) {
+    std::cerr << "ERR: " << err << std::endl;
+  }
+
+  const tinyobj::real_t kGrey[] = {0.6, 0.6, 0.6};
+  const tinyobj::real_t kRed[] = {1.0, 0.0, 0.0};
+
+  TEST_CHECK(true == ret);
+  TEST_CHECK(2 == materials.size());
+  for (size_t i = 0; i < materials.size(); ++i) {
+    const tinyobj::material_t& material = materials[i];
+    if (material.name == "has_map") {
+      for (int i = 0; i < 3; ++i) TEST_CHECK(material.diffuse[i] == kGrey[i]);
+    } else if (material.name == "has_kd") {
+      for (int i = 0; i < 3; ++i) TEST_CHECK(material.diffuse[i] == kRed[i]);
+    } else {
+      std::cerr << "Unexpected material found!" << std::endl;
+      TEST_CHECK(false);
+    }
+  }  
+}
+
+void test_removeUtf8Bom() {
+  // Basic input with BOM
+  std::string withBOM = "\xEF\xBB\xBFhello world";
+  TEST_CHECK(tinyobj::removeUtf8Bom(withBOM) == "hello world");
+
+  // Input without BOM
+  std::string noBOM = "hello world";
+  TEST_CHECK(tinyobj::removeUtf8Bom(noBOM) == "hello world");
+
+  // Leaves short string unchanged
+  std::string shortStr = "\xEF";
+  TEST_CHECK(tinyobj::removeUtf8Bom(shortStr) == shortStr);
+
+  std::string shortStr2 = "\xEF\xBB";
+  TEST_CHECK(tinyobj::removeUtf8Bom(shortStr2) == shortStr2);
+
+  // BOM only returns empty string
+  std::string justBom = "\xEF\xBB\xBF";
+  TEST_CHECK(tinyobj::removeUtf8Bom(justBom) == "");
+
+  // Empty string
+  std::string emptyStr = "";
+  TEST_CHECK(tinyobj::removeUtf8Bom(emptyStr) == "");
+}
+
+void test_loadObj_with_BOM() {
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+
+  std::string warn;
+  std::string err;
+  bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err,
+                              "../models/cube_w_BOM.obj", gMtlBasePath);
+
+  if (!warn.empty()) {
+    std::cout << "WARN: " << warn << std::endl;
+  }
+
+  if (!err.empty()) {
+    std::cerr << "ERR: " << err << std::endl;
+  }
+
+  TEST_CHECK(true == ret);
+  TEST_CHECK(6 == shapes.size());
+  TEST_CHECK(0 == shapes[0].name.compare("front cube"));
+  TEST_CHECK(0 == shapes[1].name.compare("back cube"));  // multiple whitespaces
+                                                         // are aggregated as
+                                                         // single white space.
+}
+
+
 // Fuzzer test.
 // Just check if it does not crash.
 // Disable by default since Windows filesystem can't create filename of afl
@@ -1467,4 +1623,14 @@ TEST_LIST = {
      test_mtl_filename_with_whitespace_issue46},
     {"test_face_missing_issue295",
      test_face_missing_issue295},
+    {"test_comment_issue389",
+     test_comment_issue389},
+    {"test_invalid_relative_vertex_index",
+     test_invalid_relative_vertex_index},
+    {"test_invalid_texture_vertex_index",
+     test_invalid_texture_vertex_index},
+    {"default_kd_for_multiple_materials_issue391",
+     test_default_kd_for_multiple_materials_issue391},
+    {"test_removeUtf8Bom", test_removeUtf8Bom},
+    {"test_loadObj_with_BOM", test_loadObj_with_BOM},
     {NULL, NULL}};
