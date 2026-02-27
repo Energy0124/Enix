@@ -13,7 +13,7 @@ namespace Enix {
 
     class AppUI {
 
-        bool _showDemo;
+        bool _showDemo = false;
 
         VulkanEngine &_engine;
 

@@ -66,19 +66,19 @@ namespace Enix {
     }
 
     void Renderer::draw() {
-        // // Start the Dear ImGui frame
-        // ImGui_ImplVulkan_NewFrame();
-        // ImGui_ImplGlfw_NewFrame();
-        //
-        // ImGui::NewFrame();
-        // drawUI();
-        // ImGui::Render();
-        //
-        // // Update and Render additional Platform Windows
-        // if (_imguiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-        //     ImGui::UpdatePlatformWindows();
-        //     ImGui::RenderPlatformWindowsDefault();
-        // }
+        // Start the Dear ImGui frame
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+
+        ImGui::NewFrame();
+        drawUI();
+        ImGui::Render();
+
+        // Update and Render additional Platform Windows
+        if (_imguiIo->ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
 
         updateCamera();
         drawFrame();
@@ -113,7 +113,10 @@ namespace Enix {
                                                 _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE,
                                                 &imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            cleanupImguiFramebuffers();
             _swapChain.recreateSwapChain();
+            ImGui_ImplVulkan_SetMinImageCount(_maxFramesInFlight);
+            createImguiFramebuffers();
             return;
         } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");
@@ -123,14 +126,13 @@ namespace Enix {
         vkResetCommandBuffer(_commandBuffers[_currentFrame], 0);
         recordCommandBuffer(_commandBuffers[_currentFrame], imageIndex);
 
-        // vkResetCommandBuffer(_imguiCommandBuffers[_currentFrame], 0);
-        // recordImGuiCommandBuffer(_imguiCommandBuffers[_currentFrame], imageIndex);
+        vkResetCommandBuffer(_imguiCommandBuffers[_currentFrame], 0);
+        recordImGuiCommandBuffer(_imguiCommandBuffers[_currentFrame], imageIndex);
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        // VkCommandBuffer commandBuffers[] = { _commandBuffers[_currentFrame], _imguiCommandBuffers[_currentFrame] };
-        VkCommandBuffer commandBuffers[] = { _commandBuffers[_currentFrame] };
+        VkCommandBuffer commandBuffers[] = { _commandBuffers[_currentFrame], _imguiCommandBuffers[_currentFrame] };
         VkSemaphore waitSemaphores[] = {_imageAvailableSemaphores[_currentFrame]};
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         submitInfo.waitSemaphoreCount = 1;
@@ -162,7 +164,10 @@ namespace Enix {
         result = vkQueuePresentKHR(_device.presentQueue(), &presentInfo);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _window.framebufferResized()) {
             _window.setFramebufferResized(false);
+            cleanupImguiFramebuffers();
             _swapChain.recreateSwapChain();
+            ImGui_ImplVulkan_SetMinImageCount(_maxFramesInFlight);
+            createImguiFramebuffers();
             return;
         } else if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
@@ -270,15 +275,11 @@ namespace Enix {
         VkRenderPassBeginInfo imguiRenderPassInfo{};
         imguiRenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         imguiRenderPassInfo.renderPass = _imguiRenderPass.renderPass();
-        imguiRenderPassInfo.framebuffer = _swapChain.swapChainFramebuffers()[imageIndex]; // Use same framebuffer
+        imguiRenderPassInfo.framebuffer = _imguiFramebuffers[imageIndex];
         imguiRenderPassInfo.renderArea.offset = {0, 0};
         imguiRenderPassInfo.renderArea.extent = _swapChain.swapChainExtent();
-
-        VkClearValue clearValue{};
-        clearValue.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
-
-        imguiRenderPassInfo.clearValueCount = 1;
-        imguiRenderPassInfo.pClearValues = &clearValue;
+        imguiRenderPassInfo.clearValueCount = 0;
+        imguiRenderPassInfo.pClearValues = nullptr;
 
         vkCmdBeginRenderPass(imguiCommandBuffer, &imguiRenderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -455,6 +456,37 @@ namespace Enix {
         ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
         _device.endSingleTimeCommands(commandBuffer);
         ImGui_ImplVulkan_DestroyFontUploadObjects();
+
+        createImguiFramebuffers();
+    }
+
+    void Renderer::createImguiFramebuffers() {
+        const auto &imageViews = _swapChain.swapChainImageViews();
+        _imguiFramebuffers.resize(imageViews.size());
+
+        for (size_t i = 0; i < imageViews.size(); i++) {
+            VkImageView attachment = imageViews[i];
+
+            VkFramebufferCreateInfo framebufferInfo{};
+            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass = _imguiRenderPass.renderPass();
+            framebufferInfo.attachmentCount = 1;
+            framebufferInfo.pAttachments = &attachment;
+            framebufferInfo.width = _swapChain.swapChainExtent().width;
+            framebufferInfo.height = _swapChain.swapChainExtent().height;
+            framebufferInfo.layers = 1;
+
+            if (vkCreateFramebuffer(_device, &framebufferInfo, nullptr, &_imguiFramebuffers[i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create imgui framebuffer!");
+            }
+        }
+    }
+
+    void Renderer::cleanupImguiFramebuffers() {
+        for (auto &framebuffer: _imguiFramebuffers) {
+            vkDestroyFramebuffer(_device, framebuffer, nullptr);
+        }
+        _imguiFramebuffers.clear();
     }
 
     void Renderer::initVulkan() {
@@ -574,6 +606,8 @@ namespace Enix {
         spdlog::debug("Cleaning up renderer");
 
         vkDeviceWaitIdle(_device);
+
+        cleanupImguiFramebuffers();
 
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();

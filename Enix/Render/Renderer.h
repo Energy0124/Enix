@@ -85,6 +85,7 @@ namespace Enix {
 
         std::vector<VkCommandBuffer> _commandBuffers;
         std::vector<VkCommandBuffer> _imguiCommandBuffers;
+        std::vector<VkFramebuffer> _imguiFramebuffers;
 
         std::vector<VkBuffer> _uniformBuffers;
         std::vector<VkDeviceMemory> _uniformBuffersMemory;
@@ -120,6 +121,10 @@ namespace Enix {
         void initVulkan();
 
         void initImgui();
+
+        void createImguiFramebuffers();
+
+        void cleanupImguiFramebuffers();
 
         void updateUniformBuffer(uint32_t currentImage);
 
