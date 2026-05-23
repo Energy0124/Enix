@@ -6,15 +6,41 @@ Enix is a Vulkan-based game engine written in C++20. It is a learning/research p
 
 ## Build
 
-```bash
-cmake -S . -B <build_dir>
-cmake --build <build_dir>
+Requires cmake ≥ 3.21, a C++20 toolchain, and the Vulkan SDK (`$env:VULKAN_SDK` set). No CLion dependency — CLion only supplies its own bundled compiler inside its own build dirs.
+
+Presets live in `CMakePresets.json`. Each writes to its own build directory so you can have several toolchains coexisting.
+
+| Preset       | Toolchain        | Generator           | Notes |
+|--------------|------------------|---------------------|-------|
+| `default`    | MSVC (cl)        | Visual Studio 2022  | Works from any plain shell. MSBuild locates the toolchain itself — no vcvars. |
+| `ninja-msvc` | MSVC (cl)        | Ninja               | Faster incremental. Requires running from a Developer Command Prompt or after sourcing `vcvars64.bat`. |
+| `mingw`      | GCC (MinGW)      | MinGW Makefiles     | Needs `gcc`, `g++`, `mingw32-make` on `PATH`. |
+| `ninja-gcc`  | GCC (MinGW)      | Ninja               | Needs `gcc`, `g++`, `ninja` on `PATH`. Fastest. |
+
+Build with:
+
+```powershell
+cmake --preset <name>
+cmake --build --preset <name>
 ```
 
-Build configurations in use:
-- `cmake-build-debug` — CLion debug (default)
-- `cmake-build-debug-mingw` — MinGW/MSYS2
-- `cmake-build-debug-visual-studio` — MSVC
+`bin/Enix.exe` (single-config generators) or `bin/Debug/Enix.exe` (VS multi-config generator) is produced.
+
+### MinGW on `PATH`
+
+Any GCC distribution that exposes `gcc.exe` / `g++.exe` works — MSYS2 (`pacman -S mingw-w64-x86_64-gcc`), [w64devkit](https://github.com/skeeto/w64devkit), or the bundle inside `CLion\bin\mingw\bin\`. The presets do not hard-code a path. To use CLion's bundled MinGW from a plain shell:
+
+```powershell
+$env:Path = "C:\Users\energy\AppData\Local\Programs\CLion\bin\mingw\bin;$env:Path"
+cmake --preset mingw
+cmake --build --preset mingw
+```
+
+### Other build directories
+
+- `cmake-build-debug*` — CLion's own build dirs; leave alone unless you're inside CLion.
+
+Pick a fresh directory if you change generator/toolchain — cmake refuses to switch generators inside an existing build dir.
 
 Shaders are compiled automatically via `glslc` as a CMake custom target (`Shaders`). The `Enix` executable target depends on `Shaders`.
 

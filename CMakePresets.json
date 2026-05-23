@@ -1,0 +1,52 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "Visual Studio 2022 (x64)",
+      "description": "Default Windows preset. MSBuild finds its own toolchain — no vcvars needed.",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "ninja-msvc",
+      "displayName": "Ninja + MSVC",
+      "description": "Faster incremental builds with MSVC. Requires a Developer Command Prompt (or sourcing vcvars64.bat) before running.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-ninja-msvc",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "mingw",
+      "displayName": "MinGW (GCC)",
+      "description": "GCC via MinGW Makefiles. Requires gcc / g++ / mingw32-make on PATH (MSYS2, w64devkit, CLion-bundled, etc.).",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build-mingw",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "ninja-gcc",
+      "displayName": "Ninja + GCC (MinGW)",
+      "description": "Faster builds with GCC. Requires gcc / g++ / ninja on PATH.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-ninja-gcc",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "default",     "configurePreset": "default",     "configuration": "Debug", "targets": ["Enix"] },
+    { "name": "ninja-msvc",  "configurePreset": "ninja-msvc",  "targets": ["Enix"] },
+    { "name": "mingw",       "configurePreset": "mingw",       "targets": ["Enix"] },
+    { "name": "ninja-gcc",   "configurePreset": "ninja-gcc",   "targets": ["Enix"] }
+  ]
+}

@@ -29,7 +29,7 @@ namespace Enix {
                         [this, i] {
                             spdlog::info("Worker thread {} started", i);
                             while (true) {
-                                std::packaged_task<void()> task;
+                                std::function<void()> task;
                                 {
                                     std::unique_lock<std::mutex> lock(this->_queueMutex);
                                     this->_queueConditionVariable.wait(lock, [&] {
@@ -60,16 +60,20 @@ namespace Enix {
         template<class F, class... Args>
         auto enqueue(F &&f, Args &&... args) {
             using returnType = std::invoke_result_t<F, Args...>;
-            std::packaged_task<returnType()> task{
+            // packaged_task is move-only, so wrap it in a shared_ptr to store it inside the
+            // copyable std::function the worker queue holds.
+            auto task = std::make_shared<std::packaged_task<returnType()>>(
                     [f = std::forward<F>(f), ... args = std::forward<Args>(args)]() mutable {
                         return f(std::forward<Args>(args)...);
-                    }
-            };
-            auto result = task.get_future();
-            if (_shouldStop) {
-                throw std::runtime_error("Cannot enqueue on stopped thread pool!");
+                    });
+            auto result = task->get_future();
+            {
+                std::lock_guard<std::mutex> lock(_queueMutex);
+                if (_shouldStop) {
+                    throw std::runtime_error("Cannot enqueue on stopped thread pool!");
+                }
+                _taskQueue.emplace([task] { (*task)(); });
             }
-            _taskQueue.emplace(std::move(task));
             _queueConditionVariable.notify_one();
             return result;
         }
@@ -77,7 +81,7 @@ namespace Enix {
     private:
         std::atomic<bool> _shouldStop{false};
         std::vector<std::jthread> _workerThreads;
-        std::queue<std::packaged_task<void()>> _taskQueue;
+        std::queue<std::function<void()>> _taskQueue;
         std::mutex _queueMutex;
         std::condition_variable _queueConditionVariable;
     };

@@ -500,3 +500,5 @@ glfw3ConfigVersion.cmake
 /ThirdParty/tinyobjloader/tinyobjloader-targets.cmake
 
 build
+build/
+build-*/
